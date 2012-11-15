@@ -7,19 +7,19 @@ import play.mvc.*;
 
 import java.util.Map;
 
-
+@With(Secure.class)
 public class NoteManager extends Controller {
   
     public static void index() {
-        render("app/views/manage.html",User.findByEmail(session.get("user")));
+        render("manage.html",User.findByEmail(session.get("user")));
     }
     
     public static void sharenote() {
-	    render("views/dialogs/sharenote.html");
+	    render("dialogs/sharenote.html");
     }
 
     public static void newNotebook() {
-        render("views/items/notebook.html",
+        render("items/notebook.html",
             new Notebook("Nový poznámkový blok",User.findByEmail(session.get("user")))
         );
     }

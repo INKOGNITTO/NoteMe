@@ -134,7 +134,8 @@ $(function(){
             success : function(data){
                 console.log(data);
                 console.log(data.next);
-                $(location).attr("href",data.next);
+                window.location.assign(data.next);
+                //$(location).attr("href",data.next);
             },
             error : function(err){
                 console.log(err);

@@ -1,6 +1,8 @@
 package controllers;
 
 import hash.Passwords;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import models.*;
 import play.mvc.*;
 import play.mvc.Http.*;
@@ -17,7 +19,12 @@ public class Security extends Secure.Security {
     }
     
     static void onAuthenticated() {
-        NoteManager.index();
+        try {
+            Secure.login();
+            //NoteManager.index();
+        } catch (Throwable ex) {
+            Logger.getLogger(Security.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 	
 

@@ -1,5 +1,8 @@
 package controllers;
 
+import com.google.gson.*;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import play.*;
 import models.User;
@@ -55,11 +58,10 @@ public class App extends Controller{
             @Required
             String password
             ) {
-        Logger.info(email);
-        Logger.info(password);
     	if(validation.hasErrors()) {
-            response.status = StatusCode.BAD_REQUEST;
-            renderJSON(validation.errorsMap());
+            Gson gson = new Gson();
+            JsonElement json  = gson.toJsonTree(validation.errorsMap());
+            renderJSON(json);
     	} 
         if(Security.authenticate(email, password)) {
             session.put("user",email);
