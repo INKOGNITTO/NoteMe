@@ -1,0 +1,26 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                           App.index
+
+# Login & Registration
+GET     /welcome                    Secure.login
+POST    /login                      App.authenticate
+POST    /registration               App.register
+GET     /logout                     Secure.logout
+
+# Manage
+GET     /manage	                    NoteManager.index
+POST 	/sharenote                  NoteManager.sharenote
+POST    /newNotebook                NoteManager.newNotebook
+POST    /saveNotebook               NoteManager.saveNewNotebook
+POST    /newNote                    NoteManager.newNote
+POST    /saveNote                   NoteManager.saveNote
+
+# Edit
+GET	/edit                       Edit.index
+
+# Map static resources
+GET     /public/                    staticDir:public

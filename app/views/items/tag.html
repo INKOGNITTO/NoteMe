@@ -1,0 +1,7 @@
+@(name: String, place: String)
+
+<div class="tag">
+    <span class="ui-icon ui-button-icon-primary ui-icon-tag"></span>
+    <span class="title">@name</span>
+    <span class="ui-icon ui-button-icon-secondary @if(place=="sidebar"){ui-icon-grip-dotted-vertical}else{ui-icon-close}"></span>
+</div>

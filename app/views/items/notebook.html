@@ -1,0 +1,17 @@
+@(notebook: Notebook)
+<div class="notebook" data-id="@notebook.id">
+	<h2>
+		<span class="ui-icon ui-icon-grip-dotted-vertical handle"></span>
+		<span class="title">@notebook.name</span>
+		<span class="iconbar">
+			<span class="ui-icon ui-icon-note new-note" title="Nová poznámka"></span>
+			<span class="ui-icon ui-icon-link" title="Zdieľať poznámkový blok"></span>
+			<span class="ui-icon ui-icon-close" title="Zmazať poznámkový blok"></span>
+		</span>
+	</h2>
+	<div>
+		@for(n <- notebook.getNotes()) {
+			@note(n)
+		}
+	</div>
+</div>

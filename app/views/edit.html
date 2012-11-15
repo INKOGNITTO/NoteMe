@@ -1,0 +1,26 @@
+@(user: User)
+
+@main("")("edit")(user) {
+<div id="toolbar">
+    <!-- <button id="new-notebook">Nový poznámkový blok</button> -->
+    <button id="hide-notebooks" data-ui-icon-primary="ui-icon-carat-1-w">Skryť bloky</button>
+</div>
+<div id="main" class="fill">
+    <div id="left-column-wrapper" class="column-wrapper fill">
+        <div id="left-column-scroll">
+            <div class="left-column notebooks">
+                @for(nb <- models.User.findNotebooks(user.id)){
+                    @views.html.items.notebook(nb)
+                }
+            </div>
+        </div>
+    </div>
+    <div id="right-column-wrapper" class="column-wrapper fill">
+        <div class="right-column">
+			@views.html.items.noteEdit()
+        </div>
+        <div style="clear:both;"></div>
+    </div>
+</div>
+
+}
