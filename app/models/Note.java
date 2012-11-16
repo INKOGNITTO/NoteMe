@@ -75,4 +75,8 @@ public class Note extends Model {
         return note;
     }
     
+    public List<Tag> getTags(){
+        return tags;
+    }
+    
 }
