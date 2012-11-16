@@ -1,0 +1,19 @@
+var noteMe = noteMe || {};
+(function() {
+    
+    var makeRoute = function(jsr) {
+        return {
+            ajax: function(obj) {
+                jsr.url = jsr.url.apply({},obj?obj.urlParams:{});
+                jsr.type = jsr.method;
+                delete(jsr.method);
+                $.ajax($.extend(jsr,obj));
+            }   
+        };
+    };
+    
+    noteMe.jsRoutes = {
+        newNotebook: makeRoute(#{jsRoute @NoteManager.newNotebook() /}),
+        saveNewNotebook: makeRoute(#{jsRoute @NoteManager.saveNewNotebook() /})
+    };
+}());

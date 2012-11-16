@@ -15,12 +15,15 @@ GET     /logout                     Secure.logout
 GET     /manage	                    NoteManager.index
 POST 	/sharenote                  NoteManager.sharenote
 POST    /newNotebook                NoteManager.newNotebook
-POST    /saveNotebook               NoteManager.saveNewNotebook
+POST    /saveNewNotebook            NoteManager.saveNewNotebook
 POST    /newNote                    NoteManager.newNote
 POST    /saveNote                   NoteManager.saveNote
 
 # Edit
 GET	/edit                       Edit.index
+
+# jsRoutes
+GET     /jsRoutes                   App.jsRoutes
 
 # Map static resources
 GET     /public/                    staticDir:public

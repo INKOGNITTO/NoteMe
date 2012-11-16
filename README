@@ -1,9 +1,4 @@
 noteMe
-====================================
+----------------------------
 
-vytvorenie Eclipse projektu:
- - instalovat framework Play!
- - v adresari projektu spustit prikaz:
-	play eclipsify
-	
-Potom je mozne dokoncit import do Eclipse
+Tvorba a zdielanie poznamok

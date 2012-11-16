@@ -1,31 +1,31 @@
+var noteMe = noteMe || {};
+
 $(function() {
-
-
 
     // aplikacia :D
 
-    var noteMe = {};
     (function() {
+        var _self = this;
         this.manage = {
-            _self : this,
             rename : function(cb) {
                 var oldText = $(this).text(),
-                    saved = false;
-
+                    result = {
+                        saved : false
+                    };
                 $(this).off(".rename").off("keydown");
                 $(this).on("focus.rename", function() {
                     $(this).selectText();
                 }).on("blur.rename", function() {
-                    if(!saved){
+                    if(!result.saved){
                         $(this).text(oldText);
                     }
                     $(this).removeAttr("contenteditable");
-                    saved = false;
+                    result.saved = false;
                     if(typeof cb === "function"){
-                        cb.apply($(this));
+                        cb.apply($(this),result);
                     }
                 }).enterKey(function() {
-                    saved = true;
+                    result.saved = true;
                     $(this).blur();
                 },"on").escKey(function() {
                     $(this).blur();
@@ -36,101 +36,109 @@ $(function() {
         };
     }.apply(noteMe));
 
-
-	
-	$.datepicker.setDefaults( $.datepicker.regional[ "sk" ] );
-
-	$("header nav a").button();
-	$("header #user-account a").iconButton();
-	$("input[type='submit']").button();
-
-	$("form#search input[type='submit']").each(function(){
-	    var button = $("<button>").text($(this).val()),
-	        submit = this;
-	    $(this).parent().append(button);
-	    $(button).button({
-	        icons: {
-	            primary: "ui-icon-search"
-	        },
-	        text: false
-	    });
-	    $(this).hide();
-	});
-
-	$("form#search").submit(function(){
-	    console.log("hľadané "+$(this).find("input[type='search']").val());
-	    return false;
-	});
-	
-	//iconbar
-	/*$(".notebook .note .iconbar").each(function() {
-		$(this).css({
-			paddingTop: ($(this).parent().height() - $(this).children().height())/2 + 1,
-			right: -$(this).outerWidth()+40,
-		}).hover(function() {
-			$(this).animate({right:0});
-		}, function() {
-			$(this).animate({right:-$(this).outerWidth()+40});
-		});
-	})*/
-	
-	// scrollbary
-	$("#left-column-scroll").scrollbar();
-	$(".sidebar-wrapper").scrollbar();
-	$("#notetags").scrollbar();
-	$("#note-scroll").scrollbar().addClass("jspAlwaysShow");
+    // nacitaj routy
+    $.ajax({
+        url: "/jsRoutes",
+        type: "GET",
+        dataType: "script",
+        cache: true
+    });
 
 
-	// vyska poznamky
-	$("#about, .right-column > h2").on("resize", function() {
-		var noteScroll = $("#note-scroll"),
-			about = $("#about"),
-			header = $(".right-column > h2"),
-			aboutHeight = about.outerHeight(true),
-			headerHeight = header.outerHeight(true);
-		noteScroll.css({
-			"margin-top": headerHeight,
-			"margin-bottom": aboutHeight
-		});
-	});
-	$("#about").trigger("resize");
 
+    $.datepicker.setDefaults( $.datepicker.regional[ "sk" ] );
 
-	// vertikalna zmena velkosti
-	$(".vertical-resize").mousedown(function(event) {
-		var self = this,
-			resize = true,
-			startY = event.pageY,
-			startH = $(this).parent().height();
-		event.preventDefault();
-		$("body").one("mouseup", function() {
-			resize = false;
-		}).mousemove(function(event) {
-			if (resize) {
-				var resizeAmount = startY - event.pageY;
-				$(self).parent().height(startH+resizeAmount);
-			}
-			event.preventDefault();
-		});
-	}).dblclick(function() {
-		//return to default value set by css
-		$(this).parent().height("");
-	}).disableSelection();;
+    $("header nav a").button();
+    $("header #user-account a").iconButton();
+    $("input[type='submit']").button();
 
-	(function() {
-	    var timeout;
-	    $("#user-account #header-menu").removeClass("visuallyhidden").hide();
-        $("#user-account").click(function() {
-            $(this).find("#header-menu").slideToggle();
-        }).mouseleave(function() {
-            var self = this;
-            timeout = setTimeout(function() {
-                $(self).find("#header-menu").slideUp();
-            },500);
-        }).mouseenter(function() {
-            clearTimeout(timeout);
+    $("form#search input[type='submit']").each(function(){
+        var button = $("<button>").text($(this).val()),
+            submit = this;
+        $(this).parent().append(button);
+        $(button).button({
+            icons: {
+                primary: "ui-icon-search"
+            },
+            text: false
         });
-	}());
+        $(this).hide();
+    });
+
+    $("form#search").submit(function(){
+        console.log("hľadané "+$(this).find("input[type='search']").val());
+        return false;
+    });
+
+    //iconbar
+    /*$(".notebook .note .iconbar").each(function() {
+            $(this).css({
+                    paddingTop: ($(this).parent().height() - $(this).children().height())/2 + 1,
+                    right: -$(this).outerWidth()+40,
+            }).hover(function() {
+                    $(this).animate({right:0});
+            }, function() {
+                    $(this).animate({right:-$(this).outerWidth()+40});
+            });
+    })*/
+
+    // scrollbary
+    $("#left-column-scroll").scrollbar();
+    $(".sidebar-wrapper").scrollbar();
+    $("#notetags").scrollbar();
+    $("#note-scroll").scrollbar().addClass("jspAlwaysShow");
+
+
+    // vyska poznamky
+    $("#about, .right-column > h2").on("resize", function() {
+            var noteScroll = $("#note-scroll"),
+                    about = $("#about"),
+                    header = $(".right-column > h2"),
+                    aboutHeight = about.outerHeight(true),
+                    headerHeight = header.outerHeight(true);
+            noteScroll.css({
+                    "margin-top": headerHeight,
+                    "margin-bottom": aboutHeight
+            });
+    });
+    $("#about").trigger("resize");
+
+
+    // vertikalna zmena velkosti
+    $(".vertical-resize").mousedown(function(event) {
+            var self = this,
+                    resize = true,
+                    startY = event.pageY,
+                    startH = $(this).parent().height();
+            event.preventDefault();
+            $("body").one("mouseup", function() {
+                    resize = false;
+            }).mousemove(function(event) {
+                    if (resize) {
+                            var resizeAmount = startY - event.pageY;
+                            $(self).parent().height(startH+resizeAmount);
+                    }
+                    event.preventDefault();
+            });
+    }).dblclick(function() {
+            //return to default value set by css
+            $(this).parent().height("");
+    }).disableSelection();;
+
+    (function() {
+        var timeout;
+        $("#user-account #header-menu").removeClass("visuallyhidden").hide();
+    $("#user-account").click(function() {
+        $(this).find("#header-menu").slideToggle();
+    }).mouseleave(function() {
+        var self = this;
+        timeout = setTimeout(function() {
+            $(self).find("#header-menu").slideUp();
+        },500);
+    }).mouseenter(function() {
+        clearTimeout(timeout);
+    });
+    }());
 
 
     $(".notebooks").sortable({
@@ -214,12 +222,16 @@ $(function() {
             primary: "ui-icon-circle-plus"
         }
     }).click(function(event) {
-        jsRoutes.controllers.NoteManager.newNotebook().ajax({
+        noteMe.jsRoutes.newNotebook.ajax({
             success : function(data) {
                 var ad = $(data).prependTo($(".notebooks").first());
-                noteMe.manage.rename.call($(ad).find("h2 .title"),function() {
+                noteMe.manage.rename.call($(ad).find("h2 .title"),function(saved) {
                     var self = this;
-                    jsRoutes.controllers.NoteManager.saveNewNotebook().ajax({
+                    if(!saved) {
+                        $(this).parents(".notebook").remove();
+                        return;
+                    }
+                    noteMe.jsRoutes.saveNewNotebook.ajax({
                         data: {
                             name: $(this).text()
                         },
@@ -242,7 +254,7 @@ $(function() {
 
     $(".new-note").click(function(evnet) {
         var notebook = $(this).parents(".notebook");
-           jsRoutes.controllers.NoteManager.newNote().ajax({
+           noteMe.jsRoutes.newNote.ajax({
             data: {
                 notebookId: $(notebook).attr("data-id")
             },
@@ -335,9 +347,9 @@ jQuery.fn.singleDoubleClick = function(single_click_callback, double_click_callb
     jQuery(this.selector).live("click",function(event){
         var self = $(this);
         clicks++;
-        if (clicks == 1) {
+        if (clicks === 1) {
             setTimeout(function(){
-                if(clicks == 1) {
+                if(clicks === 1) {
                     self.trigger("singleClick",event);
                     //single_click_callback.call(self, event);
                 } else {

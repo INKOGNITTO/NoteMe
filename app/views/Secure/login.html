@@ -23,16 +23,16 @@
         #{form @App.authenticate(), id:'lrform'}
             <h1>Vitajte!</h1>
             <label for="email">e-mail:</label>
-            <input type="email" placeholder="e-mail" id="email" name="email" title="Zadajte svoj e-mail"><br>
+            <input type="email" placeholder="e-mail" id="email" name="user.email" title="Zadajte svoj e-mail"><br>
             <div style="display:none;" class="registration-fields">
                 <label for="name">meno:</label>
-                <input type="text" placeholder="meno" id="name" name="name" disabled="disabled" title="Zadajte meno (voliteľná položka)"><br>
+                <input type="text" placeholder="meno" id="name" name="user.name" disabled="disabled" title="Zadajte meno (voliteľná položka)"><br>
             </div>
             <label for="passwd">heslo:</label>
-            <input type="password" placeholder="heslo" id="passwd" name="password" title="Zadajte svoje heslo"><br>
+            <input type="password" placeholder="heslo" id="passwd" name="user.password" title="Zadajte svoje heslo"><br>
             <div style="display:none;" class="registration-fields">
                 <label for="passwdcheck">potvrdenie hesla:</label>
-                <input type="password" placeholder="potvrdenie hesla" id="passwdcheck" name="passwordcheck" disabled="disabled" title="Zopakujte svoje nové heslo"><br>
+                <input type="password" placeholder="potvrdenie hesla" id="passwdcheck" name="user.passwordCheck" disabled="disabled" title="Zopakujte svoje nové heslo"><br>
             </div>
             <div style="position:relative;left:14px;text-align: right;">
                 <input type="submit" value="Prihlásiť" id="submit">
@@ -132,24 +132,30 @@ $(function(){
             url : $(this).attr("action"),
             data : $(this).serialize(),
             success : function(data){
-                console.log(data);
-                console.log(data.next);
-                window.location.assign(data.next);
-                //$(location).attr("href",data.next);
+                if(data.next) {
+                    window.location.assign(data.next);
+                    //$(location).attr("href",data.next);}
+                }
             },
             error : function(err){
-                console.log(err);
                 var resp = $.parseJSON(err.responseText),
+                    selector = "input[type='text'], input[type='password'], input[type='email']",
                     tooltips, globalTooltip;
-                tooltips = $("input[type='text'], input[type='password'], input[type='email']").tooltip({
+                try {
+                    $(selector).tooltip("destroy");
+                } catch (e) {
+                    // ignoruj, sluzi len na zatvorenie pripadnych tooltipov
+                }
+                
+                tooltips = $(selector).tooltip({
                     content: function() {
                         if(resp && resp[$(this).attr("name")]) {
-                            return resp[$(this).attr("name")][0];
+                            return resp[$(this).attr("name")][0].message;
                         }
                     },
                     open: function(){
                         var self = $(this);
-                        setTimeout(function(){self.tooltip("close");}, 5000);
+                        setTimeout(function(){self.tooltip("close");}, 10000);
                     },
                     close: function(){
                         $(this).tooltip("destroy");
@@ -173,7 +179,8 @@ $(function(){
                         }
                     });
                     globalTooltip.tooltip("open");
-                }
+                } 
+                
             }
         });
     });

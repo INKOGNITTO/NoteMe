@@ -11,15 +11,20 @@ import play.db.jpa.Model;
 @Table(name = "users")
 public class User extends Model {
 
-    @Required
-    @Email
+    @Required (message = "E-mail je požadovaný")
+    @Email (message = "Zadajte platný email")
+    @Unique (message = "Na zadaný email je už registrovaný používateľ")
     public String email;
     
-    @Required
     public String name;
     
-    @Required
+    @MinSize(value = 6, message = "Heslo je krátke, zadajte aspoň 6 znakov")
+    @Required (message = "Zadajte svoje nové heslo")
     public String password;
+    
+    @Transient
+    @CheckWith(controllers.App.PasswordCheckCheck.class)
+    public String passwordCheck;
     
     @ManyToMany
     @OrderColumn

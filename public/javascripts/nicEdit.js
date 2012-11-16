@@ -268,7 +268,7 @@ var nicEditorConfig = bkClass.extend({
 		'outdent' : {name : __('Odstrániť odsadenie'), command : 'outdent', noActive : true},
 		'hr' : {name : __('Horizontálny oddeľovač'), command : 'insertHorizontalRule', noActive : true}
 	},
-	iconsPath : '/assets/images/text-editor.png',
+	iconsPath : '/public/images/text-editor.png',
 	buttonList : ['save','bold','italic','underline','left','center','right','justify','ol','ul','fontSize','fontFamily','fontFormat','indent','outdent','image','upload','link','unlink','forecolor','bgcolor'],
 	iconList : {"xhtml":30,"bgcolor":18,"forecolor":17,"bold":1,"center":11,"hr":30,"indent":13,"italic":2,"justify":12,"left":9,"ol":8,"outdent":14,"removeformat":30,"right":10,"save":16,"strikethrough":4,"subscript":6,"superscript":5,"ul":7,"underline":3,"image":30,"link":19,"unlink":20,"close":15,"arrow":30,"upload":30}
 	

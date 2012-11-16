@@ -11,7 +11,12 @@ import java.util.Map;
 public class NoteManager extends Controller {
   
     public static void index() {
-        render("manage.html",User.findByEmail(session.get("user")));
+        /*Notebook nb = Notebook.create("Pokus", User.findByEmail(session.get("username")).getId());
+        User u = User.findByEmail(session.get("username"));
+        u.notebooks.add(nb);
+        u.save();*/
+        renderArgs.put("user", User.findByEmail(session.get("username")));
+        render("manage.html");
     }
     
     public static void sharenote() {
@@ -19,19 +24,16 @@ public class NoteManager extends Controller {
     }
 
     public static void newNotebook() {
-        render("items/notebook.html",
-            new Notebook("Nový poznámkový blok",User.findByEmail(session.get("user")))
-        );
+        renderArgs.put("notebook", new Notebook("Nový poznámkový blok",User.findByEmail(session.get("username"))));
+        render("tags/notebook.html");
     }
 
     public static void saveNewNotebook() {
-        /*Map<String, String[]> nb = request.body.asFormUrlEncoded();
-        User user = User.findByEmail(session().get("user"));
-        Notebook notebook = Notebook.create(nb.get("name")[0],
-                user.id);
+        User user = User.findByEmail(session.get("username"));
+        Notebook notebook = Notebook.create(params.get("name"), user.id);
         user.notebooks.add(0,notebook);
-        user.saveManyToManyAssociations("notebooks");
-        return ok(String.valueOf(notebook.id)); */
+        user.save();
+        renderText(notebook.id);
     }
 
     public static void newNote() {

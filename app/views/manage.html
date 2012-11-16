@@ -1,6 +1,6 @@
 #{extends 'main.html' /}
 #{set section:'manage' /}
-@main("")("manage")(user) {
+
 <div id="toolbar">
     <button id="new-notebook">Nový poznámkový blok</button>
 </div>
@@ -10,27 +10,23 @@
     		<span class="ui-icon ui-icon-plus"></span>
     		<span class="title"><input type="text"></span>
     	</div>
-   	    @for(j <- 1 to 10){
-        	@views.html.items.tag("značka "+j,"sidebar")
-        }
+   	    *{tu idu tagy}*
     </div>
 </div>
 <div id="main" class="fill">
     <div id="left-column-wrapper" class="column-wrapper fill">
         <div id="left-column-scroll">
             <div class="left-column notebooks">
-	            @for(nb <- models.User.findNotebooks(user.id)){
-	            	@views.html.items.notebook(nb)
-	            }
+                #{list items:user.notebooks, as:'nb'}
+                    #{notebook notebook: nb /}
+                #{/list}
             </div>
         </div>
     </div>
     <div id="right-column-wrapper" class="column-wrapper fill">
         <div class="right-column">
-			@views.html.items.noteDetail()
+			#{noteDetail /}
         </div>
         <div style="clear:both;"></div>
     </div>
 </div>
-
-}

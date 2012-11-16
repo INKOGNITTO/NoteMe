@@ -1,6 +1,6 @@
-@(user: User)
+#{extends 'main.html' /}
+#{set section:'edit' /}
 
-@main("")("edit")(user) {
 <div id="toolbar">
     <!-- <button id="new-notebook">Nový poznámkový blok</button> -->
     <button id="hide-notebooks" data-ui-icon-primary="ui-icon-carat-1-w">Skryť bloky</button>
@@ -9,18 +9,16 @@
     <div id="left-column-wrapper" class="column-wrapper fill">
         <div id="left-column-scroll">
             <div class="left-column notebooks">
-                @for(nb <- models.User.findNotebooks(user.id)){
-                    @views.html.items.notebook(nb)
-                }
+                #{list items:user.notebooks, as:'nb'}
+                    #{notebook notebook: nb /}
+                #{/list}
             </div>
         </div>
     </div>
     <div id="right-column-wrapper" class="column-wrapper fill">
         <div class="right-column">
-			@views.html.items.noteEdit()
+			#{noteEdit /}
         </div>
         <div style="clear:both;"></div>
     </div>
 </div>
-
-}

@@ -1,8 +1,12 @@
-@(notebook: Notebook)
-<div class="notebook" data-id="@notebook.id">
+%{
+    if(_notebook!=null) {
+        notebook = _notebook;
+    }
+}%
+<div class="notebook" data-id="${notebook?.id}">
 	<h2>
 		<span class="ui-icon ui-icon-grip-dotted-vertical handle"></span>
-		<span class="title">@notebook.name</span>
+		<span class="title">${notebook.name}</span>
 		<span class="iconbar">
 			<span class="ui-icon ui-icon-note new-note" title="Nová poznámka"></span>
 			<span class="ui-icon ui-icon-link" title="Zdieľať poznámkový blok"></span>
@@ -10,8 +14,8 @@
 		</span>
 	</h2>
 	<div>
-		@for(n <- notebook.getNotes()) {
-			@note(n)
-		}
+            #{list items:notebook.notes, as:'n'}
+                #{note note: n /}
+            #{/list}
 	</div>
 </div>

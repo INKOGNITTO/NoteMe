@@ -69,11 +69,11 @@
 }
 
 .jspTrack {
-    background: #757575 url(/assets/images/bg-noise-midtone.png);
+    background: #757575 url(/public/images/bg-noise-midtone.png);
 }
 
 .jspDrag {
-    background: #555555 url(/assets/images/bg-noise-dark.png);
+    background: #555555 url(/public/images/bg-noise-dark.png);
 }
 
 .jspHorizontalBar .jspTrack,

@@ -1,87 +1,72 @@
 package controllers;
 
 import com.google.gson.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import play.*;
 import models.User;
 import play.data.validation.*;
+import play.data.validation.Check;
 import play.mvc.*;
 import play.mvc.Http.StatusCode;
 
 
 public class App extends Controller{
 
-	// Autentifikácia
-    
-    public class Login {
-        @Required (message = "Zadajte e-mail")
-        @Email(message = "Zadajte platný email")
-    	public String email;
-
-        @Required (message = "Zadajte heslo")
-    	public String password;
-    	
-    }
-
-    public class Registration {
-        @Required (message = "E-mail je požadovaný")
-        @Email(message = "Zadajte platný email")
-        public String email;
-
-        public String name;
-
-        //@Length(value = 6, message = "Heslo je krátke, zadajte aspoň 6 znakov")
-        @Required (message = "Zadajte svoje nové heslo")
-        public String password;
-
-        @Required (message = "Zopakujte svoje nové heslo")
-        public String passwordcheck;
-
-        public String validate() {
-            if(!password.equals(passwordcheck)) {
-                return "Zadané heslo sa nezhoduje s kontrolou hesla";
-            } else if(User.findByEmail(email)!=null) {
-                return "Zadaný e-mail je už zaregistrovaný. " +
-                        "Skontrolujte e-mail. " +
-                        "Ak ste sa už v noteMe registrovali, prihláste sa.";
-            }
-            return null;
+    public static class PasswordCheck extends Check{
+        @Override
+        public boolean isSatisfied(Object user, Object password) {
+            setMessage("Chybné meno alebo heslo");
+            return Security.authenticate(((LoginCheck)user).email, (String)password);
         }
     }
     
-    public static void authenticate(
-            @Required
-            @Email
-            String email,
-            @Required
-            String password
-            ) {
+    public static class PasswordCheckCheck extends Check {
+        @Override
+        public boolean isSatisfied(Object user, Object passwordcheck) {
+            setMessage("Heslá sa nezhodujú");
+            return (((User)user).password).equals((String)passwordcheck);
+        }
+    }
+    
+    public class LoginCheck {
+        @Required (message = "Zadajte e-mail")
+        @Email (message = "Zadajte platný email") 
+        public String email;
+        
+        @Required (message = "Zadajte heslo")
+        @CheckWith(PasswordCheck.class)
+        public String password;
+        
+        public LoginCheck(String email, String password) {
+            this.email = email;
+            this.password = password;
+        }
+    }
+    
+    public static void authenticate(@Valid LoginCheck user) {
     	if(validation.hasErrors()) {
             Gson gson = new Gson();
-            JsonElement json  = gson.toJsonTree(validation.errorsMap());
-            renderJSON(json);
+            error(StatusCode.BAD_REQUEST,gson.toJson(validation.errorsMap()));
     	} 
-        if(Security.authenticate(email, password)) {
-            session.put("user",email);
-            renderJSON("{\"next\":\"/manage\"}");
-    	}
+        
+        session.put("username",user.email);
+        renderJSON("{\"next\":\"/manage\"}");
     }
 
-    public static void register() {
-        /*Form<Registration> registerForm = form(Registration.class).bindFromRequest();
-        if(registerForm.hasErrors()) {
-            return badRequest(registerForm.errorsAsJson());
-        } else {
-            User newUser = new User(registerForm.get().email, registerForm.get().name, registerForm.get().password);
-            newUser.save();
-            session("user",registerForm.get().email);
-            ObjectNode resp = Json.newObject();
-            resp.put("next",routes.NoteManager.index().url());
-            return ok(resp);
-        }
-*/
+    public static void register(@Valid User user) {
+        if(validation.hasErrors()) {
+            Gson gson = new Gson();
+            error(StatusCode.BAD_REQUEST,gson.toJson(validation.errorsMap()));
+        } 
+        
+        User newUser = new User(user.email, user.name, user.password);
+        newUser.save();
+        session.put("username",user.email);
+        renderJSON("{\"next\":\"/manage\"}");
+
     }
     
     public static void logout() {
@@ -96,5 +81,14 @@ public class App extends Controller{
     public static void index() {
         NoteManager.index();
     }
-
+    
+    public static void jsRoutes() {
+        if(Security.isConnected()) {
+            response.setContentTypeIfNotSet("text/javascript");
+            render("jsRoutes");
+        } else {
+            error(StatusCode.FORBIDDEN, "Nie ste prihlásený");
+        }
+    }
+    
 }

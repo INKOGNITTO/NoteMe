@@ -7,7 +7,8 @@ import play.mvc.*;
 public class Edit extends Controller {
 	
 	public static void index() {
-	    renderTemplate("views/edit.html",new Object[3]);
+            renderArgs.put("user", User.findByEmail(session.get("username")));
+	    render("edit.html");
 	    
 	}
 
