@@ -21,7 +21,7 @@ public class Notebook extends Model {
     public List<User> contributors = new LinkedList<User>();
 
 
-    @OneToMany(mappedBy="notebook")
+    @OneToMany
     @OrderColumn
     public List<Note> notes = new LinkedList<Note>();
 
@@ -35,10 +35,6 @@ public class Notebook extends Model {
         Notebook notebook = new Notebook(name, User.<User>findById(userID));
         notebook.save();
         return notebook;
-    }
-
-    public List<Note> getNotes() {
-        return notes;
     }
 
     public static String rename(Long notebookID, String newName) {

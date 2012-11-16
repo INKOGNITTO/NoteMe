@@ -1,3 +1,9 @@
 # You can specialize this file for each language.
 # For example, for French create a messages.fr file
 #
+
+crud.title=noteMe Administrácia
+crud.home=Domov
+crud.blank=Nový
+crud.index.title=Zvoľte objekt, ktorý chcete editovať
+crud.index.objectType=Typy objektov

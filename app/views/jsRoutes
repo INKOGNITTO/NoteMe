@@ -2,11 +2,12 @@ var noteMe = noteMe || {};
 (function() {
     
     var makeRoute = function(jsr) {
+        var urlMethod = jsr.url;
+        jsr.type = jsr.method;
+        delete(jsr.method);
         return {
             ajax: function(obj) {
-                jsr.url = jsr.url.apply({},obj?obj.urlParams:{});
-                jsr.type = jsr.method;
-                delete(jsr.method);
+                jsr.url = urlMethod.apply({},obj?obj.urlParams:{});
                 $.ajax($.extend(jsr,obj));
             }   
         };
@@ -14,6 +15,9 @@ var noteMe = noteMe || {};
     
     noteMe.jsRoutes = {
         newNotebook: makeRoute(#{jsRoute @NoteManager.newNotebook() /}),
-        saveNewNotebook: makeRoute(#{jsRoute @NoteManager.saveNewNotebook() /})
+        saveNewNotebook: makeRoute(#{jsRoute @NoteManager.saveNewNotebook() /}),
+        newNote: makeRoute(#{jsRoute @NoteManager.newNote() /}),
+        saveNewNote: makeRoute(#{jsRoute @NoteManager.saveNewNote() /}),
+        shareNote: makeRoute(#{jsRoute @NoteManager.shareNote() /})
     };
 }());

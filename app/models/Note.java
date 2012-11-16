@@ -7,6 +7,7 @@ import play.data.binding.As;
 import play.data.validation.*;
 
 import play.db.jpa.Model;
+import play.libs.Codec;
 
 
 @Entity
@@ -18,14 +19,16 @@ public class Note extends Model {
 
     @Column(unique = true)
     public String publicID;
+    
+    public Boolean isPublic = false;
 
     @Column(columnDefinition = "TEXT")
     public String content;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     public List<Tag> tags = new ArrayList<Tag>();
 	
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @Required
     public Notebook notebook;
 
@@ -42,17 +45,32 @@ public class Note extends Model {
 
     
 
-    public Note(String name, Long notebookID, Long userID) {
+    public Note(String name, Long notebookID, User owner) {
         this.name = name;
+        //this.notebooks.add((Notebook)Notebook.findById(notebookID));
         this.notebook = Notebook.findById(notebookID);
-        this.owner = User.findById(userID);
+        this.owner = owner;
         this.creationDate = new Date();
         this.updateDate = new Date();
+        this.publicID = generatePublicId();
+        
 
+    }
+    
+    public String generatePublicId() {
+        String uuid = Codec.UUID();
+        if(Note.findByPublicId(uuid)!=null) {
+            return generatePublicId();
+        }
+        return uuid;
+    }
+    
+    public static Note findByPublicId(String publicId) {
+        return Note.find("publicID = ?", publicId).first();
     }
 
     public static Note create(String name, Long notebookID, Long userID) {
-        Note note = new Note(name, notebookID, userID);
+        Note note = new Note(name, notebookID, (User)User.findById(userID));
         note.save();
         return note;
     }

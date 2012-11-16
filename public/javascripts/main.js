@@ -20,10 +20,11 @@ $(function() {
                         $(this).text(oldText);
                     }
                     $(this).removeAttr("contenteditable");
-                    result.saved = false;
                     if(typeof cb === "function"){
-                        cb.apply($(this),result);
+                        console.log(result);
+                        cb.call($(this),result);
                     }
+                    return result;
                 }).enterKey(function() {
                     result.saved = true;
                     $(this).blur();
@@ -225,9 +226,10 @@ $(function() {
         noteMe.jsRoutes.newNotebook.ajax({
             success : function(data) {
                 var ad = $(data).prependTo($(".notebooks").first());
-                noteMe.manage.rename.call($(ad).find("h2 .title"),function(saved) {
+                noteMe.manage.rename.call($(ad).find("h2 .title"),function(result) {
                     var self = this;
-                    if(!saved) {
+                    console.log(result.saved);
+                    if(!result.saved) {
                         $(this).parents(".notebook").remove();
                         return;
                     }
@@ -237,12 +239,10 @@ $(function() {
                         },
                         success: function(data){
                             $(self).parents(".notebook").attr("data-id",data);
-                            console.log(data);
                         },
                         error: function(err) {
                             console.log(err);
                         }
-
                     });
                 });
             },
@@ -252,15 +252,34 @@ $(function() {
         });
     });
 
-    $(".new-note").click(function(evnet) {
+    $(".new-note").live("click",function(evnet) {
         var notebook = $(this).parents(".notebook");
            noteMe.jsRoutes.newNote.ajax({
             data: {
                 notebookId: $(notebook).attr("data-id")
             },
             success: function(data) {
-                console.log(data);
-                $(notebook).children("div").prepend(data);
+                var note = $(data).prependTo($(notebook).children("div.notes").first());
+                noteMe.manage.rename.call($(note).find("span.title"), function(result) {
+                    var self = this;
+                    console.log(result.saved);
+                    if (!result.saved) {
+                        $(note).remove();
+                        return;
+                    }
+                    noteMe.jsRoutes.saveNewNote.ajax({
+                        data: {
+                            notebookId: $(notebook).attr("data-id"),
+                            name: $(this).text()
+                        },
+                        success: function(data) {
+                            $(self).parents(".note").attr("data-id",data);
+                        },
+                        error: function(err) {
+                            console.log(err);
+                        }
+                    });
+                });
             },
             error: function(err) {
                 console.log(err);
@@ -303,37 +322,36 @@ $(function() {
     // zdielanie
     // tlacidlo pod poznamkou
     $(".sharenote-button").click(function() {
-    	$.ajax({
-    		url: "sharenote",
-    		type: "post",
-    		dataType: "html",
-    		context: $("body")
-    	}).done(function(response) {
-            $(response).appendTo($(this)).dialog({
-                buttons: {
-                    "Zavrieť": function() {
-                        $(this).dialog("close");
+    	noteMe.jsRoutes.shareNote.ajax({
+            dataType: "html",
+            context: $("body"),
+            success: function(data) {
+                $(data).appendTo($(this)).dialog({
+                    buttons: {
+                        "Zavrieť": function() {
+                            $(this).dialog("close");
+                        },
+                        "OK": function(){
+                            $(this).find("form").submit();
+                        }
                     },
-                    "OK": function(){
-                        $(this).find("form").submit();
+                    close:function() {
+                        $(this).dialog("destroy");
+                        $(this).remove();
                     }
-                },
-                close:function() {
-                    $(this).dialog("destroy");
-                    $(this).remove();
-                }
-            });
-            $("#sharenote .add-multiple").adder({inputLabel:"Pridať email používateľa"});
-            $("#sharenote #share-public").hide();
-            $("#sharenote input[type='checkbox']").click(function(){
-                $("#sharenote #share-public").fadeIn();
-            });
-            $("#sharenote form").submit(function(event) {
-                console.log("posiela sa zdielanie");
-                event.preventDefault();
-                $("#sharenote").dialog("close");
-            });
-        });
+                });
+                $("#sharenote .add-multiple").adder({inputLabel:"Pridať email používateľa"});
+                $("#sharenote #share-public").hide();
+                $("#sharenote input[type='checkbox']").click(function(){
+                    $("#sharenote #share-public").fadeIn();
+                });
+                $("#sharenote form").submit(function(event) {
+                    console.log("posiela sa zdielanie");
+                    event.preventDefault();
+                    $("#sharenote").dialog("close");
+                }); 
+            }
+    	});
     });
 
 

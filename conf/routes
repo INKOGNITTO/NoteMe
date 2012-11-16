@@ -13,17 +13,20 @@ GET     /logout                     Secure.logout
 
 # Manage
 GET     /manage	                    NoteManager.index
-POST 	/sharenote                  NoteManager.sharenote
-POST    /newNotebook                NoteManager.newNotebook
-POST    /saveNewNotebook            NoteManager.saveNewNotebook
-POST    /newNote                    NoteManager.newNote
-POST    /saveNote                   NoteManager.saveNote
+POST 	/manage/sharenote           NoteManager.shareNote
+POST    /manage/newNotebook         NoteManager.newNotebook
+POST    /manage/saveNewNotebook     NoteManager.saveNewNotebook
+POST    /manage/newNote             NoteManager.newNote
+POST    /manage/saveNewNote         NoteManager.saveNewNote
 
 # Edit
 GET	/edit                       Edit.index
 
 # jsRoutes
 GET     /jsRoutes                   App.jsRoutes
+
+# Admin 
+*       /admin                      module:crud
 
 # Map static resources
 GET     /public/                    staticDir:public

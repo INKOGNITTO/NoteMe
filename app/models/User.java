@@ -6,6 +6,7 @@ import javax.persistence.*;
 import hash.Passwords;
 import play.data.validation.*;
 import play.db.jpa.Model;
+import controllers.CRUD;
 
 @Entity
 @Table(name = "users")
@@ -20,6 +21,7 @@ public class User extends Model {
     
     @MinSize(value = 6, message = "Heslo je krátke, zadajte aspoň 6 znakov")
     @Required (message = "Zadajte svoje nové heslo")
+    @CRUD.Exclude
     public String password;
     
     @Transient
@@ -46,6 +48,10 @@ public class User extends Model {
 
     public static List<Notebook> findNotebooks(Long user) {
         return User.<User>findById(user).notebooks;
+    }
+    
+    public String toString() {
+        return email + " (" + name + ")";
     }
 
 }

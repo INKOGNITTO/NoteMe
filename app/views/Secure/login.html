@@ -99,7 +99,7 @@ $(function(){
             $("*[disabled]").removeAttr("disabled");
             $("#submit").attr("value","Registrovať");
             $("#go-registration").fadeOut();
-            $("#lrform").attr("action","/registration");
+            $("#lrform").attr("action","@{App.register()}");
             return false;
         },
         _default: function() {
@@ -107,7 +107,7 @@ $(function(){
             $("*[disabled]").attr("disabled");
             $("#submit").attr("value","Prihlásiť");
             $("#go-registration").fadeIn();
-            $("#lrform").attr("action","/login");
+            $("#lrform").attr("action","@{App.authenticate()}");
             return false;
         }
     };
