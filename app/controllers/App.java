@@ -64,6 +64,7 @@ public class App extends Controller{
         
         User newUser = new User(user.email, user.name, user.password);
         newUser.save();
+        newUser.setDefaults();
         session.put("username",user.email);
         renderJSON("{\"next\":\"/manage\"}");
 
