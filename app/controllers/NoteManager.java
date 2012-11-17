@@ -77,7 +77,6 @@ public class NoteManager extends Controller {
         if (dump != null) {
             usrNtb.add(newPosition, dump);
         }
-
-
+        User.findByEmail(session.get("username")).save();
     }
 }
