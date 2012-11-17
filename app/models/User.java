@@ -37,6 +37,13 @@ public class User extends Model {
         this.name = name;
         this.password = Passwords.hashPassword(password);
     }
+    
+    public void setDefaults() {
+        Notebook defaultNotebook = Notebook.create("Moje poznámky", this.id);
+        this.notebooks.add(0, defaultNotebook);
+        defaultNotebook.save();
+        this.save();
+    }
 
     public static List<User> getAll() {
         return User.<User>findAll();
@@ -50,6 +57,7 @@ public class User extends Model {
         return User.<User>findById(user).notebooks;
     }
     
+    @Override
     public String toString() {
         return email + " (" + name + ")";
     }

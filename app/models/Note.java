@@ -19,8 +19,6 @@ public class Note extends Model {
 
     @Column(unique = true)
     public String publicID;
-    
-    public Boolean isPublic = false;
 
     @Column(columnDefinition = "TEXT")
     public String content;
@@ -47,21 +45,19 @@ public class Note extends Model {
 
     public Note(String name, Long notebookID, User owner) {
         this.name = name;
-        //this.notebooks.add((Notebook)Notebook.findById(notebookID));
         this.notebook = Notebook.findById(notebookID);
         this.owner = owner;
         this.creationDate = new Date();
         this.updateDate = new Date();
-        this.publicID = generatePublicId();
-        
-
+        //this.publicID = generatePublicId();
     }
     
     public String generatePublicId() {
         String uuid = Codec.UUID();
         if(Note.findByPublicId(uuid)!=null) {
-            return generatePublicId();
+            generatePublicId();
         }
+        this.publicID = uuid;
         return uuid;
     }
     

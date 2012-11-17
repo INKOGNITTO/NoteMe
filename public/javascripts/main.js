@@ -6,6 +6,22 @@ $(function() {
 
     (function() {
         var _self = this;
+        
+        /*var globalTooltip = $("body").tooltip({
+            content: "správa",
+            tooltipClass: "ui-state-error",
+            items:"body",
+            position:{my:"center top-20", at:"center top-20"},
+            close: function(){
+                $(this).tooltip("destroy");
+            },
+            open: function(){
+                var self = $(this);
+                setTimeout(function(){self.tooltip("close");}, 5000);
+            }
+        });*/
+        //globalTooltip.tooltip("open");
+        
         this.manage = {
             rename : function(cb) {
                 var oldText = $(this).text(),
@@ -34,6 +50,9 @@ $(function() {
 
                 $(this).attr("contenteditable",true).focus();
             }
+        };
+        this.messageCenter = {
+            show: null
         };
     }.apply(noteMe));
 
@@ -146,7 +165,23 @@ $(function() {
         axis: "y",
         handle: ".handle",
         placeholder: "sortable-placeholder",
-        forcePlaceholderSize: true
+        forcePlaceholderSize: true,
+        update: function(event, ui) {
+            console.log(ui.item, ui.item.parent());
+            console.log(ui.item.parent().children().index(ui.item));
+            noteMe.jsRoutes.orderNotebook.ajax({
+                data: {
+                    notebookId: ui.item.attr("data-id"),
+                    newPosition: ui.item.parent().children().index(ui.item)
+                },
+                success: function(data) {
+                    console.log("zmena pozicie",data);
+                },
+                error: function(err) {
+                    console.log("chyba zmeny pozicie poz.bloku",err);
+                }
+            });
+        }
     });
     $(".notebook >  div").sortable({
         axis: "y",
