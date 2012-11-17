@@ -1,11 +1,7 @@
 package controllers;
 
 import com.google.gson.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
-import play.*;
 import models.User;
 import play.data.validation.*;
 import play.data.validation.Check;
