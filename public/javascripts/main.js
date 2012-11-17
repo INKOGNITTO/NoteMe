@@ -169,7 +169,7 @@ $(function() {
         update: function(event, ui) {
             console.log(ui.item, ui.item.parent());
             console.log(ui.item.parent().children().index(ui.item));
-            noteMe.jsRoutes.orderNotebook.ajax({
+            noteMe.jsRoutes.orderNotebooks.ajax({
                 data: {
                     notebookId: ui.item.attr("data-id"),
                     newPosition: ui.item.parent().children().index(ui.item)
