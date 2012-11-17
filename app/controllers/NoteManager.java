@@ -64,7 +64,7 @@ public class NoteManager extends Controller {
         }
     }
 
-    public static void orderNoteBooks(long notebookId, int newPosition) {
+    public static void orderNotebooks(long notebookId, int newPosition) {
         List<Notebook> usrNtb = User.findByEmail(session.get("username")).notebooks;
         Notebook dump = null;
         for (Notebook nb : usrNtb) {
