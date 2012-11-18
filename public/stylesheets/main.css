@@ -778,7 +778,8 @@ fieldset legend {
 }
 
 .ui-tooltip {
-    border: 1px solid #555555 !important;;
+    border: 1px solid #555555;
+    border-width: 1px !important;
     background: #81ae40 url(noteMe-dark/images/ui-bg_fine-grain_30_81ae40_60x60.png);
     color: #fafafa;
     max-width: 180px;
@@ -788,6 +789,17 @@ fieldset legend {
 .ui-tooltip.ui-state-error{
     background: #ffd43d url(noteMe-dark/images/ui-bg_fine-grain_20_ffd43d_60x60.png);
     color: #2e2e2e;
+}
+.global-message.ui-tooltip {
+    box-shadow: none;
+    max-width:300px;
+    border: 1px solid #c3c3c3;
+    box-shadow: 0px 0px 4px #2e2e2e;
+    border-style: dashed;
+    margin:15px;
+}
+.global-message.ui-tooltip.ui-state-error {
+    border-color: #ff7624;
 }
 
 

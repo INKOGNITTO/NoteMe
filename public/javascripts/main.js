@@ -7,20 +7,24 @@ $(function() {
     (function() {
         var _self = this;
         
-        /*var globalTooltip = $("body").tooltip({
+        var globalTooltip = $("body").tooltip({
             content: "správa",
-            tooltipClass: "ui-state-error",
             items:"body",
-            position:{my:"center top-20", at:"center top-20"},
+            disabled: true,
+            tooltipClass: "global-message",
+            show:{effect:"slideDown",duration:500,easing:"swing"},
+            hide:{effect:"slideUp",duration:500,easing:"swing"},
+            position:{my:"center top+2", at:"center top",collision:"none"},
             close: function(){
-                $(this).tooltip("destroy");
+                
             },
             open: function(){
                 var self = $(this);
-                setTimeout(function(){self.tooltip("close");}, 5000);
-            }
-        });*/
-        //globalTooltip.tooltip("open");
+                setTimeout(function(){self.tooltip("close");}, 10000);
+            }   
+        });
+    
+        //$("body").click(function(){globalTooltip.tooltip("open");});
         
         this.manage = {
             rename : function(cb) {
@@ -37,7 +41,6 @@ $(function() {
                     }
                     $(this).removeAttr("contenteditable");
                     if(typeof cb === "function"){
-                        console.log(result);
                         cb.call($(this),result);
                     }
                     return result;
@@ -51,7 +54,7 @@ $(function() {
                 $(this).attr("contenteditable",true).focus();
             }
         };
-        this.messageCenter = {
+        this.globalMessage = {
             show: null
         };
     }.apply(noteMe));
@@ -188,7 +191,27 @@ $(function() {
         handle: ".handle",
         connectWith:".notebook > div",
         placeholder: "sortable-placeholder",
-        forcePlaceholderSize: true
+        forcePlaceholderSize: true,
+        update: function(event, ui) {
+            var targetNotebook = ui.item.parents(".notebook"),
+                eventTargetNotebook = $(event.target).parents(".notebook");
+            if(targetNotebook.get(0)!==eventTargetNotebook.get(0)){
+                return;
+            }
+            noteMe.jsRoutes.orderNotes.ajax({
+                data: {
+                    noteId: ui.item.attr("data-id"),
+                    notebookId: targetNotebook.attr("data-id"),
+                    newPosition: ui.item.parent().children().index(ui.item)
+                },
+                success: function(data) {
+                    console.log("zmena pozicie",data);
+                },
+                error: function(err) {
+                    console.log("chyba zmeny pozicie poz.bloku",err);
+                }
+            });
+        }
     });
 
     $("#tag-sidebar").sortable({
@@ -246,7 +269,32 @@ $(function() {
 
     
     // premenovania
-    $('.notebook h2 .title, .note .title, .right-column > h2').live("dblclick",noteMe.manage.rename);
+    $('.notebook h2 .title, .note .title, .right-column > h2').live("dblclick",function() {
+        noteMe.manage.rename.call($(this),function(result){
+            if(!result.saved){return;}
+            var parents = $(this).parents(),
+                self = $(this),
+                type;
+            if(parents.filter(".note").length){
+                type="note";
+            } else if(parents.filter(".notebook").length){
+                type = "notebook";
+            }
+            noteMe.jsRoutes.rename.ajax({
+                data: {
+                    type: type,
+                    id: self.parents("."+type).attr("data-id"),
+                    newName: self.text()
+                },
+                success: function(data){
+                    console.log("premenovane",data);
+                },
+                error: function(err) {
+                    console.log("chyba premenovania",err);
+                }
+            });
+        });
+    });
     
     $("*[contenteditable='true']").live("click, focus", function() {
     	$(this).select();

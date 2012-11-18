@@ -19,6 +19,8 @@ POST    /manage/saveNewNotebook     NoteManager.saveNewNotebook
 POST    /manage/newNote             NoteManager.newNote
 POST    /manage/saveNewNote         NoteManager.saveNewNote
 POST    /manage/orderNotebooks      NoteManager.orderNotebooks
+POST    /manage/orderNotes          NoteManager.orderNotes
+POST    /manage/rename              NoteManager.rename  
 
 # Edit
 GET	/edit                       Edit.index
