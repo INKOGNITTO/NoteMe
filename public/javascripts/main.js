@@ -2,7 +2,7 @@ var noteMe = noteMe || {};
 
 $(function() {
 
-    // aplikacia :D
+    // aplikacia :)
 
     (function() {
         var _self = this,
@@ -28,7 +28,7 @@ $(function() {
                     globalTooltip.tooltip("close");
                     globalTooltip.tooltip({tooltipClass: gtClass+type});
                     globalTooltip.tooltip({content: message, items: "body"}).tooltip("open");
-                }
+                };
             };
     
         this.manage = {
@@ -247,7 +247,7 @@ $(function() {
     });
     
     $("#notetags .tag .ui-icon-close").click(function() {
-        $(this).parents(".tag").hide('fast').promise().done(function(){$(this).remove()});
+        $(this).parents(".tag").hide('fast').promise().done(function(){$(this).remove();});
     });
 
     $(".note").droppable({
@@ -476,12 +476,12 @@ jQuery.fn.singleDoubleClick = function(single_click_callback, double_click_callb
 jQuery.fn.iconButton = function(options) {
 	return this.each(function() {
 		var opt = {},
-			icons = {
-				icons: {
-					primary: jQuery(this).attr("data-ui-icon-primary"),
-					secondary: jQuery(this).attr("data-ui-icon-secondary")
-				}
-		};
+                    icons = {
+                            icons: {
+                                    primary: jQuery(this).attr("data-ui-icon-primary"),
+                                    secondary: jQuery(this).attr("data-ui-icon-secondary")
+                            }
+                    };
 		jQuery.extend(true, opt, options?options:{}, icons);
 		jQuery(this).button(opt);
 	});

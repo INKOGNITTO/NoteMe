@@ -36,10 +36,9 @@ public class Notebook extends Model {
         return notebook;
     }
 
-    public static String rename(Long notebookID, String newName) {
-        Notebook notebook = findById(notebookID);
-        notebook.name = newName;
-        notebook.save();
+    public String rename(String newName) {
+        this.name = newName;
+        this.save();
         return newName;
     }
 
