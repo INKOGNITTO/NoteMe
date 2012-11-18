@@ -283,6 +283,15 @@ footer{
     background: #638631 url(/public/images/bg-noise-green.png) left top;
 }
 
+.seam-header {
+    background: url(/public/images/seam-header.png) left top repeat-x;
+    width:100%;
+    height:3px;
+    z-index:10100;
+    position:absolute;
+    box-shadow:0px 0px 3px #2e2e2e;
+}
+
 .seam-top {
     background: url(/public/images/seam-top.png) left top repeat-x;
     height: 3px;
@@ -596,6 +605,9 @@ input[type="search"].ui-state-highlight {
     font-size:1.4em;
     margin-bottom:0px !important;
 }
+.right-column > h2[contenteditable="true"] {
+    margin-top:11px;
+}
 .notebook h2 .title {
 	border: 1px solid transparent;
 	padding:2px;
@@ -698,8 +710,8 @@ input[type="search"].ui-state-highlight {
 }
 
 #note-scroll {
-margin-top:48px;
-margin-bottom:132px;
+    margin-top:48px;
+    margin-bottom:132px;
 }
 
 #note {
@@ -718,58 +730,59 @@ margin-bottom:132px;
 }
 
 #notetags {
-	margin-top: 65px;
+    margin-top: 65px;
 }
 
 .vertical-resize {
-	width:100%;
-	height:4px;
-	text-align: center;
-	line-height:0;
-	cursor: n-resize;
+    width:100%;
+    height:4px;
+    text-align: center;
+    line-height:0;
+    cursor: n-resize;
 }
 .vertical-resize span {
-	background-image: url(noteMe-dark/images/ui-icons_222222_256x240.png);
-	background-position: -16px -230px;
-	width:16px;
-	height:5px;
-	display:inline-block;
+    background-image: url(noteMe-dark/images/ui-icons_222222_256x240.png);
+    background-position: -16px -230px;
+    width:16px;
+    height:5px;
+    display:inline-block;
 	
 }
 
 .ui-dialog-titlebar {
-	color: #fafafa;
+    color: #fafafa;
 }
 .ui-dialog {
-	box-shadow: 0px 0px 3px #acacac;
-	cursor: default;
+    box-shadow: 0px 0px 3px #acacac;
+    cursor: default;
 }
 fieldset {
-	border: 1px solid #638631;
-	padding: 10px;
-	border-radius: 2px;
+    border: 1px solid #638631;
+    padding: 10px;
+    border-radius: 2px;
 }
 fieldset legend {
-	padding:5px;
+    padding:5px;
 }
 #share-public > div {
-	border: 1px dashed #638631;
+    border: 1px dashed #638631;
 }
 
 #editor-panel {
-	margin-top:5px;
-	margin-bottom:5px;
+    margin-top:5px;
+    margin-bottom:5px;
 }
 #edit-scroll {
-	margin-top:89px;
-	border-image: url(/public/images/dashed-border.png) 1 1 1 1 repeat;
+    margin-top:89px;
+    border-image: url(/public/images/dashed-border.png) 1 1 1 1 repeat;
     border-top: 1px dashed #555555;
     border-left: 0px solid transparent;
     border-right: 0px solid transparent;
     border-bottom: 0px solid transparent;
+    overflow:auto;
 }
 .nicEdit-button, .nicEdit-selectContain {
-	margin:2px;
+    margin:2px;
 }
 
 .ui-state-error {

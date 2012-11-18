@@ -31,6 +31,9 @@ public class User extends Model {
     @ManyToMany
     @OrderColumn
     public List<Notebook> notebooks = new LinkedList<Notebook>();
+    
+    //@ManyToMany(fetch = FetchType.LAZY)
+    //public List<Note> notes = new LinkedList<Note>();
 
     public User(String email, String name, String password) {
         this.email = email;

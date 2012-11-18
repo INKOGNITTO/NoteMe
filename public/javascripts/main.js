@@ -5,27 +5,32 @@ $(function() {
     // aplikacia :D
 
     (function() {
-        var _self = this;
-        
-        var globalTooltip = $("body").tooltip({
-            content: "správa",
-            items:"body",
-            disabled: true,
-            tooltipClass: "global-message",
-            show:{effect:"slideDown",duration:500,easing:"swing"},
-            hide:{effect:"slideUp",duration:500,easing:"swing"},
-            position:{my:"center top+2", at:"center top",collision:"none"},
-            close: function(){
-                
-            },
-            open: function(){
-                var self = $(this);
-                setTimeout(function(){self.tooltip("close");}, 10000);
-            }   
-        });
+        var _self = this,
+            gtClass = "global-message ",
+            globalTooltip = $("body").tooltip({
+                content: "správa",
+                items:"body",
+                disabled: true,
+                tooltipClass: "global-message",
+                show:{effect:"slideDown",duration:500,easing:"swing"},
+                hide:{effect:"slideUp",duration:500,easing:"swing"},
+                position:{my:"center top+2", at:"center top",collision:"none"},
+                close: function(){
+
+                },
+                open: function(){
+                    var self = $(this);
+                    setTimeout(function(){self.tooltip("close");}, 7000);
+                }   
+            }),
+            gtFunction = function(type) {
+                return function(message) {
+                    globalTooltip.tooltip("close");
+                    globalTooltip.tooltip({tooltipClass: gtClass+type});
+                    globalTooltip.tooltip({content: message, items: "body"}).tooltip("open");
+                }
+            };
     
-        //$("body").click(function(){globalTooltip.tooltip("open");});
-        
         this.manage = {
             rename : function(cb) {
                 var oldText = $(this).text(),
@@ -54,8 +59,9 @@ $(function() {
                 $(this).attr("contenteditable",true).focus();
             }
         };
-        this.globalMessage = {
-            show: null
+        this.message = {
+            info: gtFunction(""),
+            error: gtFunction("ui-state-error")
         };
     }.apply(noteMe));
 
@@ -66,8 +72,6 @@ $(function() {
         dataType: "script",
         cache: true
     });
-
-
 
     $.datepicker.setDefaults( $.datepicker.regional[ "sk" ] );
 
@@ -311,7 +315,6 @@ $(function() {
                 var ad = $(data).prependTo($(".notebooks").first());
                 noteMe.manage.rename.call($(ad).find("h2 .title"),function(result) {
                     var self = this;
-                    console.log(result.saved);
                     if(!result.saved) {
                         $(this).parents(".notebook").remove();
                         return;
@@ -322,6 +325,7 @@ $(function() {
                         },
                         success: function(data){
                             $(self).parents(".notebook").attr("data-id",data);
+                            noteMe.message.info("Vytvorený poznámkový blok \""+self.text()+"\"");
                         },
                         error: function(err) {
                             console.log(err);
@@ -357,6 +361,7 @@ $(function() {
                         },
                         success: function(data) {
                             $(self).parents(".note").attr("data-id",data);
+                            noteMe.message.info("Vytvorená poznámka \""+self.text()+"\"");
                         },
                         error: function(err) {
                             console.log(err);
@@ -465,7 +470,7 @@ jQuery.fn.singleDoubleClick = function(single_click_callback, double_click_callb
         event.preventDefault();
     });
     return jQuery(this.selector);
-}
+};
 
 // ikony tlacidiel
 jQuery.fn.iconButton = function(options) {
@@ -476,43 +481,44 @@ jQuery.fn.iconButton = function(options) {
 					primary: jQuery(this).attr("data-ui-icon-primary"),
 					secondary: jQuery(this).attr("data-ui-icon-secondary")
 				}
-		}
+		};
 		jQuery.extend(true, opt, options?options:{}, icons);
 		jQuery(this).button(opt);
 	});
-}
+};
 
 // scrollbary
 jQuery.fn.scrollbar = function(){
 	return this.each(function() {
 		var self = this;
+                var api = $(this).jScrollPane({hideFocus:true, autoReinitialise:true,stickToBottom:true}).data("jsp");
 		// apply to this, to all children and parents
 		$(this).add($(this).children()).add($(this).parents()).on("resize", function(event) {
 			event.stopPropagation();
-			$(self).jScrollPane({hideFocus:true});
+			api.reinitialise();
 		});
-		$(this).jScrollPane();
+		
 		return $(this);
 	});
-}
+};
 
 
 $.fn.keydownCode = function(keyCode,callback,method) {
     return $(this)[method||"live"]("keydown",function(event) {
         var keycode = (event.keyCode ? event.keyCode : event.which);
-        if (keycode == keyCode) {
+        if (keycode === keyCode) {
             callback.call(this, event);
         }
     });
-}
+};
 
 $.fn.enterKey = function(cb,method) {
 	    return $(this).keydownCode(13,cb,method);
-}
+};
 
 $.fn.escKey = function(cb,method) {
         return $(this).keydownCode(27,cb,method);
-}
+};
 
 // select text
 $.fn.selectText = function () {
@@ -533,7 +539,7 @@ $.fn.selectText = function () {
             selection.addRange(range);
         }
     });
-}
+};
 
 
 // adder

@@ -1,22 +1,5 @@
 <h2>Poznámka</h2>
 <div id="editor-panel"></div>
 <div id="edit-scroll" class="fill">
-<div id="editor-space" style="margin:5px">Text poznámky...</div>
+<div id="editor-space" style="margin:5px"></div>
 </div>
-<script type="text/javascript">
-$(function() {
-	
-	var editorPanel = $("#editor-panel"),
-		editorSpace = $("#editor-space"),
-		editor = new nicEditor();
-	
-	editor.setPanel("editor-panel");
-	
-	editor.addInstance(editorSpace.attr("id"));
-	
-	$("#edit-scroll").scrollbar();
-
-	
-});
-
-</script>

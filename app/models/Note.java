@@ -15,7 +15,10 @@ import play.libs.Codec;
 public class Note extends Model {
 
     @ManyToOne
-    public User owner;    
+    public User owner;
+    
+    //@ManyToMany
+    //public List<User> users = new LinkedList<User>();
 
     @Column(unique = true)
     public String publicID;

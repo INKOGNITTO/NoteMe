@@ -1,10 +1,13 @@
 package controllers;
 
 import java.util.List;
+import javax.persistence.Query;
 import models.Note;
 import models.Notebook;
 import models.User;
+import play.Logger;
 import play.Play;
+import play.db.jpa.JPA;
 import play.mvc.*;
 
 @With(Secure.class)
@@ -80,42 +83,33 @@ public class NoteManager extends Controller {
     }
 
     public static void orderNotes(long noteId, long notebookId, int newPosition) {
-        System.out.println("ordering........................................................");
         try {
             Notebook notebook = Notebook.findById(notebookId);
             Note note = Note.findById(noteId);
-
+            User user = User.findByEmail(session.get("username"));
+            
+            if(!user.notebooks.contains(notebook)){
+                error(Http.StatusCode.FORBIDDEN,"No access");
+            }
+            
             note.notebook.notes.remove(note);
+            note.notebook.save();
             note.notebook = notebook;
-
+            note.notebook.notes.add(newPosition,note);
             note.save();
             note.notebook.save();
-            notebook.save();
-
-            notebook.notes.add(newPosition, note);
-
-            note.save();
-            note.notebook.save();
-            notebook.save();
-
+            
         } catch (Exception ex) {
-//            System.out.println("ERROR> "+ex.getMessage());
             error(Http.StatusCode.BAD_REQUEST, "Error while reordering notes");
         }
     }
 
-    private static void show(Notebook ntb) {
-        for (Note note : ntb.notes) {
-            System.out.println(note.name);
-        }
-    }
-
-    public static String rename(String type, Long id, String newName) {
+    public static void rename(String type, Long id, String newName) {
         if (type.equals("notebook")) {
-            return Notebook.rename(id, newName);
+            renderText(Notebook.rename(id, newName));
         } else if (type.equals("note")) {
-            return Note.rename(id, newName);
+            renderText(Note.rename(id, newName));
         }
-        return null;
+        error(Http.StatusCode.BAD_REQUEST,"Bad object type");
     }
 }
