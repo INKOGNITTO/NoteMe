@@ -65,18 +65,38 @@ public class NoteManager extends Controller {
     }
 
     public static void orderNotebooks(long notebookId, int newPosition) {
-        List<Notebook> usrNtb = User.findByEmail(session.get("username")).notebooks;
-        Notebook dump = null;
-        for (Notebook nb : usrNtb) {
-            if (nb.id.equals(notebookId)) {
-                dump = nb;
-                usrNtb.remove(nb);
-                break;
+        User user = User.findByEmail(session.get("username"));
+        try {
+            List<Notebook> usrNtb = user.notebooks;
+            Notebook dump = Notebook.findById(notebookId);
+            usrNtb.remove(dump);
+            if (dump != null) {
+                usrNtb.add(newPosition, dump);
             }
+            user.save();
+        } catch (Exception ex) {
+            error(Http.StatusCode.BAD_REQUEST, "Error while reordering notebooks");
         }
-        if (dump != null) {
-            usrNtb.add(newPosition, dump);
+    }
+
+    public static void orderNotes(long noteId, long notebookId, int newPosition) {
+        try {
+            Notebook notebook = Notebook.findById(notebookId);
+            Note note = Note.findById(noteId);
+            note.notebook.notes.remove(note);
+            notebook.notes.add(newPosition, note);
+            notebook.save();
+        } catch (Exception ex) {
+            error(Http.StatusCode.BAD_REQUEST, "Error while reordering notes");
         }
-        User.findByEmail(session.get("username")).save();
+    }
+
+    public static String rename(String type, Long id, String newName) {
+        if (type.equals("notebook")) {
+            return Notebook.rename(id, newName);
+        } else if (type.equals("note")) {
+            return Note.rename(id, newName);
+        }
+        return null;
     }
 }

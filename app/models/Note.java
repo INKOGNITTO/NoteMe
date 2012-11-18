@@ -75,4 +75,11 @@ public class Note extends Model {
         return tags;
     }
     
+     public static String rename(Long noteID, String newName) {
+        Note note = findById(noteID);
+        note.name = newName;
+        note.save();
+        return newName;
+    }
+    
 }
