@@ -80,14 +80,33 @@ public class NoteManager extends Controller {
     }
 
     public static void orderNotes(long noteId, long notebookId, int newPosition) {
+        System.out.println("ordering........................................................");
         try {
             Notebook notebook = Notebook.findById(notebookId);
             Note note = Note.findById(noteId);
+
             note.notebook.notes.remove(note);
-            notebook.notes.add(newPosition, note);
+            note.notebook = notebook;
+
+            note.save();
+            note.notebook.save();
             notebook.save();
+
+            notebook.notes.add(newPosition, note);
+
+            note.save();
+            note.notebook.save();
+            notebook.save();
+
         } catch (Exception ex) {
+//            System.out.println("ERROR> "+ex.getMessage());
             error(Http.StatusCode.BAD_REQUEST, "Error while reordering notes");
+        }
+    }
+
+    private static void show(Notebook ntb) {
+        for (Note note : ntb.notes) {
+            System.out.println(note.name);
         }
     }
 
