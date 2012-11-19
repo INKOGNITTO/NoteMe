@@ -43,5 +43,5 @@ public class Notebook extends Model {
         return newName;
     }
 
-
+    
 }
