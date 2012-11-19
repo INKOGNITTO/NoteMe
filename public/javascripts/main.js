@@ -170,7 +170,8 @@ $(function() {
 
     $(".notebooks").sortable({
         axis: "y",
-        handle: ".handle",
+        handle: "> h2 .handle",
+        items: ".notebook",
         placeholder: "sortable-placeholder",
         forcePlaceholderSize: true,
         update: function(event, ui) {
@@ -190,9 +191,11 @@ $(function() {
             });
         }
     });
-    $(".notebook >  div").sortable({
+
+    var sortNotesSettings = {
         axis: "y",
-        handle: ".handle",
+        handle: "> .handle",
+        items: ".note",
         connectWith:".notebook > div",
         placeholder: "sortable-placeholder",
         forcePlaceholderSize: true,
@@ -216,7 +219,8 @@ $(function() {
                 }
             });
         }
-    });
+    }
+    $(".notebook >  div").sortable(sortNotesSettings);
 
     $("#tag-sidebar").sortable({
         axis: "y",
@@ -325,6 +329,7 @@ $(function() {
                         },
                         success: function(data){
                             $(self).parents(".notebook").attr("data-id",data);
+                            $(".notebook >  div").sortable(sortNotesSettings);
                             noteMe.message.info("Vytvorený poznámkový blok \""+self.text()+"\"");
                         },
                         error: function(err) {

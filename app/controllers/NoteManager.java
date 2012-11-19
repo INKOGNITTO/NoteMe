@@ -59,6 +59,7 @@ public class NoteManager extends Controller {
             notebook.notes.add(0, note);
             notebook.save();
             note.save();
+            renderText(note.id);
         } catch (Exception e) {
             error(Http.StatusCode.BAD_REQUEST, "Error while creating new note");
         }
