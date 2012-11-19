@@ -4,6 +4,7 @@ import java.util.List;
 import javax.persistence.Query;
 import models.Note;
 import models.Notebook;
+import models.Tag;
 import models.User;
 import play.Logger;
 import play.Play;
@@ -109,6 +110,8 @@ public class NoteManager extends Controller {
             renderText(Notebook.rename(id, newName));
         } else if (type.equals("note")) {
             renderText(Note.rename(id, newName));
+        } else if(type.equals("tag")){
+         renderText(Tag.rename(id, newName));   
         }
         error(Http.StatusCode.BAD_REQUEST,"Bad object type");
     }
