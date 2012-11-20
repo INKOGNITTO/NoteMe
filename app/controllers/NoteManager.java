@@ -3,9 +3,11 @@ package controllers;
 import java.util.List;
 import models.Note;
 import models.Notebook;
+import models.Tag;
 import models.User;
 import play.Logger;
 import play.Play;
+import play.db.jpa.GenericModel;
 import play.mvc.*;
 
 @With(Secure.class)
@@ -85,18 +87,18 @@ public class NoteManager extends Controller {
             Notebook notebook = Notebook.findById(notebookId);
             Note note = Note.findById(noteId);
             User user = User.findByEmail(session.get("username"));
-            
-            if(!user.notebooks.contains(notebook)){
-                error(Http.StatusCode.FORBIDDEN,"No access");
+
+            if (!user.notebooks.contains(notebook)) {
+                error(Http.StatusCode.FORBIDDEN, "No access");
             }
-            
+
             note.notebook.notes.remove(note);
             note.notebook.save();
             note.notebook = notebook;
-            note.notebook.notes.add(newPosition,note);
+            note.notebook.notes.add(newPosition, note);
             note.save();
             note.notebook.save();
-            
+
         } catch (Exception ex) {
             error(Http.StatusCode.BAD_REQUEST, "Error while reordering notes");
         }
@@ -104,10 +106,23 @@ public class NoteManager extends Controller {
 
     public static void rename(String type, Long id, String newName) {
         if (type.equals("notebook")) {
-            renderText( ((Notebook)Notebook.findById(id)).rename(newName) );
+            renderText(((Notebook) Notebook.findById(id)).rename(newName));
         } else if (type.equals("note")) {
-            renderText( ((Note)Note.findById(id)).rename(newName) );
+            renderText(((Note) Note.findById(id)).rename(newName));
+        } else if (type.equals("tag")) {
+            renderText(((Tag) Tag.findById(id)).rename(newName));
         }
-        error(Http.StatusCode.BAD_REQUEST,"Bad object type");
+        error(Http.StatusCode.BAD_REQUEST, "Bad object type");
+    }
+
+    public static void remove(String type, Long id) {
+        if (type.equals("notebook")) {
+            //renderText(((Notebook) Notebook.findById(id)).);
+        } else if (type.equals("note")) {
+            renderText(((Note) Note.findById(id)).delete());
+        } else if (type.equals("tag")) {
+            ((Tag) Tag.findById(id)).remove();
+        }
+        error(Http.StatusCode.BAD_REQUEST, "Bad object type");
     }
 }

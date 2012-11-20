@@ -21,6 +21,7 @@ var noteMe = noteMe || {};
         shareNote: makeRoute(#{jsRoute @NoteManager.shareNote() /}),
         orderNotebooks: makeRoute(#{jsRoute @NoteManager.orderNotebooks() /}),
         orderNotes: makeRoute(#{jsRoute @NoteManager.orderNotes() /}),
-        rename: makeRoute(#{jsRoute @NoteManager.rename() /})
+        rename: makeRoute(#{jsRoute @NoteManager.rename() /}),
+        remove: makeRoue(#{jsRoute @NoteManager.remove() /})
     };
 }());

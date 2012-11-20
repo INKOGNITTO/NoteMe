@@ -39,6 +39,6 @@ public class Tag extends Model {
     }
     
     public void remove(){
-        this.owner = null;
+        this.delete();
     }
 }
