@@ -119,7 +119,7 @@ public class NoteManager extends Controller {
         if (type.equals("notebook")) {
             //renderText(((Notebook) Notebook.findById(id)).);
         } else if (type.equals("note")) {
-            renderText(((Note) Note.findById(id)).delete());
+            ((Note) Note.findById(id)).remove();
         } else if (type.equals("tag")) {
             ((Tag) Tag.findById(id)).remove();
         }

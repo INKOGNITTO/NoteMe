@@ -85,7 +85,9 @@ public class Note extends Model {
     }
      
      public void remove(){
-         this.delete();
+         this.notebook.notes.remove(this);
+         this.notebook.save();
+
      }
     
 }
