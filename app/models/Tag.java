@@ -32,10 +32,9 @@ public class Tag extends Model {
         return tag;
     }
     
-    public static String rename(Long tagID, String newName) {
-        Tag tag = findById(tagID);
-        tag.name = newName;
-        tag.save();
+    public String rename(String newName) {
+        this.name = newName;
+        this.save();
         return newName;
     }
     

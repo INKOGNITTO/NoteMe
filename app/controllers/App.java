@@ -11,6 +11,9 @@ import play.mvc.Http.StatusCode;
 
 public class App extends Controller{
 
+    /**
+     * pomocna trieda pre overenie udajov pri prihlasovani pouzivatela
+     */
     public static class PasswordCheck extends Check{
         @Override
         public boolean isSatisfied(Object user, Object password) {
@@ -19,6 +22,9 @@ public class App extends Controller{
         }
     }
     
+    /**
+     * Pomocna metoda pre kontrolu zhody zadanych hesiel pri registracii pouzivatela
+     */
     public static class PasswordCheckCheck extends Check {
         @Override
         public boolean isSatisfied(Object user, Object passwordcheck) {
@@ -27,6 +33,9 @@ public class App extends Controller{
         }
     }
     
+    /**
+     * Pomocna trieda pre kontrolu udajov pri prihlasovani pouzivatela 
+     */
     public class LoginCheck {
         @Required (message = "Zadajte e-mail")
         @Email (message = "Zadajte platný email") 
@@ -42,6 +51,10 @@ public class App extends Controller{
         }
     }
     
+   /**
+    * Prihlasovanie pouzivatela
+    * @param user pouzivatel
+    */
     public static void authenticate(@Valid LoginCheck user) {
     	if(validation.hasErrors()) {
             Gson gson = new Gson();
@@ -52,6 +65,10 @@ public class App extends Controller{
         renderJSON("{\"next\":\"/manage\"}");
     }
 
+    /**
+     * Resgitracia pouzivatela
+     * @param user pouzivatel
+     */
     public static void register(@Valid User user) {
         if(validation.hasErrors()) {
             Gson gson = new Gson();
@@ -79,6 +96,9 @@ public class App extends Controller{
         NoteManager.index();
     }
     
+    /**
+     * Generovanie skriptu obsahujuceho reverzne cesty pre AJAX
+     */
     public static void jsRoutes() {
         if(Security.isConnected()) {
             response.setContentTypeIfNotSet("text/javascript");

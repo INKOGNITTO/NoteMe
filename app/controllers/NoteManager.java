@@ -1,28 +1,25 @@
 package controllers;
 
 import java.util.List;
-import javax.persistence.Query;
 import models.Note;
 import models.Notebook;
 import models.Tag;
 import models.User;
 import play.Logger;
 import play.Play;
-import play.db.jpa.JPA;
 import play.mvc.*;
 
 @With(Secure.class)
 public class NoteManager extends Controller {
 
     public static void index() {
-        /*Notebook nb = Notebook.create("Pokus", User.findByEmail(session.get("username")).getId());
-         User u = User.findByEmail(session.get("username"));
-         u.notebooks.add(nb);
-         u.save();*/
         renderArgs.put("user", User.findByEmail(session.get("username")));
         render("manage.html");
     }
 
+    /**
+     * Dialogove okno zdielania poznamok
+     */
     public static void shareNote() {
         render("dialogs/sharenote.html");
     }
@@ -34,9 +31,9 @@ public class NoteManager extends Controller {
         render("tags/notebook.html");
     }
 
-    public static void saveNewNotebook() {
+    public static void saveNewNotebook(String name) {
         User user = User.findByEmail(session.get("username"));
-        Notebook notebook = Notebook.create(params.get("name"), user.id);
+        Notebook notebook = Notebook.create(name, user.id);
         user.notebooks.add(0, notebook);  // novy blok treba pridat na zaciatok zoznamu
         user.save();
         renderText(notebook.id);
@@ -63,6 +60,7 @@ public class NoteManager extends Controller {
             notebook.notes.add(0, note);
             notebook.save();
             note.save();
+            renderText(note.id);
         } catch (Exception e) {
             error(Http.StatusCode.BAD_REQUEST, "Error while creating new note");
         }
@@ -107,7 +105,7 @@ public class NoteManager extends Controller {
 
     public static void rename(String type, Long id, String newName) {
         if (type.equals("notebook")) {
-            renderText(Notebook.rename(id, newName));
+            renderText( ((Notebook)Notebook.findById(id)).rename(newName) );
         } else if (type.equals("note")) {
             renderText(Note.rename(id, newName));
         } else if (type.equals("tag")) {

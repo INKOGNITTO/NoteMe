@@ -2,7 +2,7 @@ var noteMe = noteMe || {};
 
 $(function() {
 
-    // aplikacia :D
+    // aplikacia :)
 
     (function() {
         var _self = this,
@@ -28,7 +28,7 @@ $(function() {
                     globalTooltip.tooltip("close");
                     globalTooltip.tooltip({tooltipClass: gtClass+type});
                     globalTooltip.tooltip({content: message, items: "body"}).tooltip("open");
-                }
+                };
             };
     
         this.manage = {
@@ -170,7 +170,8 @@ $(function() {
 
     $(".notebooks").sortable({
         axis: "y",
-        handle: ".handle",
+        handle: "> h2 .handle",
+        items: ".notebook",
         placeholder: "sortable-placeholder",
         forcePlaceholderSize: true,
         update: function(event, ui) {
@@ -190,9 +191,11 @@ $(function() {
             });
         }
     });
-    $(".notebook >  div").sortable({
+
+    var sortNotesSettings = {
         axis: "y",
-        handle: ".handle",
+        handle: "> .handle",
+        items: ".note",
         connectWith:".notebook > div",
         placeholder: "sortable-placeholder",
         forcePlaceholderSize: true,
@@ -216,7 +219,8 @@ $(function() {
                 }
             });
         }
-    });
+    }
+    $(".notebook >  div").sortable(sortNotesSettings);
 
     $("#tag-sidebar").sortable({
         axis: "y",
@@ -247,7 +251,7 @@ $(function() {
     });
     
     $("#notetags .tag .ui-icon-close").click(function() {
-        $(this).parents(".tag").hide('fast').promise().done(function(){$(this).remove()});
+        $(this).parents(".tag").hide('fast').promise().done(function(){$(this).remove();});
     });
 
     $(".note").droppable({
@@ -325,6 +329,7 @@ $(function() {
                         },
                         success: function(data){
                             $(self).parents(".notebook").attr("data-id",data);
+                            $(".notebook >  div").sortable(sortNotesSettings);
                             noteMe.message.info("Vytvorený poznámkový blok \""+self.text()+"\"");
                         },
                         error: function(err) {
@@ -378,9 +383,10 @@ $(function() {
 
 
 
-    $(".note").click(function(){
+    $(".note").live("click",function(){
         $(".right-column > h2").text($(this).text());
-    }).find(".ui-icon").click(function(event){
+    });
+    $(".note .ui-icon").live("click", function(event){
         // neklikni, ak sa robil sort
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -409,7 +415,7 @@ $(function() {
     
     // zdielanie
     // tlacidlo pod poznamkou
-    $(".sharenote-button").click(function() {
+    $(".sharenote-button").live("click",function() {
     	noteMe.jsRoutes.shareNote.ajax({
             dataType: "html",
             context: $("body"),
@@ -476,12 +482,12 @@ jQuery.fn.singleDoubleClick = function(single_click_callback, double_click_callb
 jQuery.fn.iconButton = function(options) {
 	return this.each(function() {
 		var opt = {},
-			icons = {
-				icons: {
-					primary: jQuery(this).attr("data-ui-icon-primary"),
-					secondary: jQuery(this).attr("data-ui-icon-secondary")
-				}
-		};
+                    icons = {
+                            icons: {
+                                    primary: jQuery(this).attr("data-ui-icon-primary"),
+                                    secondary: jQuery(this).attr("data-ui-icon-secondary")
+                            }
+                    };
 		jQuery.extend(true, opt, options?options:{}, icons);
 		jQuery(this).button(opt);
 	});
