@@ -1,6 +1,6 @@
 var noteMe = noteMe || {};
 (function() {
-    
+
     var makeRoute = function(jsr) {
         var urlMethod = jsr.url;
         jsr.type = jsr.method;
@@ -22,6 +22,6 @@ var noteMe = noteMe || {};
         orderNotebooks: makeRoute(#{jsRoute @NoteManager.orderNotebooks() /}),
         orderNotes: makeRoute(#{jsRoute @NoteManager.orderNotes() /}),
         rename: makeRoute(#{jsRoute @NoteManager.rename() /}),
-        remove: makeRoue(#{jsRoute @NoteManager.remove() /})
+        remove: makeRoute(#{jsRoute @NoteManager.remove() /})
     };
 }());

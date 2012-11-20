@@ -388,8 +388,24 @@ $(function() {
     });
     $(".note .ui-icon").live("click", function(event){
         // neklikni, ak sa robil sort
-        event.preventDefault();
-        event.stopImmediatePropagation();
+        //event.preventDefault();
+        //event.stopImmediatePropagation();
+    });
+    $(".note .ui-icon-close").live("click", function(event){
+        var note = $(this).parents(".note");
+        console.log("asd");
+        noteMe.jsRoutes.remove.ajax({
+            data: {
+                id: note.attr("data-id"),
+                type: "note"
+            },
+            success: function(data) {
+                note.slideUp("slow",function(){$(this).remove();});
+            },
+            error: function(err) {
+                console.log(err);
+            }
+        });
     });
 
     $(".right-column #note-toolbar button").iconButton();

@@ -1,10 +1,12 @@
-<h2>Poznámka</h2>
+%{
+    if(_note!=null) {
+        note = _note;
+    }
+}%
+<h2>${note.name}</h2>
 <div id="note-scroll" class="fill">
     <div id="note">
-        Tu bude nejaká veľmi dlhá poznámka ...
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br>a ďalej...<br><br><br><br><br><br><br><br><br><br><br><br><br>
-        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>koniec
+        ${note.content}
     </div>
 </div>
 <div id="about" style="color: #555555;padding:5px;position:absolute;bottom:0;right:0;left:0;">
@@ -15,14 +17,16 @@
             <button data-ui-icon-primary="ui-icon-link" class="sharenote-button">Zdieľanie</button> zdieľané, verejné
         </div>
         <div style="float:right;text-align:right;">
-            vlastník: meno | ja<br>
-            vytvorené: 23.10.2012<br>
-            úprava: 25.10.2012
+            vlastník: ${note.owner.email}<br>
+            vytvorené: ${note.creationDate}<br>
+            úprava: ${note.updateDate}
         </div>
         <div style="clear:both;"></div>
     </div>
 
     <div id="notetags" class="fill">
-        *{tu idu tagy}*
+        #{list items:note.tags, as:'tag'}
+            #{tag tag: tag, place: "note" /}
+        #{/list}
     </div>
 </div>
