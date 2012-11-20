@@ -1,7 +1,10 @@
-@(name: String, place: String)
-
+%{
+    if(_tag!=null) {
+        tag = _tag;
+    }
+}%
 <div class="tag">
     <span class="ui-icon ui-button-icon-primary ui-icon-tag"></span>
-    <span class="title">@name</span>
-    <span class="ui-icon ui-button-icon-secondary @if(place=="sidebar"){ui-icon-grip-dotted-vertical}else{ui-icon-close}"></span>
+    <span class="title">${tag.name}</span>
+    <span class="ui-icon ui-button-icon-secondary #{if _place=="sidebar"}ui-icon-grip-dotted-vertical#{/if}#{else}ui-icon-close#{/else}"></span>
 </div>

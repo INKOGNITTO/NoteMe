@@ -7,6 +7,7 @@ import hash.Passwords;
 import play.data.validation.*;
 import play.db.jpa.Model;
 import controllers.CRUD;
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "users")
@@ -58,6 +59,11 @@ public class User extends Model {
 
     public static List<Notebook> findNotebooks(Long user) {
         return User.<User>findById(user).notebooks;
+    }
+    
+    public List<Tag> getTags() {
+        Query query = JPA.em().createQuery("select tag from Tag tag where tag.owner = :this").setParameter("this", this);
+        return (List<Tag>)query.getResultList();
     }
     
     @Override

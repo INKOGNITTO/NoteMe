@@ -383,9 +383,10 @@ $(function() {
 
 
 
-    $(".note").click(function(){
+    $(".note").live("click",function(){
         $(".right-column > h2").text($(this).text());
-    }).find(".ui-icon").click(function(event){
+    });
+    $(".note .ui-icon").live("click", function(event){
         // neklikni, ak sa robil sort
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -414,7 +415,7 @@ $(function() {
     
     // zdielanie
     // tlacidlo pod poznamkou
-    $(".sharenote-button").click(function() {
+    $(".sharenote-button").live("click",function() {
     	noteMe.jsRoutes.shareNote.ajax({
             dataType: "html",
             context: $("body"),

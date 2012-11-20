@@ -10,7 +10,9 @@
     		<span class="ui-icon ui-icon-plus"></span>
     		<span class="title"><input type="text"></span>
     	</div>
-   	    *{tu idu tagy}*
+            #{list items:user.getTags(), as:'tag'}
+                #{tag tag: tag, place: "sidebar" /}
+            #{/list}
     </div>
 </div>
 <div id="main" class="fill">
