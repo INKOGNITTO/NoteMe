@@ -38,4 +38,8 @@ public class Tag extends Model {
         tag.save();
         return newName;
     }
+    
+    public void remove(){
+        this.owner = null;
     }
+}

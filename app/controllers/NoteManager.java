@@ -88,18 +88,18 @@ public class NoteManager extends Controller {
             Notebook notebook = Notebook.findById(notebookId);
             Note note = Note.findById(noteId);
             User user = User.findByEmail(session.get("username"));
-            
-            if(!user.notebooks.contains(notebook)){
-                error(Http.StatusCode.FORBIDDEN,"No access");
+
+            if (!user.notebooks.contains(notebook)) {
+                error(Http.StatusCode.FORBIDDEN, "No access");
             }
-            
+
             note.notebook.notes.remove(note);
             note.notebook.save();
             note.notebook = notebook;
-            note.notebook.notes.add(newPosition,note);
+            note.notebook.notes.add(newPosition, note);
             note.save();
             note.notebook.save();
-            
+
         } catch (Exception ex) {
             error(Http.StatusCode.BAD_REQUEST, "Error while reordering notes");
         }
@@ -110,9 +110,9 @@ public class NoteManager extends Controller {
             renderText(Notebook.rename(id, newName));
         } else if (type.equals("note")) {
             renderText(Note.rename(id, newName));
-        } else if(type.equals("tag")){
-         renderText(Tag.rename(id, newName));   
+        } else if (type.equals("tag")) {
+            renderText(Tag.rename(id, newName));
         }
-        error(Http.StatusCode.BAD_REQUEST,"Bad object type");
+        error(Http.StatusCode.BAD_REQUEST, "Bad object type");
     }
 }
