@@ -17,6 +17,12 @@ public class NoteManager extends Controller {
         renderArgs.put("user", User.findByEmail(session.get("username")));
         render("manage.html");
     }
+    
+    public static void viewNote(long id) {
+        renderArgs.put("note",Note.findById(id));
+        render("tags/noteDetail.html");  
+    
+    }
 
     /**
      * Dialogove okno zdielania poznamok
@@ -54,7 +60,7 @@ public class NoteManager extends Controller {
 
     public static void saveNewNote() {
         User user = User.findByEmail(session.get("username"));
-        try {
+        //try {
             Long nbid = Long.valueOf(params.get("notebookId")).longValue();
             Note note = Note.create(params.get("name"), nbid, user.id);
             Notebook notebook = Notebook.findById(nbid);
@@ -62,9 +68,10 @@ public class NoteManager extends Controller {
             notebook.save();
             note.save();
             renderText(note.id);
-        } catch (Exception e) {
-            error(Http.StatusCode.BAD_REQUEST, "Error while creating new note");
-        }
+        /*} catch (Exception e) {
+            error(Http.StatusCode.BAD_REQUEST, e.);
+            //error(Http.StatusCode.BAD_REQUEST, "Error while creating new note");
+        }*/
     }
 
     public static void orderNotebooks(long notebookId, int newPosition) {
@@ -82,23 +89,26 @@ public class NoteManager extends Controller {
         }
     }
 
-    public static void orderNotes(long noteId, long notebookId, int newPosition) {
+    public static void orderNotes(long noteId, long toNotebookId, long fromNotebookId, int newPosition) {
         try {
-            Notebook notebook = Notebook.findById(notebookId);
-            Note note = Note.findById(noteId);
             User user = User.findByEmail(session.get("username"));
-
-            if (!user.notebooks.contains(notebook)) {
+            Notebook destinationNotebook = Notebook.findById(toNotebookId);
+            Notebook sourceNotebook = destinationNotebook;
+            Note note = Note.findById(noteId);
+            
+            if(fromNotebookId>0) {
+                sourceNotebook = Notebook.findById(fromNotebookId);
+            }
+            
+            if (!user.notebooks.contains(destinationNotebook) || ! user.notebooks.contains(sourceNotebook)) {
                 error(Http.StatusCode.FORBIDDEN, "No access");
             }
-
-            note.notebook.notes.remove(note);
-            note.notebook.save();
-            note.notebook = notebook;
-            note.notebook.notes.add(newPosition, note);
-            note.save();
-            note.notebook.save();
-
+            
+            sourceNotebook.notes.remove(note);
+            sourceNotebook.save();
+            destinationNotebook.notes.add(newPosition, note);
+            destinationNotebook.save();
+            
         } catch (Exception ex) {
             error(Http.StatusCode.BAD_REQUEST, "Error while reordering notes");
         }
@@ -119,10 +129,11 @@ public class NoteManager extends Controller {
         if (type.equals("notebook")) {
             //renderText(((Notebook) Notebook.findById(id)).);
         } else if (type.equals("note")) {
-            ((Note) Note.findById(id)).remove();
+            ((Note)Note.findById(id)).remove();
         } else if (type.equals("tag")) {
             ((Tag) Tag.findById(id)).remove();
+        } else {
+            error(Http.StatusCode.BAD_REQUEST, "Bad object type");
         }
-        error(Http.StatusCode.BAD_REQUEST, "Bad object type");
     }
 }

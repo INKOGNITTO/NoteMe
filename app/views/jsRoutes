@@ -7,13 +7,14 @@ var noteMe = noteMe || {};
         delete(jsr.method);
         return {
             ajax: function(obj) {
-                jsr.url = urlMethod.apply({},obj?obj.urlParams:{});
+                jsr.url = urlMethod.call({},obj?obj.urlParams:{});
                 $.ajax($.extend(jsr,obj));
             }   
         };
     };
     
     noteMe.jsRoutes = {
+        viewNote: makeRoute(#{jsRoute @NoteManager.viewNote(':id') /}),
         newNotebook: makeRoute(#{jsRoute @NoteManager.newNotebook() /}),
         saveNewNotebook: makeRoute(#{jsRoute @NoteManager.saveNewNotebook() /}),
         newNote: makeRoute(#{jsRoute @NoteManager.newNote() /}),

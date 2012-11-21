@@ -29,9 +29,13 @@ public class User extends Model {
     @CheckWith(controllers.App.PasswordCheckCheck.class)
     public String passwordCheck;
     
-    @ManyToMany
+    @ManyToMany (cascade = CascadeType.ALL)
     @OrderColumn
     public List<Notebook> notebooks = new LinkedList<Notebook>();
+    
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
+    public List<Note> ownedNotes = new LinkedList<Note>();
+    
     
     //@ManyToMany(fetch = FetchType.LAZY)
     //public List<Note> notes = new LinkedList<Note>();

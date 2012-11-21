@@ -2,22 +2,35 @@ $(function() {
 	
     var editorPanel = $("#editor-panel"),
         editorSpace = $("#editor-space"),
-        editorContainer = $("#editor-scroll"),
         editor = new nicEditor(),
         blockCount = null,
         createBlock = function(x,y) {
             blockCount = blockCount || editorSpace.find(".note-block").length;
+            blockCount++;
             var block = $("<div>").addClass("note-block").attr("id","note-block-"+blockCount),
-                wrapper = $("<div>").addClass("note-block-wrapper").append(block);
+                handle = $("<div>").addClass("handle"),  
+                wrapper = $("<div>").addClass("note-block-wrapper").append(handle).append(block).addClass("ui-corner-all");
             editorSpace.append(wrapper);
-            wrapper.css({
-                left: x,
-                top: y,
-                border: "1px solid black",
-                position:"absolute",
-                width:100,
-                height:100
+            wrapper.position({
+                my: "left-5 center",
+                at: "left top",
+                offset: x + " " + y,
+                of: document    ,
+                collision:"none"
+            }).draggable({
+                cancel: ".note-block",
+                handle: "> .handle",
+                grid: [10,10]
+            }).resizable({
+                handles: "e,w",
+                maxWidth:1500,
+                grid: [10,10],
+                resize: function(event, ui) {
+                    ui.element.css({height:"",maxWidth:1500});
+                }
             });
+            editor.addInstance(block.attr("id"));
+            return block;
         }
     
     // zatial neviem co s tym
@@ -25,11 +38,28 @@ $(function() {
 
     editor.setPanel(editorPanel.attr("id"));
     
-    createBlock(50,500);
-    
-    
+    editor.addEvent("focus", function() {
+        $(this.selectedInstance.elm).parent().addClass("selected-editor");
+    });
+    editor.addEvent("blur", function() {
+        if(this.selectedInstance) {
+            var jqe = $(this.selectedInstance.elm);
+            jqe.parent().removeClass("selected-editor");
+            if(!jqe.text()){
+                editor.removeInstance(jqe.attr("id"));
+                jqe.parent().remove();
+            }
+        }
+    });
 
-
+    editorSpace.click(function(e){
+        if(e.target!==this){
+            e.stopPropagation();
+            return;
+        }
+	createBlock(e.pageX,e.pageY).focus();
+    });
+    
 });
 
 

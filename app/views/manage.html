@@ -27,7 +27,15 @@
     </div>
     <div id="right-column-wrapper" class="column-wrapper fill">
         <div class="right-column">
-            {noteDetail /}
+            %{
+                for(notebook in user.notebooks) {
+                    if(notebook.notes.size()!=0) {
+                        firstnote = notebook.notes[0]
+                        break
+                    }
+                }
+            }%
+            #{if firstnote!=null}#{noteDetail note: firstnote /}#{/if}
         </div>
         <div style="clear:both;"></div>
     </div>

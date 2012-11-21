@@ -3,11 +3,14 @@ package models;
 import java.util.*;
 
 import javax.persistence.*;
+import play.Logger;
 import play.data.binding.As;
 import play.data.validation.*;
+import play.db.jpa.JPA;
 
 import play.db.jpa.Model;
 import play.libs.Codec;
+import play.mvc.Scope;
 
 
 @Entity
@@ -26,12 +29,12 @@ public class Note extends Model {
     @Column(columnDefinition = "TEXT")
     public String content;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     public List<Tag> tags = new ArrayList<Tag>();
 	
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "notes")
     @Required
-    public Notebook notebook;
+    public Set<Notebook> notebooks = new HashSet<Notebook>();
 
     @Required
     public String name;
@@ -48,7 +51,7 @@ public class Note extends Model {
 
     public Note(String name, Long notebookID, User owner) {
         this.name = name;
-        this.notebook = Notebook.findById(notebookID);
+        //this.notebooks.add((Notebook)Notebook.findById(notebookID));
         this.owner = owner;
         this.creationDate = new Date();
         this.updateDate = new Date();
@@ -71,6 +74,9 @@ public class Note extends Model {
     public static Note create(String name, Long notebookID, Long userID) {
         Note note = new Note(name, notebookID, (User)User.findById(userID));
         note.save();
+        note.refresh();
+        note.notebooks.add((Notebook)Notebook.findById(notebookID));
+        note.save();
         return note;
     }
     
@@ -85,8 +91,21 @@ public class Note extends Model {
     }
      
      public void remove(){
-         this.notebook.notes.remove(this);
-         this.notebook.save();
+         // vyhladaj vsetky bloky, v ktorych je tato poznamka a ktore su pristupne prihlasenemu pouzivatelovi
+         Query q = JPA.em().createQuery("select nb from Notebook nb where :n member of nb.notes and :u member of nb.contributors")
+                 .setParameter("n", this)
+                 .setParameter("u", User.findByEmail(Scope.Session.current.get().get("username")));
+         List<Notebook> notebookWithNote = q.getResultList();
+         //v tychto pozn. blokoch zmaz tuto (this) poznamku
+         for(Notebook n :  notebookWithNote) {
+             n.notes.remove(this);
+             n.save();
+         }
+         // ak uz poznamka nie je v ziadnom bloku, zmaz ju z db
+         this.refresh();
+         if(this.notebooks.isEmpty()){
+            this.delete();
+         }
 
      }
     

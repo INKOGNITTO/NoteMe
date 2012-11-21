@@ -13,6 +13,7 @@ GET     /logout                     Secure.logout
 
 # Manage
 GET     /manage	                    NoteManager.index
+GET     /manage/viewNote/{id}       NoteManager.viewNote
 POST 	/manage/sharenote           NoteManager.shareNote
 POST    /manage/newNotebook         NoteManager.newNotebook
 POST    /manage/saveNewNotebook     NoteManager.saveNewNotebook

@@ -772,8 +772,10 @@ fieldset legend {
     margin-top:5px;
     margin-bottom:5px;
 }
-#edit-scroll {
+#editor-space {
     margin-top:89px;
+    padding: 5px;
+    background: url(/public/images/bg-lighter-50.png);
     border-image: url(/public/images/dashed-border.png) 1 1 1 1 repeat;
     border-top: 1px dashed #555555;
     border-left: 0px solid transparent;
@@ -783,6 +785,39 @@ fieldset legend {
 }
 .nicEdit-button, .nicEdit-selectContain {
     margin:2px;
+}
+
+.note-block-wrapper {
+    border: 1px solid transparent;
+    position:absolute;
+    padding: 12px 0px 0px;
+    min-height:25px;
+    min-width:100px;
+    max-width:50%;
+}
+.note-block-wrapper .handle {
+    position: absolute;
+    width: 100%;
+    height: 12px;
+    top:0px;
+}
+.note-block-wrapper:hover,
+.note-block-wrapper.selected-editor {
+    border: 1px solid #4589be;  
+    box-shadow: 0px 0px 3px #757575;
+
+}
+.note-block-wrapper:hover .handle,
+.note-block-wrapper.selected-editor .handle{
+    background: url(/public/images/vertical-handle-blue.png) repeat-x left 3px;    
+}
+
+.note-block {
+    padding:3px;
+    min-width: 95%;
+    min-height: 95%;
+    height: 95%;
+    cursor: default;
 }
 
 .ui-state-error {

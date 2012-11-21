@@ -132,7 +132,7 @@ $(function() {
 
 
     // vertikalna zmena velkosti
-    $(".vertical-resize").mousedown(function(event) {
+    $(".vertical-resize").live("mousedown",function(event) {
             var self = this,
                     resize = true,
                     startY = event.pageY,
@@ -147,10 +147,10 @@ $(function() {
                     }
                     event.preventDefault();
             });
-    }).dblclick(function() {
+    }).live("dblclick",function() {
             //return to default value set by css
             $(this).parent().height("");
-    }).disableSelection();;
+    }).disableSelection();
 
     (function() {
         var timeout;
@@ -201,14 +201,17 @@ $(function() {
         forcePlaceholderSize: true,
         update: function(event, ui) {
             var targetNotebook = ui.item.parents(".notebook"),
-                eventTargetNotebook = $(event.target).parents(".notebook");
+                eventTargetNotebook = $(event.target).parents(".notebook"),
+                sourceNotebook = ui.sender?$(ui.sender).parents(".notebook"):null;
             if(targetNotebook.get(0)!==eventTargetNotebook.get(0)){
                 return;
             }
+            console.log(sourceNotebook);
             noteMe.jsRoutes.orderNotes.ajax({
                 data: {
                     noteId: ui.item.attr("data-id"),
-                    notebookId: targetNotebook.attr("data-id"),
+                    fromNotebookId: sourceNotebook?sourceNotebook.attr("data-id"):-1,
+                    toNotebookId: targetNotebook.attr("data-id"),
                     newPosition: ui.item.parent().children().index(ui.item)
                 },
                 success: function(data) {
@@ -219,7 +222,7 @@ $(function() {
                 }
             });
         }
-    }
+    };
     $(".notebook >  div").sortable(sortNotesSettings);
 
     $("#tag-sidebar").sortable({
@@ -384,7 +387,19 @@ $(function() {
 
 
     $(".note").live("click",function(){
-        $(".right-column > h2").text($(this).text());
+        var self = $(this);
+        noteMe.jsRoutes.viewNote.ajax({
+            urlParams: {
+                id: self.attr("data-id")
+            },
+            success: function(data){
+                $(".right-column").first().html(data);
+                $(".right-column button").iconButton();
+            },
+            error: function(err) {
+                console.log(err);
+            }
+        });
     });
     $(".note .ui-icon").live("click", function(event){
         // neklikni, ak sa robil sort
@@ -393,11 +408,10 @@ $(function() {
     });
     $(".note .ui-icon-close").live("click", function(event){
         var note = $(this).parents(".note");
-        console.log("asd");
         noteMe.jsRoutes.remove.ajax({
             data: {
-                id: note.attr("data-id"),
-                type: "note"
+                type: "note",
+                id: note.attr("data-id")
             },
             success: function(data) {
                 note.slideUp("slow",function(){$(this).remove();});

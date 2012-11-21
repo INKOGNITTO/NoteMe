@@ -2,6 +2,7 @@ package models;
 
 import java.util.*;
 import javax.persistence.*;
+import org.hibernate.annotations.Cascade;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -20,7 +21,8 @@ public class Notebook extends Model {
     public List<User> contributors = new LinkedList<User>();
 
 
-    @OneToMany
+    @ManyToMany(cascade = CascadeType.ALL)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @OrderColumn
     public List<Note> notes = new LinkedList<Note>();
 

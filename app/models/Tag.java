@@ -17,7 +17,7 @@ public class Tag extends Model {
     @Required
     public User owner;
     
-    @ManyToMany(mappedBy = "tags")
+    @ManyToMany()
     @OrderColumn
     public List<Note> notes = new LinkedList<Note>();
 
