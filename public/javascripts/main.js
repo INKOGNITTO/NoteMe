@@ -63,6 +63,29 @@ $(function() {
             info: gtFunction(""),
             error: gtFunction("ui-state-error")
         };
+        this.loadAnim = (function(){
+            var animUrl = "/public/images/load-anim.gif",
+                staticUrl = "/public/images/logo-under-circles.png",
+                elem = $("#logo-circles");
+                buffer = $("<div class=\"hidden\">").css({
+                    position: "absolute",
+                    zIndex: -200,
+                    top:0,
+                    left:0
+                }).appendTo("body");
+            buffer.append($("<img>").attr("src",animUrl));
+            buffer.append($("<img>").attr("src",staticUrl));
+            
+            return {
+                start: function(){
+                    elem.attr("src",animUrl);
+                },
+                stop: function(){
+                    elem.attr("src",staticUrl);
+                }
+            };
+
+        }());
     }.apply(noteMe));
 
     // nacitaj routy
@@ -73,6 +96,10 @@ $(function() {
         cache: true
     });
 
+    $(document)
+            .bind("ajaxSend", noteMe.loadAnim.start)
+            .bind("ajaxComplete", noteMe.loadAnim.stop);
+    
     $.datepicker.setDefaults( $.datepicker.regional[ "sk" ] );
 
     $("header nav a").button();

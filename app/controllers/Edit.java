@@ -11,5 +11,9 @@ public class Edit extends Controller {
 	    render("edit.html");
 	    
 	}
+        
+        public static void saveNote(long id, String content) {
+            //TODO
+        }
 
 }

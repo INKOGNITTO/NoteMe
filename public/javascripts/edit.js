@@ -2,7 +2,13 @@ $(function() {
 	
     var editorPanel = $("#editor-panel"),
         editorSpace = $("#editor-space"),
-        editor = new nicEditor(),
+        editor = new nicEditor({
+            onSave: function(c){
+                console.log("ukladanie.....");
+                console.log(c);
+                console.log(editorSpace.html());
+            }
+        }),
         blockCount = null,
         createBlock = function(x,y) {
             blockCount = blockCount || editorSpace.find(".note-block").length;
@@ -59,7 +65,7 @@ $(function() {
         }
 	createBlock(e.pageX,e.pageY).focus();
     });
-    
+
 });
 
 

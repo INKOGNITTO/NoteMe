@@ -117,6 +117,10 @@ a:hover{
     text-decoration:none;
 }
 
+*:focus {
+    outline: none;
+}
+
 .small {
     font-size:0.85em;
 }

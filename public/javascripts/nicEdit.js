@@ -1335,17 +1335,17 @@ var nicImageButton = nicEditorAdvancedButton.extend({
 
 
 /* START CONFIG */
-var nicSaveOptions = {
+/*var nicSaveOptions = {
 	buttons : {
 		'save' : {name : __('Save this content'), type : 'nicEditorSaveButton'}
 	}
-};
+};*/
 /* END CONFIG */
 
-var nicEditorSaveButton = nicEditorButton.extend({
+/*var nicEditorSaveButton = nicEditorButton.extend({
 	init : function() {
 		if(!this.ne.options.onSave) {
-			this.margin.setStyle({'display' : 'none'});
+			this.margin.setStyle({'display' : 'block'});
 		}
 	},
 	mouseClick : function() {
@@ -1353,11 +1353,36 @@ var nicEditorSaveButton = nicEditorButton.extend({
 		var selectedInstance = this.ne.selectedInstance;
 		onSave(selectedInstance.getContent(), selectedInstance.elm.id, selectedInstance);
 	}
-});
+});*/
 
 
-// ----!!!!!!!!!!!!!!!!!!!!!!!!!! ===================================
 //nicEditors.registerPlugin(nicPlugin,nicSaveOptions);
+
+
+
+    var nicSaveOptions = {
+	buttons : {
+		'save' : {name : __('Uložiť poznámku'), type : 'nicEditorSaveButton'}
+	}
+    };
+
+    var nicEditorSaveButton = nicEditorButton.extend({
+            init : function() {
+                $(this.margin).css({display : 'block'});
+            },
+            mouseClick : function() {
+                    var onSave = this.ne.options.onSave;
+                    var selectedInstance = this.ne.selectedInstance;
+                    var allContent = [];
+                    
+                    for(var i in nicEditors.editors[0].nicInstances) {
+                        allContent.push(nicEditors.editors[0].nicInstances[i].getContent());
+                    }
+                    onSave(allContent, selectedInstance.elm.id, selectedInstance);
+            }
+    });
+
+    nicEditors.registerPlugin(nicPlugin,nicSaveOptions);
 
 
 
