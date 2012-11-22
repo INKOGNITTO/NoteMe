@@ -7,3 +7,12 @@ crud.home=Domov
 crud.blank=Nový
 crud.index.title=Zvoľte objekt, ktorý chcete editovať
 crud.index.objectType=Typy objektov
+crud.index.add=Pridať
+crud.delete=Zmazať &{%s}
+crud.add=Pridať &{%s}
+crud.edit=Upraviť &{%s}
+
+Users=Používatelia
+notebooks=poznámkové bloky
+notes=poznámky
+name=meno

@@ -408,8 +408,12 @@ input[type="search"].ui-state-highlight {
     margin-left:160px;
 }
 
-.content button {
+.content button,
+.content a.ui-button {
     font-size: 0.9em;
+}
+.content a.ui-button {
+    color: #fafafa;
 }
 .sidebar-wrapper {
     width: 145px;
@@ -427,7 +431,7 @@ input[type="search"].ui-state-highlight {
 #left-column-wrapper {
     float: left;
     width:34%;
-    margin-top: 50px;
+    margin-top: 48px;
     border-image: url(/public/images/dashed-border.png) 1 1 1 1 repeat;
     border-top: 1px dashed #555555;
     border-left: 0px solid transparent;
@@ -719,7 +723,7 @@ input[type="search"].ui-state-highlight {
 }
 
 #note {
-    margin: 5px;
+    /*margin: 5px;*/
 }
 
 #about {

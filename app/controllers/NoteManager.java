@@ -23,13 +23,6 @@ public class NoteManager extends Controller {
         render("tags/noteDetail.html");     
     }
 
-    /**
-     * Dialogove okno zdielania poznamok
-     */
-    public static void shareNote() {
-        render("dialogs/sharenote.html");
-    }
-
     public static void newNotebook() {
         renderArgs.put("notebook",
                 new Notebook(Play.configuration.getProperty("notebook.defaultName"),

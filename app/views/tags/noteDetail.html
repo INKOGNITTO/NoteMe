@@ -1,19 +1,14 @@
-%{
-    if(_note!=null) {
-        note = _note;
-    }
-}%
-<h2>${note.name}</h2>
-<div id="note-scroll" class="fill">
-    <div id="note">
-        #{if note.content != null}${note.content.raw()}#{/if}
+<h2 data-id="${note.id}">${note.name}</h2>
+<!--<div id="note-scroll" class="fill">-->
+<div id="note" class="fill" style="overflow: auto;margin-top: 48px; margin-bottom: 132px;">
+        ${note.content?.raw()}
     </div>
-</div>
+<!--</div>-->
 <div id="about" style="color: #555555;padding:5px;position:absolute;bottom:0;right:0;left:0;">
     <div class="vertical-resize"><span></span></div>
     <div>
         <div style="float:left;" id="note-toolbar">
-            <button id="note-edit" data-ui-icon-primary="ui-icon-pencil">Editácia</button>
+            <a href="@{Edit.index()}#${note.id}" id="note-edit" data-ui-icon-primary="ui-icon-pencil">Editácia</a>
             <button data-ui-icon-primary="ui-icon-link" class="sharenote-button">Zdieľanie</button> zdieľané, verejné
         </div>
         <div style="float:right;text-align:right;">

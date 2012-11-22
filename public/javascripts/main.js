@@ -59,6 +59,146 @@ $(function() {
                 $(this).attr("contenteditable",true).focus();
             }
         };
+        this.showNoteHooks = [];
+        this.showNote = function(noteId){
+            //window.location.hash = noteId;
+            if($("body").hasClass("section-edit")){
+                noteMe.jsRoutes.editNote.ajax({
+                    urlParams: {
+                        id: noteId
+                    },
+                    beforeSend: function() {
+                        noteMe.edit.removeAllInstances();
+                    },
+                    success: function(data){
+                        $(".right-column").first().html(data);
+                        noteMe.edit.init();
+
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            } else if($("body").hasClass("section-manage")){
+                noteMe.jsRoutes.viewNote.ajax({
+                    urlParams: {
+                        id: noteId
+                    },
+                    success: function(data){
+                        $(".right-column").first().html(data);
+                        $(".right-column button, .right-column a").iconButton();
+                        for (var i in noteMe.showNoteHooks){
+                            noteMe.showNoteHooks[i]();
+                        }
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            } else {
+                return;
+            }   
+        };
+        this.edit = (function(){
+            if(typeof nicEditor === "undefined"){
+                return null;
+            }
+            var editorPanel = $("#editor-panel"),
+                editorSpace = $("#editor-space"),
+                editorInstances = [],
+                editor = null,
+                createEditor = function(){
+                    return new nicEditor({
+                        onSave: function(c){
+                            console.log("ukladanie.....");
+                            console.log(c);
+                            console.log(editorSpace.html());
+                            console.log($(".right-column h2").attr("data-id"));
+                            noteMe.jsRoutes.saveNote.ajax({
+                                data: {
+                                    id: $(".right-column h2").attr("data-id"),
+                                    content: $("#editor-space").html()
+                                },
+                                success: function(data) {
+                                    console.log(data);
+                                },
+                                error: function(err) {
+                                    console.log(err);
+                                }
+                            });
+                        }
+                    });
+                },
+                blockCount = null;
+                
+            editor = createEditor();    
+        
+            return {
+                removeAllInstances: function(){
+                    for(var i in editorInstances){
+                        editor.removeInstance(editorInstances[i].attr("id"));
+                        blockCount = null;
+                    }
+                },
+                createBlock : function(x,y) {
+                    blockCount = blockCount || editorSpace.find(".note-block").length;
+                    blockCount++;
+                    var block = $("<div>").addClass("note-block").attr("id","note-block-"+blockCount),
+                        handle = $("<div>").addClass("handle"),  
+                        wrapper = $("<div>").addClass("note-block-wrapper").append(handle).append(block).addClass("ui-corner-all");
+                    editorSpace.append(wrapper);
+                    wrapper.position({
+                        my: "left-5 center",
+                        at: "left top",
+                        offset: x + " " + y,
+                        of: document    ,
+                        collision:"none"
+                    }).draggable({
+                        cancel: ".note-block",
+                        handle: "> .handle",
+                        grid: [10,10]
+                    }).resizable({
+                        handles: "e,w",
+                        maxWidth:1500,
+                        grid: [10,10],
+                        resize: function(event, ui) {
+                            ui.element.css({height:"",maxWidth:1500});
+                        }
+                    });
+                    editor.addInstance(block.attr("id"));
+                    editorInstances.push(block);
+                    return block;
+                },
+                init: function() {
+                    //editor = createEditor();
+                    editorPanel = $("#editor-panel");
+                    editorSpace = $("#editor-space");
+                    editor.setPanel(editorPanel.attr("id"));
+
+                    editor.addEvent("focus", function() {
+                        $(this.selectedInstance.elm).parent().addClass("selected-editor");
+                    });
+                    editor.addEvent("blur", function() {
+                        if(this.selectedInstance) {
+                            var jqe = $(this.selectedInstance.elm);
+                            jqe.parent().removeClass("selected-editor");
+                            if(!jqe.text()){
+                                editor.removeInstance(jqe.attr("id"));
+                                jqe.parent().remove();
+                            }
+                        }
+                    });
+
+                    editorSpace.click(function(e){
+                        if(e.target!==this){
+                            e.stopPropagation();
+                            return;
+                        }
+                        noteMe.edit.createBlock(e.pageX,e.pageY).focus();
+                    }); 
+                }
+            }
+        }());
         this.message = {
             info: gtFunction(""),
             error: gtFunction("ui-state-error")
@@ -88,24 +228,11 @@ $(function() {
         }());
     }.apply(noteMe));
 
-    // nacitaj routy
-    $.ajax({
-        url: "/jsRoutes",
-        type: "GET",
-        dataType: "script",
-        cache: true
-    });
-
-    $(document)
-            .bind("ajaxSend", noteMe.loadAnim.start)
-            .bind("ajaxComplete", noteMe.loadAnim.stop);
-    
-    $.datepicker.setDefaults( $.datepicker.regional[ "sk" ] );
-
+    // tlacidla pred jsRoutes, lebo ten je synchronny
+    $("button").iconButton();
     $("header nav a").button();
     $("header #user-account a").iconButton();
     $("input[type='submit']").button();
-
     $("form#search input[type='submit']").each(function(){
         var button = $("<button>").text($(this).val()),
             submit = this;
@@ -118,6 +245,62 @@ $(function() {
         });
         $(this).hide();
     });
+    $("#new-notebook").button({
+        icons: {
+            primary: "ui-icon-circle-plus"
+        }
+    });
+
+    // nacitaj routy
+    $.ajax({
+        url: "/jsRoutes",
+        type: "GET",
+        dataType: "script",
+        cache: true,
+        async: false
+    });
+
+    $(document)
+            .bind("ajaxSend", noteMe.loadAnim.start)
+            .bind("ajaxComplete", noteMe.loadAnim.stop);
+    
+    
+    
+    var hashChange = function (event,noanim) {
+        var action = window.location.hash.slice(1),
+            returnValue;
+        if (action && navActions[action]){
+            if (noanim) {
+                return $.noanim(navActions[action]);
+            } else {
+                return navActions[action]();
+            }
+        } else if(action && navActions["_data"]) {
+            navActions["_data"](action);
+        } else if(action === "" && navActions["_default"]) {
+            if (noanim) {
+                return $.noanim(navActions["_default"]);
+            } else {
+                return navActions["_default"]();
+            }
+        }
+    };
+
+    var navActions = {
+        _default: function() {
+            return false;
+        },
+        _data: function(data) {
+            noteMe.showNote(parseInt(data,10));
+        }
+    
+    };
+
+    $(window).bind("hashchange",hashChange);
+
+    hashChange(null,true);
+    
+    $.datepicker.setDefaults( $.datepicker.regional[ "sk" ] );
 
     $("form#search").submit(function(){
         console.log("hľadané "+$(this).find("input[type='search']").val());
@@ -140,12 +323,14 @@ $(function() {
     $("#left-column-scroll").scrollbar();
     $(".sidebar-wrapper").scrollbar();
     $("#notetags").scrollbar();
-    $("#note-scroll").scrollbar().addClass("jspAlwaysShow");
+    //$("#note-scroll").scrollbar().addClass("jspAlwaysShow");
 
 
     // vyska poznamky
-    $("#about, .right-column > h2").on("resize", function() {
-            var noteScroll = $("#note-scroll"),
+    var noteResize = function() {
+        $("#about, .right-column > h2").on("resize",function(){
+            console.log("alskmda");
+            var noteScroll = $("#note"),
                     about = $("#about"),
                     header = $(".right-column > h2"),
                     aboutHeight = about.outerHeight(true),
@@ -154,8 +339,10 @@ $(function() {
                     "margin-top": headerHeight,
                     "margin-bottom": aboutHeight
             });
-    });
-    $("#about").trigger("resize");
+        });
+        $("#about").trigger("resize");
+    };
+    noteMe.showNoteHooks.push(noteResize);
 
 
     // vertikalna zmena velkosti
@@ -337,13 +524,8 @@ $(function() {
     $("*[contenteditable='true']").live("click, focus", function() {
     	$(this).select();
     });
-    
 
-    $("#new-notebook").button({
-        icons: {
-            primary: "ui-icon-circle-plus"
-        }
-    }).click(function(event) {
+    $("#new-notebook").click(function(event) {
         noteMe.jsRoutes.newNotebook.ajax({
             success : function(data) {
                 var ad = $(data).prependTo($(".notebooks").first());
@@ -410,27 +592,18 @@ $(function() {
            });
     });
 
+    
 
 
 
     $(".note").live("click",function(){
-        var self = $(this);
-        noteMe.jsRoutes.viewNote.ajax({
-            urlParams: {
-                id: self.attr("data-id")
-            },
-            success: function(data){
-                $(".right-column").first().html(data);
-                $(".right-column button").iconButton();
-            },
-            error: function(err) {
-                console.log(err);
-            }
-        });
+        window.location.hash=$(this).attr("data-id");
+        //noteMe.showNote($(this).attr("data-id"));
     });
     $(".note .ui-icon").live("click", function(event){
         // neklikni, ak sa robil sort
         //event.preventDefault();
+        event.stopPropagation();
         //event.stopImmediatePropagation();
     });
     $(".note .ui-icon-close").live("click", function(event){
@@ -474,6 +647,9 @@ $(function() {
     // tlacidlo pod poznamkou
     $(".sharenote-button").live("click",function() {
     	noteMe.jsRoutes.shareNote.ajax({
+            data: {
+                id: $(this).parents(".right-column").find("h2").attr("data-id")
+            },
             dataType: "html",
             context: $("body"),
             success: function(data) {
@@ -603,6 +779,15 @@ $.fn.selectText = function () {
         }
     });
 };
+
+$.noanim = function(action) {
+    var fx = jQuery.fx.off,
+        returnValue;
+    jQuery.fx.off = true;
+    returnvalue = action();
+    jQuery.fx.off = fx;
+    return returnValue;
+}
 
 
 // adder

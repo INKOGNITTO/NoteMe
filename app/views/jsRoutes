@@ -19,10 +19,12 @@ var noteMe = noteMe || {};
         saveNewNotebook: makeRoute(#{jsRoute @NoteManager.saveNewNotebook() /}),
         newNote: makeRoute(#{jsRoute @NoteManager.newNote() /}),
         saveNewNote: makeRoute(#{jsRoute @NoteManager.saveNewNote() /}),
-        shareNote: makeRoute(#{jsRoute @NoteManager.shareNote() /}),
+        shareNote: makeRoute(#{jsRoute @Share.shareNote() /}),
         orderNotebooks: makeRoute(#{jsRoute @NoteManager.orderNotebooks() /}),
         orderNotes: makeRoute(#{jsRoute @NoteManager.orderNotes() /}),
         rename: makeRoute(#{jsRoute @NoteManager.rename() /}),
-        remove: makeRoute(#{jsRoute @NoteManager.remove() /})
+        remove: makeRoute(#{jsRoute @NoteManager.remove() /}),
+        saveNote: makeRoute(#{jsRoute @Edit.saveNote() /}),
+        editNote: makeRoute(#{jsRoute @Edit.editNote(':id') /})
     };
 }());

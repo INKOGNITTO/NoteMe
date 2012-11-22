@@ -19,23 +19,15 @@
     <div id="left-column-wrapper" class="column-wrapper fill">
         <div id="left-column-scroll">
             <div class="left-column notebooks">
-                #{list items:user.notebooks, as:'nb'}
-                    #{notebook notebook: nb /}
+                #{list items:user.notebooks, as:'notebook'}
+                    #{include 'tags/notebook.html' /}
                 #{/list}
             </div>
         </div>
     </div>
     <div id="right-column-wrapper" class="column-wrapper fill">
         <div class="right-column">
-            %{
-                for(notebook in user.notebooks) {
-                    if(notebook.notes.size()!=0) {
-                        firstnote = notebook.notes[0]
-                        break
-                    }
-                }
-            }%
-            #{if firstnote!=null}#{noteDetail note: firstnote /}#{/if}
+
         </div>
         <div style="clear:both;"></div>
     </div>

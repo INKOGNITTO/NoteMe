@@ -1,6 +1,7 @@
 package controllers;
 
 import hash.Passwords;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import models.*;
@@ -21,10 +22,27 @@ public class Security extends Secure.Security {
     static void onAuthenticated() {
         try {
             Secure.login();
-            //NoteManager.index();
         } catch (Throwable ex) {
             Logger.getLogger(Security.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    static boolean checkNoteAccessibility(long noteId) {
+        User user = User.findByEmail(session.get("username"));
+        List<Note> notes = user.getAllNotes();
+        if(notes.contains((Note)Note.findById(noteId))){
+            return true;
+        }
+        return false;
+    }
+    
+    static boolean checkNoteOwnership(long noteId){
+        User user = User.findByEmail(session.get("username"));
+        List<Note> notes = user.getOwnedNotes();
+        if(notes.contains((Note)Note.findById(noteId))){
+            return true;
+        }
+        return false;
     }
     
 

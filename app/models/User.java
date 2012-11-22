@@ -65,9 +65,25 @@ public class User extends Model {
         return User.<User>findById(user).notebooks;
     }
     
+    public List<Note> getAllNotes() {
+        Query noteQuery = JPA.em().createQuery("select note from Note note join note.notebooks nb join nb.contributors cont"
+                + " where cont = :user")
+                .setParameter("user", this);
+        return noteQuery.getResultList();
+    }
+    
+    public List<Note> getOwnedNotes() {
+        Query noteQuery = JPA.em().createQuery("select note from Note note where note.owner = :owner").setParameter("owner", this);
+        return noteQuery.getResultList();
+    }
+    
+    public Note getFirstNote() {
+        return null; //TODO
+    }
+    
     public List<Tag> getTags() {
         Query query = JPA.em().createQuery("select tag from Tag tag where tag.owner = :this").setParameter("this", this);
-        return (List<Tag>)query.getResultList();
+        return query.getResultList();
     }
     
     @Override

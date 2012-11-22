@@ -14,7 +14,6 @@ GET     /logout                     Secure.logout
 # Manage
 GET     /manage	                    NoteManager.index
 GET     /manage/viewNote/{id}       NoteManager.viewNote
-POST 	/manage/sharenote           NoteManager.shareNote
 POST    /manage/newNotebook         NoteManager.newNotebook
 POST    /manage/saveNewNotebook     NoteManager.saveNewNotebook
 POST    /manage/newNote             NoteManager.newNote
@@ -26,6 +25,11 @@ POST    /manage/remove              NoteManager.remove
 
 # Edit
 GET	/edit                       Edit.index
+POST    /edit/{<[0-9]+>id}          Edit.editNote
+POST    /edit/saveNote              Edit.saveNote
+
+#Share
+POST 	/sharenote                 Share.shareNote
 
 # jsRoutes
 GET     /jsRoutes                   App.jsRoutes
