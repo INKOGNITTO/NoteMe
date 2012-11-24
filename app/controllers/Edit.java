@@ -34,7 +34,6 @@ public class Edit extends Controller {
             forbidden("You do not have permission to save this note.");
         }
         Note note = Note.findById(id);
-        Logger.info(content);
         note.content = content;
         note.updateDate = new Date();
         note.save();

@@ -64,34 +64,33 @@ $(function() {
             //window.location.hash = noteId;
             if($("body").hasClass("section-edit")){
                 noteMe.jsRoutes.editNote.ajax({
-                    urlParams: {
+                    urlParams : {
                         id: noteId
                     },
-                    beforeSend: function() {
+                    beforeSend : function() {
                         noteMe.edit.removeAllInstances();
                     },
-                    success: function(data){
+                    success : function(data){
                         $(".right-column").first().html(data);
                         noteMe.edit.init();
-
                     },
-                    error: function(err) {
+                    error : function(err) {
                         console.log(err);
                     }
                 });
             } else if($("body").hasClass("section-manage")){
                 noteMe.jsRoutes.viewNote.ajax({
-                    urlParams: {
+                    urlParams : {
                         id: noteId
                     },
-                    success: function(data){
+                    success : function(data){
                         $(".right-column").first().html(data);
                         $(".right-column button, .right-column a").iconButton();
                         for (var i in noteMe.showNoteHooks){
                             noteMe.showNoteHooks[i]();
                         }
                     },
-                    error: function(err) {
+                    error : function(err) {
                         console.log(err);
                     }
                 });
@@ -105,19 +104,36 @@ $(function() {
             }
             var editorPanel = $("#editor-panel"),
                 editorSpace = $("#editor-space"),
+                draggableSettings = {
+                    cancel: ".note-block",
+                    handle: "> .handle",
+                    grid: [10,10]
+                },
+                resizebleSettings = {
+                    handles: "e,w",
+                    maxWidth:1500,
+                    grid: [10,10],
+                    resize: function(event, ui) {
+                        ui.element.css({height:"",maxWidth:1500});
+                    }
+                },
                 editorInstances = [],
                 editor = null,
                 createEditor = function(){
                     return new nicEditor({
                         onSave: function(c){
+                            var content = $(editorSpace).clone(true);
+                            content.find(".note-block-wrapper").attr("class","note-block-wrapper").find(".handle").hide();
+                            content.find(".ui-resizable-handle").remove();
+                            content.find(".note-block").removeAttr("contenteditable");
                             console.log("ukladanie.....");
                             console.log(c);
-                            console.log(editorSpace.html());
+                            console.log(content.html());
                             console.log($(".right-column h2").attr("data-id"));
                             noteMe.jsRoutes.saveNote.ajax({
                                 data: {
                                     id: $(".right-column h2").attr("data-id"),
-                                    content: $("#editor-space").html()
+                                    content: content.html()
                                 },
                                 success: function(data) {
                                     console.log(data);
@@ -153,18 +169,7 @@ $(function() {
                         offset: x + " " + y,
                         of: document    ,
                         collision:"none"
-                    }).draggable({
-                        cancel: ".note-block",
-                        handle: "> .handle",
-                        grid: [10,10]
-                    }).resizable({
-                        handles: "e,w",
-                        maxWidth:1500,
-                        grid: [10,10],
-                        resize: function(event, ui) {
-                            ui.element.css({height:"",maxWidth:1500});
-                        }
-                    });
+                    }).draggable(draggableSettings).resizable(resizebleSettings);
                     editor.addInstance(block.attr("id"));
                     editorInstances.push(block);
                     return block;
@@ -188,6 +193,13 @@ $(function() {
                             }
                         }
                     });
+                
+                    editorSpace.find(".note-block-wrapper").draggable(draggableSettings).resizable(resizebleSettings);
+                    editorSpace.find(".handle").show();
+                    editorSpace.find(".note-block").each(function(){
+                        editor.addInstance($(this).attr("id"));
+                        editorInstances.push($(this));
+                    });
 
                     editorSpace.click(function(e){
                         if(e.target!==this){
@@ -197,7 +209,7 @@ $(function() {
                         noteMe.edit.createBlock(e.pageX,e.pageY).focus();
                     }); 
                 }
-            }
+            };
         }());
         this.message = {
             info: gtFunction(""),
@@ -329,7 +341,6 @@ $(function() {
     // vyska poznamky
     var noteResize = function() {
         $("#about, .right-column > h2").on("resize",function(){
-            console.log("alskmda");
             var noteScroll = $("#note"),
                     about = $("#about"),
                     header = $(".right-column > h2"),

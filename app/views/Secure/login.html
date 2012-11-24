@@ -78,18 +78,20 @@ $(function(){
     $(window).bind('hashchange', function (event,noanim) {
         var action = window.location.hash.slice(1),
             returnValue;
-        if (action){
+        if (action && navActions[action]){
             if (noanim) {
                 return jQnoanim(navActions[action]);
             } else {
                 return navActions[action]();
             }
-        } else if(action === "") {
+        } else if(action === "" && navActions["_default"]) {
             if (noanim) {
                 return jQnoanim(navActions["_default"]);
             } else {
                 return navActions["_default"]();
             }
+        } else {
+            window.location.hash = "";
         }
     });
 

@@ -1372,13 +1372,12 @@ var nicImageButton = nicEditorAdvancedButton.extend({
             },
             mouseClick : function() {
                     var onSave = this.ne.options.onSave;
-                    var selectedInstance = this.ne.selectedInstance;
                     var allContent = [];
                     
                     for(var i in nicEditors.editors[0].nicInstances) {
                         allContent.push(nicEditors.editors[0].nicInstances[i].getContent());
                     }
-                    onSave(allContent, selectedInstance.elm.id, selectedInstance);
+                    onSave(allContent);
             }
     });
 
