@@ -9,7 +9,7 @@
     <div>
         <div style="float:left;" id="note-toolbar">
             <a href="@{Edit.index()}#${note.id}" id="note-edit" data-ui-icon-primary="ui-icon-pencil">Editácia</a>
-            <button data-ui-icon-primary="ui-icon-link" class="sharenote-button">Zdieľanie</button> zdieľané, verejné
+            <button data-ui-icon-primary="ui-icon-link" class="sharenote-button">Zdieľanie</button>
         </div>
         <div style="float:right;text-align:right;">
             vlastník: #{if note.owner.email == session.get("username")}ja#{/if}#{elseif note.owner.name}${note.owner.name}#{/elseif}#{else}${note.owner.email}#{/else}<br>

@@ -61,10 +61,18 @@ public class Note extends Model {
     public String generatePublicId() {
         String uuid = Codec.UUID();
         if(Note.findByPublicId(uuid)!=null) {
-            generatePublicId();
+            return generatePublicId();
         }
         this.publicID = uuid;
+        this.save();
+        this.refresh();
         return uuid;
+    }
+    
+    public void deletePublicId(){
+        this.publicID = null;
+        this.save();
+        this.refresh();
     }
     
     public static Note findByPublicId(String publicId) {

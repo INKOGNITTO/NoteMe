@@ -125,6 +125,10 @@ a:hover{
     font-size:0.85em;
 }
 
+p:first-child {
+    margin-top:0;
+}
+
 header,
 footer {
 	color: #fafafa;
@@ -365,7 +369,7 @@ footer{
     width: auto;
 }
 
-label {
+#section-login label {
     font-variant: small-caps;
     display: block;
 }
@@ -594,8 +598,7 @@ input[type="search"].ui-state-highlight {
 	color: black;
 }
 
-.notebook h2,
-.right-column > h2 {
+h2 {
     font-size:1.2em;
     font-variant: small-caps;
     padding: 6px 3px 3px 3px;

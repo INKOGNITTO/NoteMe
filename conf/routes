@@ -30,6 +30,11 @@ POST    /edit/saveNote              Edit.saveNote
 
 #Share
 POST 	/sharenote                 Share.shareNote
+POST    /sharenote/getPublicId     Share.getPublicId
+POST    /sharenote/removePublicId  Share.removePublicId
+
+#Public note
+GET     /publicnote/{uuid}            PublicNote.index
 
 # jsRoutes
 GET     /jsRoutes                   App.jsRoutes

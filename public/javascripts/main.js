@@ -14,7 +14,7 @@ $(function() {
                 tooltipClass: "global-message",
                 show:{effect:"slideDown",duration:500,easing:"swing"},
                 hide:{effect:"slideUp",duration:500,easing:"swing"},
-                position:{my:"center top+2", at:"center top",collision:"none"},
+                position:{my:"center top+2", at:"center top", collision:"none"},
                 close: function(){
 
                 },
@@ -40,6 +40,11 @@ $(function() {
                 $(this).off(".rename").off("keydown");
                 $(this).on("focus.rename", function() {
                     $(this).selectText();
+                    if($.browser.opera){
+                        // opera zrusi selekciu kvoli zmene stylu elementu, treba ju preto zopakovat
+                        var self = $(this);
+                        setTimeout(function(){self.selectText();},10);
+                    }
                 }).on("blur.rename", function() {
                     if(!result.saved){
                         $(this).text(oldText);
@@ -113,7 +118,7 @@ $(function() {
                     handles: "e,w",
                     maxWidth:1500,
                     grid: [10,10],
-                    resize: function(event, ui) {
+                    resize : function(event, ui) {
                         ui.element.css({height:"",maxWidth:1500});
                     }
                 },
@@ -121,25 +126,21 @@ $(function() {
                 editor = null,
                 createEditor = function(){
                     return new nicEditor({
-                        onSave: function(c){
+                        onSave : function(c){
                             var content = $(editorSpace).clone(true);
                             content.find(".note-block-wrapper").attr("class","note-block-wrapper").find(".handle").hide();
                             content.find(".ui-resizable-handle").remove();
                             content.find(".note-block").removeAttr("contenteditable");
-                            console.log("ukladanie.....");
-                            console.log(c);
-                            console.log(content.html());
-                            console.log($(".right-column h2").attr("data-id"));
                             noteMe.jsRoutes.saveNote.ajax({
-                                data: {
+                                data : {
                                     id: $(".right-column h2").attr("data-id"),
                                     content: content.html()
                                 },
-                                success: function(data) {
-                                    console.log(data);
+                                success : function(data) {
+                                    noteMe.message.info("Poznámka uložená");
                                 },
-                                error: function(err) {
-                                    console.log(err);
+                                error : function(err) {
+                                    noteMe.message.error("Chyba pri ukladaní poznámky");
                                 }
                             });
                         }
@@ -150,14 +151,13 @@ $(function() {
             editor = createEditor();    
         
             return {
-                removeAllInstances: function(){
+                removeAllInstances : function(){
                     for(var i in editorInstances){
                         editor.removeInstance(editorInstances[i].attr("id"));
                         blockCount = null;
                     }
                 },
                 createBlock : function(x,y) {
-                    blockCount = blockCount || editorSpace.find(".note-block").length;
                     blockCount++;
                     var block = $("<div>").addClass("note-block").attr("id","note-block-"+blockCount),
                         handle = $("<div>").addClass("handle"),  
@@ -167,14 +167,14 @@ $(function() {
                         my: "left-5 center",
                         at: "left top",
                         offset: x + " " + y,
-                        of: document    ,
+                        of: document,
                         collision:"none"
                     }).draggable(draggableSettings).resizable(resizebleSettings);
                     editor.addInstance(block.attr("id"));
                     editorInstances.push(block);
                     return block;
                 },
-                init: function() {
+                init : function() {
                     //editor = createEditor();
                     editorPanel = $("#editor-panel");
                     editorSpace = $("#editor-space");
@@ -194,13 +194,21 @@ $(function() {
                         }
                     });
                 
+                    // zisti najvacsie id bloku
+                    var pm;
+                    var idPattern = /[0-9]+/;
+                    editorSpace.find(".note-block").each(function(){
+                        pm = parseInt(idPattern.exec($(this).attr("id"))[0],10);
+                        blockCount = pm>blockCount?pm:blockCount;
+                    });
+                
                     editorSpace.find(".note-block-wrapper").draggable(draggableSettings).resizable(resizebleSettings);
                     editorSpace.find(".handle").show();
                     editorSpace.find(".note-block").each(function(){
                         editor.addInstance($(this).attr("id"));
                         editorInstances.push($(this));
                     });
-
+                    
                     editorSpace.click(function(e){
                         if(e.target!==this){
                             e.stopPropagation();
@@ -229,10 +237,10 @@ $(function() {
             buffer.append($("<img>").attr("src",staticUrl));
             
             return {
-                start: function(){
+                start : function(e){
                     elem.attr("src",animUrl);
                 },
-                stop: function(){
+                stop : function(){
                     elem.attr("src",staticUrl);
                 }
             };
@@ -250,7 +258,7 @@ $(function() {
             submit = this;
         $(this).parent().append(button);
         $(button).button({
-            icons: {
+            icons : {
                 primary: "ui-icon-search"
             },
             text: false
@@ -258,7 +266,7 @@ $(function() {
         $(this).hide();
     });
     $("#new-notebook").button({
-        icons: {
+        icons : {
             primary: "ui-icon-circle-plus"
         }
     });
@@ -299,10 +307,10 @@ $(function() {
     };
 
     var navActions = {
-        _default: function() {
+        _default : function() {
             return false;
         },
-        _data: function(data) {
+        _data : function(data) {
             noteMe.showNote(parseInt(data,10));
         }
     
@@ -679,15 +687,46 @@ $(function() {
                     }
                 });
                 $("#sharenote .add-multiple").adder({inputLabel:"Pridať email používateľa"});
-                $("#sharenote #share-public").hide();
-                $("#sharenote input[type='checkbox']").click(function(){
-                    $("#sharenote #share-public").fadeIn();
-                });
+                if(!$("#sharenote #publicId-dest").text()){
+                    $("#sharenote #share-public").hide();
+                } else {
+                    $("#sharenote #publicId").attr('checked', true); 
+                }
                 $("#sharenote form").submit(function(event) {
                     console.log("posiela sa zdielanie");
                     event.preventDefault();
                     $("#sharenote").dialog("close");
                 }); 
+                $("#sharenote #publicId").on("click",function(){
+                    if($(this).is(":checked")){
+                        noteMe.jsRoutes.getPublicId.ajax({
+                            data: {
+                                id: $(this).parents(".ui-dialog").find(".ui-dialog-content").attr("data-id")
+                            },
+                            success: function(data) {
+                                $("#sharenote #publicId-dest").text(data);
+                                $("#sharenote #share-public").fadeIn();
+                            },
+                            error: function(err){
+                                console.log(err);
+                            }
+                        });
+                    } else {
+                        noteMe.jsRoutes.removePublicId.ajax({
+                            data: {
+                                id: $(this).parents(".ui-dialog").find(".ui-dialog-content").attr("data-id")
+                            },
+                            success: function(){
+                                $("#sharenote #publicId-dest").text("");
+                                $("#sharenote #share-public").fadeOut();
+                            },
+                            error: function(err){
+                                console.log(err);
+                            }
+                        });
+                    }
+                });
+                $("#sharenote #publicId-dest").click(function(){$(this).selectText();});
             }
     	});
     });
@@ -798,7 +837,7 @@ $.noanim = function(action) {
     returnvalue = action();
     jQuery.fx.off = fx;
     return returnValue;
-}
+};
 
 
 // adder

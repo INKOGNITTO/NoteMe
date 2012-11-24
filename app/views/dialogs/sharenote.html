@@ -8,16 +8,12 @@
 		</fieldset>
 		<fieldset>
 			<legend>Verejné zdieľanie</legend>
-			<input type="checkbox" value="public">Povoliť verejné zdieľanie
+                        <input type="checkbox" value="public" id="publicId">
+                        <label for="publicId">Povoliť verejné zdieľanie</label>
 			<div id="share-public">
-				<p>Verejný odkaz: </p>
-				<div>http:// ...</div>
+				<p>Verejný odkaz:</p>
+				<div id="publicId-dest">#{if note.publicID!=null}@@{PublicNote.index(note.publicID)}#{/if}</div>
 			</div>
 		</fieldset>
-		<!-- <div style="text-align: right;margin:10px;">
-			<button class="close" data-ui-icon-primary="ui-icon-close">Zavrieť</button>
-			<button data-ui-icon-primary="ui-icon-check">OK</button>
-		</div> -->
 	</form>
-
 </div>
