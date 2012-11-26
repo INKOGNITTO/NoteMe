@@ -215,7 +215,7 @@ header,
 }
 #header-bar > #user > div {
     position:absolute;
-    lef:0px;
+    left:0px;
     top:0px;
     right:0px;
     bottom:0px;
@@ -349,6 +349,9 @@ footer{
 .content {
   	margin-top:83px;
   	margin-bottom:30px;
+}
+.section-admin .content {
+    overflow:auto;
 }
 
  /* Login page */
@@ -672,6 +675,9 @@ h2 {
      background: transparent url(/public/images/bg-yelowish-25.png);
      border: none;
      border-radius: 20px;
+ }
+ .notebook .note.ui-sortable-helper {
+     background: #acacac url(/public/images/bg-noise-midtone.png);
  }
 
 .notebook .note:hover {

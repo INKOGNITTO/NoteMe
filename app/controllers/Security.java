@@ -45,5 +45,15 @@ public class Security extends Secure.Security {
         return false;
     }
     
+    static boolean check(String what) {
+        User user = User.findByEmail(connected());
+        if ("admin".equals(what)) {
+            return user.isAdmin;
+        }
+        else {
+            return false;
+        }
+    }
+    
 
 }

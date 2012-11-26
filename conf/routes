@@ -3,44 +3,44 @@
 # ~~~~
 
 # Home page
-GET     /                           App.index
+GET     /                               App.index
 
 # Login & Registration
-GET     /welcome                    Secure.login
-POST    /login                      App.authenticate
-POST    /registration               App.register
-GET     /logout                     Secure.logout
+GET     /welcome                        Secure.login
+POST    /login                          App.authenticate
+POST    /registration                   App.register
+GET     /logout                         Secure.logout
 
 # Manage
-GET     /manage	                    NoteManager.index
-GET     /manage/viewNote/{id}       NoteManager.viewNote
-POST    /manage/newNotebook         NoteManager.newNotebook
-POST    /manage/saveNewNotebook     NoteManager.saveNewNotebook
-POST    /manage/newNote             NoteManager.newNote
-POST    /manage/saveNewNote         NoteManager.saveNewNote
-POST    /manage/orderNotebooks      NoteManager.orderNotebooks
-POST    /manage/orderNotes          NoteManager.orderNotes
-POST    /manage/rename              NoteManager.rename  
-POST    /manage/remove              NoteManager.remove
+GET     /manage                         NoteManager.index
+GET     /manage/viewNote/{id}           NoteManager.viewNote
+POST    /manage/newNotebook             NoteManager.newNotebook
+POST    /manage/saveNewNotebook         NoteManager.saveNewNotebook
+POST    /manage/newNote                 NoteManager.newNote
+POST    /manage/saveNewNote             NoteManager.saveNewNote
+POST    /manage/orderNotebooks          NoteManager.orderNotebooks
+POST    /manage/orderNotes              NoteManager.orderNotes
+POST    /manage/rename                  NoteManager.rename  
+POST    /manage/remove                  NoteManager.remove
 
 # Edit
-GET	/edit                       Edit.index
-POST    /edit/{<[0-9]+>id}          Edit.editNote
-POST    /edit/saveNote              Edit.saveNote
+GET	/edit                           Edit.index
+POST    /edit/{<[0-9]+>id}              Edit.editNote
+POST    /edit/saveNote                  Edit.saveNote
 
 #Share
-POST 	/sharenote                 Share.shareNote
-POST    /sharenote/getPublicId     Share.getPublicId
-POST    /sharenote/removePublicId  Share.removePublicId
+POST 	/sharenote                      Share.shareNote
+POST    /sharenote/getPublicId          Share.getPublicId
+POST    /sharenote/removePublicId       Share.removePublicId
 
 #Public note
-GET     /publicnote/{uuid}            PublicNote.index
+GET     /publicnote/{uuid}              PublicNote.index
 
 # jsRoutes
-GET     /jsRoutes                   App.jsRoutes
+GET     /jsRoutes                       App.jsRoutes
 
 # Admin 
-*       /admin                      module:crud
+*       /admin                          module:crud
 
 # Map static resources
-GET     /public/                    staticDir:public
+GET     /public/                        staticDir:public

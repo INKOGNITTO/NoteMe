@@ -406,6 +406,7 @@ $(function() {
         handle: "> h2 .handle",
         items: ".notebook",
         placeholder: "sortable-placeholder",
+        revert:"invalid",
         forcePlaceholderSize: true,
         update: function(event, ui) {
             console.log(ui.item, ui.item.parent());
@@ -429,6 +430,7 @@ $(function() {
         axis: "y",
         handle: "> .handle",
         items: ".note",
+        revert:"invalid",
         connectWith:".notebook > div",
         placeholder: "sortable-placeholder",
         forcePlaceholderSize: true,

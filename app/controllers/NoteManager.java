@@ -19,6 +19,7 @@ public class NoteManager extends Controller {
     }
     
     public static void viewNote(long id) {
+        notFoundIfNull(Note.findById(id));
         renderArgs.put("note",Note.findById(id));
         render("tags/noteDetail.html");     
     }

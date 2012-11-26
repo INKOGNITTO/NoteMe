@@ -25,6 +25,8 @@ public class User extends Model {
     @CRUD.Exclude
     public String password;
     
+    public Boolean isAdmin;
+    
     @Transient
     @CheckWith(controllers.App.PasswordCheckCheck.class)
     public String passwordCheck;
@@ -44,6 +46,7 @@ public class User extends Model {
         this.email = email;
         this.name = name;
         this.password = Passwords.hashPassword(password);
+        this.isAdmin = false;
     }
     
     public void setDefaults() {

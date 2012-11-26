@@ -2,7 +2,7 @@
 # For example, for French create a messages.fr file
 #
 
-crud.title=noteMe Administrácia
+crud.title=Administrácia
 crud.home=Domov
 crud.blank=Nový
 crud.index.title=Zvoľte objekt, ktorý chcete editovať
@@ -16,3 +16,4 @@ Users=Používatelia
 notebooks=poznámkové bloky
 notes=poznámky
 name=meno
+isAdmin=administrátor
