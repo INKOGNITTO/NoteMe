@@ -115,6 +115,13 @@ public class NoteManager extends Controller {
         }
     }
 
+    
+    public static void addTagToNote(Long noteId, Long tagId){
+        Note note = (Note) Note.findById(noteId);
+        note.tags.add((Tag) Tag.findById(tagId));
+        note.save();
+    }
+    
     public static void rename(String type, Long id, String newName) {
         if (type.equals("notebook")) {
             renderText(((Notebook) Notebook.findById(id)).rename(newName));
@@ -137,4 +144,9 @@ public class NoteManager extends Controller {
             error(Http.StatusCode.BAD_REQUEST, "Bad object type");
         }
     }
+    
+    public static void removeTagFromNote(Long noteId, Long tagId){
+        ((Tag) Tag.findById(tagId)).removeFromNote(noteId);
+    }
 }
+
