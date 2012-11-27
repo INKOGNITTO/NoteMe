@@ -14,11 +14,12 @@ public class Tag extends Model {
 
     @Required
     public String name;
+
     @ManyToOne
     @Required
     public User owner;
-    @ManyToMany()
-    @OrderColumn
+
+    @ManyToMany(mappedBy="tags")
     public List<Note> notes = new LinkedList<Note>();
 
     public Tag(String name, User user) {

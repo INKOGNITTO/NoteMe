@@ -20,7 +20,7 @@
     </div>
 
     <div id="notetags" class="fill">
-        #{list items:note.tags, as:'tag'}
+        #{list items:note.getOwnedTags(), as:'tag'}
             #{include 'tags/tag.html' /}
         #{/list}
     </div>

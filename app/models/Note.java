@@ -12,9 +12,8 @@ import play.db.jpa.Model;
 import play.libs.Codec;
 import play.mvc.Scope;
 
-
 @Entity
-@Table (name = "notes")
+@Table(name = "notes")
 public class Note extends Model {
 
     @ManyToOne
@@ -47,8 +46,6 @@ public class Note extends Model {
     @As("dd.MM.yyyy hh:mm:ss")
     public Date updateDate = new Date();
 
-    
-
     public Note(String name, Long notebookID, User owner) {
         this.name = name;
         //this.notebooks.add((Notebook)Notebook.findById(notebookID));
@@ -57,10 +54,10 @@ public class Note extends Model {
         this.updateDate = new Date();
         //this.publicID = generatePublicId();
     }
-    
+
     public String generatePublicId() {
         String uuid = Codec.UUID();
-        if(Note.findByPublicId(uuid)!=null) {
+        if (Note.findByPublicId(uuid) != null) {
             return generatePublicId();
         }
         this.publicID = uuid;
@@ -68,53 +65,60 @@ public class Note extends Model {
         this.refresh();
         return uuid;
     }
-    
-    public void deletePublicId(){
+
+    public void deletePublicId() {
         this.publicID = null;
         this.save();
         this.refresh();
     }
-    
+
     public static Note findByPublicId(String publicId) {
         return Note.find("publicID = ?", publicId).first();
     }
 
     public static Note create(String name, Long notebookID, Long userID) {
-        Note note = new Note(name, notebookID, (User)User.findById(userID));
+        Note note = new Note(name, notebookID, (User) User.findById(userID));
         note.save();
         note.refresh();
-        note.notebooks.add((Notebook)Notebook.findById(notebookID));
+        note.notebooks.add((Notebook) Notebook.findById(notebookID));
         note.save();
         return note;
     }
-    
-    public Set<Tag> getTags(){
+
+    public Set<Tag> getTags() {
         return tags;
     }
-    
-     public String rename(String newName) {
+
+    public List<Tag> getOwnedTags() {
+        Query q = JPA.em().createQuery("select tag from Tag tag where :n member of tag.notes and tag.owner = :o")
+                .setParameter("n", this)
+                .setParameter("o", this.owner);
+        List<Tag> ownedTags = q.getResultList();
+        return ownedTags;
+    }
+
+    public String rename(String newName) {
         this.name = newName;
         this.save();
         return newName;
     }
-     
-     public void remove(){
-         // vyhladaj vsetky bloky, v ktorych je tato poznamka a ktore su pristupne prihlasenemu pouzivatelovi
-         Query q = JPA.em().createQuery("select nb from Notebook nb where :n member of nb.notes and :u member of nb.contributors")
-                 .setParameter("n", this)
-                 .setParameter("u", User.findByEmail(Scope.Session.current.get().get("username")));
-         List<Notebook> notebookWithNote = q.getResultList();
-         //v tychto pozn. blokoch zmaz tuto (this) poznamku
-         for(Notebook n :  notebookWithNote) {
-             n.notes.remove(this);
-             n.save();
-         }
-         // ak uz poznamka nie je v ziadnom bloku, zmaz ju z db
-         this.refresh();
-         if(this.notebooks.isEmpty()){
-            this.delete();
-         }
 
-     }
-    
+    public void remove() {
+        // vyhladaj vsetky bloky, v ktorych je tato poznamka a ktore su pristupne prihlasenemu pouzivatelovi
+        Query q = JPA.em().createQuery("select nb from Notebook nb where :n member of nb.notes and :u member of nb.contributors")
+                .setParameter("n", this)
+                .setParameter("u", User.findByEmail(Scope.Session.current.get().get("username")));
+        List<Notebook> notebookWithNote = q.getResultList();
+        //v tychto pozn. blokoch zmaz tuto (this) poznamku
+        for (Notebook n : notebookWithNote) {
+            n.notes.remove(this);
+            n.save();
+        }
+        // ak uz poznamka nie je v ziadnom bloku, zmaz ju z db
+        this.refresh();
+        if (this.notebooks.isEmpty()) {
+            this.delete();
+        }
+
+    }
 }
