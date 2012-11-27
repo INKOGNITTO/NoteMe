@@ -25,9 +25,11 @@ public class Note extends Model {
     @Column(unique = true)
     public String publicID;
 
+    public Boolean isPulbic;
+    
     @Column(columnDefinition = "TEXT")
     public String content;
-
+    
     @ManyToMany
     public Set<Tag> tags = new HashSet<Tag>();
 	
@@ -52,6 +54,7 @@ public class Note extends Model {
         this.owner = owner;
         this.creationDate = new Date();
         this.updateDate = new Date();
+        this.isPulbic = false;
         //this.publicID = generatePublicId();
     }
 
@@ -66,8 +69,8 @@ public class Note extends Model {
         return uuid;
     }
 
-    public void deletePublicId() {
-        this.publicID = null;
+    public void unsharePublicId() {
+        this.isPulbic = false;
         this.save();
         this.refresh();
     }

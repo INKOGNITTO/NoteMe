@@ -115,23 +115,26 @@ public class NoteManager extends Controller {
         }
     }
 
-    
-    public static void addTagToNote(Long noteId, Long tagId){
+    public static void addTagToNote(Long noteId, Long tagId) {
         Note note = (Note) Note.findById(noteId);
         note.tags.add((Tag) Tag.findById(tagId));
         note.save();
-        
+
     }
-    
+
     public static void rename(String type, Long id, String newName) {
-        if (type.equals("notebook")) {
-            renderText(((Notebook) Notebook.findById(id)).rename(newName));
-        } else if (type.equals("note")) {
-            renderText(((Note) Note.findById(id)).rename(newName));
-        } else if (type.equals("tag")) {
-            renderText(((Tag) Tag.findById(id)).rename(newName));
+        if (newName.isEmpty()) {
+            if (type.equals("notebook")) {
+                renderText(((Notebook) Notebook.findById(id)).rename(newName));
+            } else if (type.equals("note")) {
+                renderText(((Note) Note.findById(id)).rename(newName));
+            } else if (type.equals("tag")) {
+                renderText(((Tag) Tag.findById(id)).rename(newName));
+            }
+            error(Http.StatusCode.BAD_REQUEST, "Bad object type");
+        } else {
+            error(Http.StatusCode.BAD_REQUEST, "Empty name");
         }
-        error(Http.StatusCode.BAD_REQUEST, "Bad object type");
     }
 
     public static void remove(String type, Long id) {
@@ -145,10 +148,9 @@ public class NoteManager extends Controller {
             error(Http.StatusCode.BAD_REQUEST, "Bad object type");
         }
     }
-    
-    public static void removeTagFromNote(Long noteId, Long tagId){
+
+    public static void removeTagFromNote(Long noteId, Long tagId) {
         ((Tag) Tag.findById(tagId)).removeFromNote(noteId);
-        
+
     }
 }
-

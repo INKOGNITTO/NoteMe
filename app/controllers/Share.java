@@ -24,7 +24,7 @@ public class Share extends Controller{
         render("dialogs/sharenote.html");
     }
     
-    public static void getPublicId(long id) {
+    public static void sharePublic(long id) {
         if(!Security.checkNoteOwnership(id)){
             forbidden();
         }
@@ -35,16 +35,18 @@ public class Share extends Controller{
         } else {
             uuid = note.publicID;
         }
+        note.isPulbic = true;
+        note.save();
         Map<String,Object> arg = new HashMap<String,Object>();
         arg.put("uuid",uuid);
         renderText(Router.getFullUrl("PublicNote.index",arg).toString());
     }
     
-    public static void removePublicId(long id){
+    public static void unsharePublic(long id){
         if(!Security.checkNoteOwnership(id)){
             forbidden();
         }
-        ((Note)Note.findById(id)).deletePublicId();
+        ((Note)Note.findById(id)).unsharePublicId();
     }
     
     
