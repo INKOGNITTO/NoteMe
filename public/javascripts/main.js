@@ -825,7 +825,7 @@ $(function() {
                             }
                         });
                     } else {
-                        noteMe.jsRoutes.unsherePublic.ajax({
+                        noteMe.jsRoutes.unsharePublic.ajax({
                             data: {
                                 id: $(this).parents(".ui-dialog").find(".ui-dialog-content").attr("data-id")
                             },
