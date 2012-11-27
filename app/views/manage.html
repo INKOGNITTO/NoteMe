@@ -11,7 +11,7 @@
     		<span class="title"><input type="text"></span>
     	</div>
             #{list items:user.getTags(), as:'tag'}
-                #{tag tag: tag, place: "sidebar" /}
+                #{include 'tags/tag.html' /}
             #{/list}
     </div>
 </div>

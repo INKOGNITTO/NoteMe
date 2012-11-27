@@ -501,17 +501,30 @@ $(function() {
     });
     
     // nova znacka
-    $(".new-tag").click(function() {
-    	$(this).removeClass("closed").find("input").show("slow").focus();
-    });
-    $(".new-tag input").enterKey( function() {
-    	console.log("vytvaram novu znacku s nazvom " + $(this).val());
-    }).escKey(function() {
+    var closeNewTag = function() {
     	$(this).val("").hide("slow").promise().done(function() {
     		$(this).parents(".new-tag").addClass("closed");
-    	});
-    	console.log("rusim vytvaranie novej znacky");
+        });
+    };
+    $(".new-tag").click(function() {
+        $(this).removeClass("closed").find("input").show("slow").focus();
     });
+    $(".new-tag input").enterKey( function() {
+        var self = this;
+        noteMe.jsRoutes.saveNewTag.ajax({
+            data: {
+                name: $(this).val()
+            },
+            success: function(data) {
+                $("#tag-sidebar .new-tag").first().after(data);
+                closeNewTag.call(self);
+                
+            },
+            error: function(err){
+                console.log(err);
+            }
+        });
+    }).escKey(closeNewTag).blur(closeNewTag);
 
     
     // premenovania

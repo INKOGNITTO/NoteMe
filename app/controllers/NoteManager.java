@@ -43,7 +43,7 @@ public class NoteManager extends Controller {
     public static void saveNewTag(String name) {
         User user = User.findByEmail(session.get("username"));
         Tag tag = Tag.create(name, user.id);
-        
+        renderArgs.put("tag", tag);
         render("tags/tag.html");
     }
 

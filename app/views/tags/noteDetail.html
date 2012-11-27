@@ -21,7 +21,7 @@
 
     <div id="notetags" class="fill">
         #{list items:note.tags, as:'tag'}
-            #{tag tag: tag, place: "note" /}
+            #{include 'tags/tag.html' /}
         #{/list}
     </div>
 </div>

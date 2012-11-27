@@ -525,9 +525,6 @@ input[type="search"].ui-state-highlight {
     white-space: nowrap;
     width: 96px;	
 }
-.tag .ui-icon-grip-dotted-vertical {
-	cursor: n-resize;
-}
 .tag .ui-icon-close {
 	cursor: pointer;
 }
