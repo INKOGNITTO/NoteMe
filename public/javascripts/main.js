@@ -64,6 +64,11 @@ $(function() {
                 $(this).attr("contenteditable",true).focus();
             }
         };
+        this.opened  = {
+            note: {
+                id: null
+            }
+        };
         this.addNoteHooks = [];
         this.addTagHooks = [];
         this.showNoteHooks = [];
@@ -84,6 +89,7 @@ $(function() {
                     },
                     success : function(data){
                         $(".right-column").first().html(data);
+                        noteMe.opened.note.id = $(".right-column").find("h2").attr("data-id");
                         noteMe.edit.init();
                     },
                     error : function(err) {
@@ -98,6 +104,7 @@ $(function() {
                     success : function(data){
                         $(".right-column").first().html(data);
                         $(".right-column button, .right-column a").iconButton();
+                        noteMe.opened.note.id = $(".right-column").find("h2").attr("data-id");
                         noteMe.executeHooks(noteMe.showNoteHooks);
                     },
                     error : function(err) {
@@ -478,7 +485,7 @@ $(function() {
     });*/
 
 
-    var tagDroppable = function(){
+    var tagHook = function(){
         $("#tag-sidebar .tag").draggable({
             helper: "clone",
             appendTo: "body",
@@ -489,8 +496,14 @@ $(function() {
             snapTolerance: 5
         });   
     };
-    tagDroppable();
-    noteMe.addTagHooks.push(tagDroppable);
+    tagHook();
+    noteMe.addTagHooks.push(tagHook);
+    
+    $(".tag .title").live("dblclick", function(){
+        noteMe.manage.rename.call($(this),function(result){
+            console.log("premenovane");
+        })
+    });
 
     /*$("#tag-sidebar .tag .ui-icon-grip-dotted-vertical").mousedown(function() {
         $("#tag-sidebar .tag").draggable("option","disabled",true);
@@ -507,7 +520,7 @@ $(function() {
                 },
                 success : function(data) {
                     noteMe.message.info("Zmazaná značka "+$(self).find(".title").text());
-                    $(self).parents(".tag").slideUp(function(){
+                    $('.tag[data-id="'+$(self).parents(".tag").attr("data-id")+'"]').animate({width:0}).promise().done(function(){
                          $(this).remove();
                     });
                 },
@@ -522,8 +535,8 @@ $(function() {
                     tagId: $(this).parents(".tag").attr("data-id")
                 },
                 success: function(data){
-                    $(self).parents(".tag").slideUp(function(){
-                        $(this).remove();
+                    $(self).parents(".tag").animate({width:0}).promise().done(function(){
+                         $(this).remove();
                     });
                 },
                 error: function(err) {
@@ -546,6 +559,12 @@ $(function() {
                         noteId: $(this).attr("data-id")
                     },
                     success: function(data) {
+                        var tag;
+                        console.log($('#notetags .tag[data-id="'+ui.draggable.attr("data-id")+'"]'));
+                        if($(self).attr("data-id")===noteMe.opened.note.id && !$('#notetags .tag[data-id="'+ui.draggable.attr("data-id")+'"]').length){
+                            tag = ui.draggable.clone().removeClass("ui-draggable");
+                            $(".right-column").find("#notetags").prepend(tag);
+                        }
                         noteMe.message.info("Značka \""+ui.draggable.find(".title").text()+"\" pridaná poznámke \""+$(self).find(".title").text()+"\"");
                     },
                     error: function(err) {

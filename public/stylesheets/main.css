@@ -517,8 +517,8 @@ input[type="search"].ui-state-highlight {
     
 }
 .new-tag .title {
-	top:0;
-	display:inline;
+    top:0;
+    display:inline;
 	
 }
 #tag-sidebar .tag .title {
