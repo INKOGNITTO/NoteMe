@@ -5,6 +5,7 @@ import models.Note;
 import models.Notebook;
 import models.Tag;
 import models.User;
+import models.Tag;
 import play.Logger;
 import play.Play;
 import play.db.jpa.GenericModel;
@@ -17,11 +18,11 @@ public class NoteManager extends Controller {
         renderArgs.put("user", User.findByEmail(session.get("username")));
         render("manage.html");
     }
-    
+
     public static void viewNote(long id) {
         notFoundIfNull(Note.findById(id));
-        renderArgs.put("note",Note.findById(id));
-        render("tags/noteDetail.html");     
+        renderArgs.put("note", Note.findById(id));
+        render("tags/noteDetail.html");
     }
 
     public static void newNotebook() {
@@ -39,6 +40,13 @@ public class NoteManager extends Controller {
         renderText(notebook.id);
     }
 
+    public static void saveNewTag(String name) {
+        User user = User.findByEmail(session.get("username"));
+        Tag tag = Tag.create(name, user.id);
+        
+        render("tags/tag.html");
+    }
+
     public static void newNote() {
         try {
             Long nbid = Long.valueOf(params.get("notebookId")).longValue();
@@ -54,17 +62,17 @@ public class NoteManager extends Controller {
     public static void saveNewNote() {
         User user = User.findByEmail(session.get("username"));
         //try {
-            Long nbid = Long.valueOf(params.get("notebookId")).longValue();
-            Note note = Note.create(params.get("name"), nbid, user.id);
-            Notebook notebook = Notebook.findById(nbid);
-            notebook.notes.add(0, note);
-            notebook.save();
-            note.save();
-            renderText(note.id);
+        Long nbid = Long.valueOf(params.get("notebookId")).longValue();
+        Note note = Note.create(params.get("name"), nbid, user.id);
+        Notebook notebook = Notebook.findById(nbid);
+        notebook.notes.add(0, note);
+        notebook.save();
+        note.save();
+        renderText(note.id);
         /*} catch (Exception e) {
-            error(Http.StatusCode.BAD_REQUEST, e.);
-            //error(Http.StatusCode.BAD_REQUEST, "Error while creating new note");
-        }*/
+         error(Http.StatusCode.BAD_REQUEST, e.);
+         //error(Http.StatusCode.BAD_REQUEST, "Error while creating new note");
+         }*/
     }
 
     public static void orderNotebooks(long notebookId, int newPosition) {
@@ -88,20 +96,20 @@ public class NoteManager extends Controller {
             Notebook destinationNotebook = Notebook.findById(toNotebookId);
             Notebook sourceNotebook = destinationNotebook;
             Note note = Note.findById(noteId);
-            
-            if(fromNotebookId>0) {
+
+            if (fromNotebookId > 0) {
                 sourceNotebook = Notebook.findById(fromNotebookId);
             }
-            
-            if (!user.notebooks.contains(destinationNotebook) || ! user.notebooks.contains(sourceNotebook)) {
+
+            if (!user.notebooks.contains(destinationNotebook) || !user.notebooks.contains(sourceNotebook)) {
                 error(Http.StatusCode.FORBIDDEN, "No access");
             }
-            
+
             sourceNotebook.notes.remove(note);
             sourceNotebook.save();
             destinationNotebook.notes.add(newPosition, note);
             destinationNotebook.save();
-            
+
         } catch (Exception ex) {
             error(Http.StatusCode.BAD_REQUEST, "Error while reordering notes");
         }
@@ -122,7 +130,7 @@ public class NoteManager extends Controller {
         if (type.equals("notebook")) {
             //renderText(((Notebook) Notebook.findById(id)).);
         } else if (type.equals("note")) {
-            ((Note)Note.findById(id)).remove();
+            ((Note) Note.findById(id)).remove();
         } else if (type.equals("tag")) {
             ((Tag) Tag.findById(id)).remove();
         } else {

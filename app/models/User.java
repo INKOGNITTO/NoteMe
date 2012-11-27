@@ -85,7 +85,7 @@ public class User extends Model {
     }
     
     public List<Tag> getTags() {
-        Query query = JPA.em().createQuery("select tag from Tag tag where tag.owner = :this").setParameter("this", this);
+        Query query = JPA.em().createQuery("select tag from Tag tag where tag.owner = :this order by tag.id desc").setParameter("this", this);
         return query.getResultList();
     }
     
