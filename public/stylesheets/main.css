@@ -599,12 +599,16 @@ input[type="search"].ui-state-highlight {
 }
 
 .notebook h2 .title[contenteditable="true"],
+.tag .title[contenteditable="true"],
 .note .title[contenteditable="true"],
 .right-column > h2[contenteditable="true"] {
 	background-color:#fafafa;
 	border: 1px solid #555555;
 	padding: 2px;
 	color: black;
+}
+.tag .title[contenteditable="true"] {
+    margin: 0px 12px 0px 16px;
 }
 
 h2 {

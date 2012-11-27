@@ -501,7 +501,21 @@ $(function() {
     
     $(".tag .title").live("dblclick", function(){
         noteMe.manage.rename.call($(this),function(result){
-            console.log("premenovane");
+            if(!result.saved){
+                return;
+            }
+            noteMe.jsRoutes.rename.ajax({
+                data: {
+                    type:"tag",
+                    id: $(this).parents(".tag").attr("data-id"),
+                    newName: $(this).text()
+                },
+                success: function(){},
+                error: function(err){
+                    console.log(err);
+                    noteMe.message.error("Chyba premenovania");
+                }
+            });
         })
     });
 
@@ -798,7 +812,7 @@ $(function() {
                 }); 
                 $("#sharenote #publicId").on("click",function(){
                     if($(this).is(":checked")){
-                        noteMe.jsRoutes.getPublicId.ajax({
+                        noteMe.jsRoutes.sharePublic.ajax({
                             data: {
                                 id: $(this).parents(".ui-dialog").find(".ui-dialog-content").attr("data-id")
                             },
@@ -811,7 +825,7 @@ $(function() {
                             }
                         });
                     } else {
-                        noteMe.jsRoutes.removePublicId.ajax({
+                        noteMe.jsRoutes.unsherePublic.ajax({
                             data: {
                                 id: $(this).parents(".ui-dialog").find(".ui-dialog-content").attr("data-id")
                             },
