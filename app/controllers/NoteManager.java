@@ -123,7 +123,7 @@ public class NoteManager extends Controller {
     }
 
     public static void rename(String type, Long id, String newName) {
-        if (newName.isEmpty()) {
+        if (!newName.isEmpty()) {
             if (type.equals("notebook")) {
                 renderText(((Notebook) Notebook.findById(id)).rename(newName));
             } else if (type.equals("note")) {
