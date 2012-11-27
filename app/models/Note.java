@@ -30,7 +30,7 @@ public class Note extends Model {
     public String content;
 
     @ManyToMany
-    public List<Tag> tags = new ArrayList<Tag>();
+    public Set<Tag> tags = new HashSet<Tag>();
 	
     @ManyToMany(mappedBy = "notes")
     @Required
@@ -88,7 +88,7 @@ public class Note extends Model {
         return note;
     }
     
-    public List<Tag> getTags(){
+    public Set<Tag> getTags(){
         return tags;
     }
     

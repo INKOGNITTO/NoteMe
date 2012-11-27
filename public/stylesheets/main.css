@@ -525,12 +525,18 @@ input[type="search"].ui-state-highlight {
     white-space: nowrap;
     width: 96px;	
 }
-.tag .ui-icon-close {
-	cursor: pointer;
+.tag .title {
+    cursor: pointer;
+}
+.tag .ui-icon:hover {
+    background-image: url(/public/stylesheets/noteMe-dark/images/ui-icons_222222_256x240.png);
+}
+#tag-sidebar .tag .ui-icon-tag {
+    cursor: move !important;
 }
 
 #notetags .tag .title { 
-	max-width:200px;
+    max-width:200px;
 }
 
 #about .tag {
@@ -539,11 +545,13 @@ input[type="search"].ui-state-highlight {
 .tag:hover {
     color: white;
 }
+
 .tag.ui-draggable-dragging {
     background: url(/public/images/bg-noise-dark.png);
     color: white;
+    cursor: move !important;
 }
-.tag.ui-draggable-dragging span.title {
+.tag.ui-draggable-dragging .title {
     max-width:200px;
     max-height: 50px;
     white-space: normal;
@@ -561,11 +569,12 @@ input[type="search"].ui-state-highlight {
 .tag .ui-button-icon-secondary {
 	right:0;
 }
-.tag:hover .ui-icon {
-    background-image: url(/public/stylesheets/noteMe-dark/images/ui-icons_ffffff_256x240.png);
-}
-.tag.ui-draggable-dragging .ui-icon-grip-dotted-vertical {
+
+.tag.ui-draggable-dragging .ui-icon-close {
     display: none;
+}
+.tag .ui-icon-close {
+    cursor: pointer !important;
 }
 
 .new-tag input {
@@ -738,7 +747,7 @@ h2 {
     border-left: 0px solid transparent;
     border-right: 0px solid transparent;
     border-bottom: 0px solid transparent;
-    height:135px;
+    height:100px;
     min-height:60px;
     max-height:75%;
 }

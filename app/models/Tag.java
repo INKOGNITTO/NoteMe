@@ -60,5 +60,6 @@ public class Tag extends Model {
         Note note = Note.findById(noteId);
         note.tags.remove(this);
         note.save();
+        
     }
 }

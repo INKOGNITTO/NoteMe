@@ -26,6 +26,8 @@ var noteMe = noteMe || {};
         orderNotes: makeRoute(#{jsRoute @NoteManager.orderNotes() /}),
         rename: makeRoute(#{jsRoute @NoteManager.rename() /}),
         remove: makeRoute(#{jsRoute @NoteManager.remove() /}),
+        removeTagFromNote: makeRoute(#{jsRoute @NoteManager.removeTagFromNote() /}),
+        addTagToNote: makeRoute(#{jsRoute @NoteManager.addTagToNote() /}),
         saveNewTag: makeRoute(#{jsRoute @NoteManager.saveNewTag() /}),
         saveNote: makeRoute(#{jsRoute @Edit.saveNote() /}),
         editNote: makeRoute(#{jsRoute @Edit.editNote(':id') /})

@@ -64,7 +64,14 @@ $(function() {
                 $(this).attr("contenteditable",true).focus();
             }
         };
+        this.addNoteHooks = [];
+        this.addTagHooks = [];
         this.showNoteHooks = [];
+        this.executeHooks = function(hooks){
+            for (var i in hooks){
+                hooks[i]();
+            }
+        };
         this.showNote = function(noteId){
             //window.location.hash = noteId;
             if($("body").hasClass("section-edit")){
@@ -91,9 +98,7 @@ $(function() {
                     success : function(data){
                         $(".right-column").first().html(data);
                         $(".right-column button, .right-column a").iconButton();
-                        for (var i in noteMe.showNoteHooks){
-                            noteMe.showNoteHooks[i]();
-                        }
+                        noteMe.executeHooks(noteMe.showNoteHooks);
                     },
                     error : function(err) {
                         console.log(err);
@@ -460,7 +465,7 @@ $(function() {
     };
     $(".notebook >  div").sortable(sortNotesSettings);
 
-    $("#tag-sidebar").sortable({
+    /*$("#tag-sidebar").sortable({
         axis: "y",
         items: ".tag",
         placeholder: "sortable-placeholder",
@@ -470,35 +475,88 @@ $(function() {
             $("#tag-sidebar .tag").draggable("option","disabled",false);
             $("#tag-sidebar").sortable("option","disabled",true);
         }
-    });
+    });*/
 
 
-    $("#tag-sidebar .tag").draggable({
-        helper: "clone",
-        appendTo: "body",
-        revert: "invalid",
-        connectToSortable: "#tag-sidebar",
-        snapMode: "inner",
-        snap: ".note",
-        snapTolerance: 5
-    });
+    var tagDroppable = function(){
+        $("#tag-sidebar .tag").draggable({
+            helper: "clone",
+            appendTo: "body",
+            revert: "invalid",
+            connectToSortable: "#tag-sidebar",
+            snapMode: "inner",
+            snap: ".note",
+            snapTolerance: 5
+        });   
+    };
+    tagDroppable();
+    noteMe.addTagHooks.push(tagDroppable);
 
-    $("#tag-sidebar .tag .ui-icon-grip-dotted-vertical").mousedown(function() {
+    /*$("#tag-sidebar .tag .ui-icon-grip-dotted-vertical").mousedown(function() {
         $("#tag-sidebar .tag").draggable("option","disabled",true);
         $("#tag-sidebar").sortable("option","disabled",false);
-    });
+    });*/
     
-    $("#notetags .tag .ui-icon-close").click(function() {
-        $(this).parents(".tag").hide('fast').promise().done(function(){$(this).remove();});
-    });
-
-    $(".note").droppable({
-        accept: ".tag",
-        hoverClass: "ui-state-active",
-        drop: function(event, ui) {
-            $(this).addClass("ui-state-highlight").removeClass("ui-state-highlight",1000);
+    $(".tag .ui-icon-close").live("click",function() {
+        var self = this;
+        if($(this).parents("#tag-sidebar").length){
+            noteMe.jsRoutes.remove.ajax({
+                data: {
+                    type: "tag",
+                    id: $(this).parents(".tag").attr("data-id")
+                },
+                success : function(data) {
+                    noteMe.message.info("Zmazaná značka "+$(self).find(".title").text());
+                    $(self).parents(".tag").slideUp(function(){
+                         $(this).remove();
+                    });
+                },
+                error: function(err) {
+                    noteMe.message.error("Chyba pri mazaní značky");
+                }
+            });
+        } else if ($(this).parents("#notetags").length){
+            noteMe.jsRoutes.removeTagFromNote.ajax({
+                data: {
+                    noteId: $(this).parents(".right-column").find("h2").attr("data-id"),
+                    tagId: $(this).parents(".tag").attr("data-id")
+                },
+                success: function(data){
+                    $(self).parents(".tag").slideUp(function(){
+                        $(this).remove();
+                    });
+                },
+                error: function(err) {
+                console.log(err);
+                }
+            });
         }
     });
+
+    var droppableNote = function() {
+        $(".note").droppable({
+            accept: ".tag",
+            hoverClass: "ui-state-active",
+            drop: function(event, ui) {
+                var self = this;
+                $(this).highlightWithClass(1000);
+                noteMe.jsRoutes.addTagToNote.ajax({
+                    data: {
+                        tagId: ui.draggable.attr("data-id"),
+                        noteId: $(this).attr("data-id")
+                    },
+                    success: function(data) {
+                        noteMe.message.info("Značka \""+ui.draggable.find(".title").text()+"\" pridaná poznámke \""+$(self).find(".title").text()+"\"");
+                    },
+                    error: function(err) {
+                        console.log(err);
+                    }
+                });
+            }
+        });
+    };
+    droppableNote();
+    noteMe.addNoteHooks.push(droppableNote);
     
     // nova znacka
     var closeNewTag = function() {
@@ -511,13 +569,19 @@ $(function() {
     });
     $(".new-tag input").enterKey( function() {
         var self = this;
+        if($(this).val()===""){
+            $(this).addClass("ui-state-highlight").removeClass("ui-state-highlight",500);
+            return;
+        }
         noteMe.jsRoutes.saveNewTag.ajax({
             data: {
                 name: $(this).val()
             },
             success: function(data) {
                 $("#tag-sidebar .new-tag").first().after(data);
+                noteMe.message.info("Vytvorená značka \""+$(self).val()+"\"");
                 closeNewTag.call(self);
+                noteMe.executeHooks(noteMe.addTagHooks);
                 
             },
             error: function(err){
@@ -613,6 +677,7 @@ $(function() {
                         success: function(data) {
                             $(self).parents(".note").attr("data-id",data);
                             noteMe.message.info("Vytvorená poznámka \""+self.text()+"\"");
+                            noteMe.executeHooks(noteMe.addNoteHooks);
                         },
                         error: function(err) {
                             console.log(err);
@@ -842,6 +907,15 @@ $.fn.selectText = function () {
             selection.removeAllRanges();
             selection.addRange(range);
         }
+    });
+};
+
+$.fn.highlightWithClass = function(time,cls){
+    return this.each(function(){
+        if(!cls) {
+            cls = "ui-state-highlight";
+        }
+        $(this).addClass(cls).removeClass(cls,time);
     });
 };
 

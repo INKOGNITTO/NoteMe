@@ -120,6 +120,7 @@ public class NoteManager extends Controller {
         Note note = (Note) Note.findById(noteId);
         note.tags.add((Tag) Tag.findById(tagId));
         note.save();
+        
     }
     
     public static void rename(String type, Long id, String newName) {
@@ -147,6 +148,7 @@ public class NoteManager extends Controller {
     
     public static void removeTagFromNote(Long noteId, Long tagId){
         ((Tag) Tag.findById(tagId)).removeFromNote(noteId);
+        
     }
 }
 

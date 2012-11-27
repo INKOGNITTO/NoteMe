@@ -23,6 +23,8 @@ POST    /manage/orderNotes              NoteManager.orderNotes
 POST    /manage/rename                  NoteManager.rename  
 POST    /manage/remove                  NoteManager.remove
 POST    /manage/saveNewTag              NoteManager.saveNewTag
+POST    /manage/removeTagFromNote       NoteManager.removeTagFromNote
+POST    /manage/addTagToNote            NoteManager.addTagToNote
 
 # Edit
 GET	/edit                           Edit.index
