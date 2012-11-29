@@ -153,4 +153,12 @@ public class NoteManager extends Controller {
         ((Tag) Tag.findById(tagId)).removeFromNote(noteId);
 
     }
+
+    public static void search(String exp) {
+        User usr = User.findByEmail(session.get("username"));
+        List<Note> notes = usr.getAllNotes();
+        for (Note note : notes) {
+            System.out.println(note.find("content", exp));
+        }
+    }
 }
