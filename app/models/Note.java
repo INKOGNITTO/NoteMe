@@ -21,10 +21,10 @@ public class Note extends Model {
     
     //@ManyToMany
     //public List<User> users = new LinkedList<User>();
-
+    
     @Column(unique = true)
     public String publicID;
-
+   
     public Boolean isPulbic;
     
     @Column(columnDefinition = "TEXT")
@@ -35,14 +35,14 @@ public class Note extends Model {
     
     @ManyToMany
     public Set<User> sharedWith = new HashSet<User>();
-	
+    
     @ManyToMany(mappedBy = "notes")
     @Required
     public Set<Notebook> notebooks = new HashSet<Notebook>();
-
+   
     @Required
     public String name;
-
+    
     @Temporal(TemporalType.TIMESTAMP)
     @As("dd.MM.yyyy hh:mm:ss")
     public Date creationDate = new Date();
@@ -110,21 +110,41 @@ public class Note extends Model {
     }
 
     public void remove() {
-        // vyhladaj vsetky bloky, v ktorych je tato poznamka a ktore su pristupne prihlasenemu pouzivatelovi
-        Query q = JPA.em().createQuery("select nb from Notebook nb where :n member of nb.notes and :u member of nb.contributors")
-                .setParameter("n", this)
-                .setParameter("u", User.findByEmail(Scope.Session.current.get().get("username")));
-        List<Notebook> notebookWithNote = q.getResultList();
-        //v tychto pozn. blokoch zmaz tuto (this) poznamku
-        for (Notebook n : notebookWithNote) {
-            n.notes.remove(this);
-            n.save();
-        }
-        // ak uz poznamka nie je v ziadnom bloku, zmaz ju z db
-        this.refresh();
-        if (this.notebooks.isEmpty()) {
+        User actualUser = User.findByEmail(Scope.Session.current.get().get("username"));
+        //ak poznamka patri prihlasenemu pouzivatelovi
+        if (this.owner.equals(actualUser)) {
+
+            // vyhladaj vsetky bloky, v ktorych je tato poznamka
+            Query q = JPA.em().createQuery("select nb from Notebook nb where :n member of nb.notes")
+                    .setParameter("n", this);
+            List<Notebook> notebookWithNote = q.getResultList();
+            //v tychto pozn. blokoch zmaz tuto (this) poznamku
+            for (Notebook n : notebookWithNote) {
+                n.notes.remove(this);
+                n.save();
+            }
+            this.refresh();
+            // uz poznamka nie je v ziadnom bloku, zmaz ju z db
             this.delete();
+            
+        } else {  //ak nie je vlastnena prihlasenym pouzivatelom
+            // sa zmaze z blokov v ktorych ju pouzivatel ma, ale nezmaze ju ak je v zdielanom bloku a prihlaseny pouzivatel nie je jej vlastnikom 
+            Query q = JPA.em().createQuery("select nb from Notebook nb where :n member of nb.notes and :u member of nb.contributors and :v not member of nb.contributors")
+                    .setParameter("n", this)
+                    .setParameter("u", actualUser)
+                    .setParameter("v", this.owner);
+            List<Notebook> notebookWithNote = q.getResultList();
+            for (Notebook n : notebookWithNote) {
+                n.notes.remove(this);
+                n.save();
+            }
+            this.refresh();
+            
+            // zmaze sa z notOwnedNotes
+            actualUser.notOwnedNotes.remove(this);
+            actualUser.save();
         }
+
 
     }
 }

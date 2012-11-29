@@ -25,12 +25,6 @@ public class Share extends Controller {
             forbidden();
         }
         Note note = Note.findById(id);
-        
-        //TODO: json vrati vsetkych sharewith<user> - ich emailov a odosle (render)
-//        Gson jshareWith = new GsonBuilder().create();
-        //jshareWith.toJson(note.sharedWith, array);
-        
-     //   renderArgs.put("jshareWith",jshareWith);
         renderArgs.put("note", note);
         render("dialogs/sharenote.html");
     }
@@ -71,13 +65,21 @@ public class Share extends Controller {
     public static void sharing(String json, Long id, String type) {
         JsonElement jsonElement = new JsonParser().parse(json);
         JsonArray jsonArray = jsonElement.getAsJsonArray();
+        User user;
 
         if (type.equals("note")) {
             Note note = Note.findById(id);
-            
             note.sharedWith.clear();
             for (int i = 0; i < jsonArray.size(); i++) {
-                note.sharedWith.add(User.findByEmail(jsonArray.get(i).getAsString()));
+                user  = User.findByEmail(jsonArray.get(i).getAsString());
+                note.sharedWith.add(user);
+                if(user.defaultNbSharedNotes==null){
+                    user.defaultNbSharedNotes = Notebook.create("Zdieľané", user.id);
+                    user.notebooks.add(user.defaultNbSharedNotes);
+                    user.save();
+                }
+                user.defaultNbSharedNotes.notes.add(note);
+                user.defaultNbSharedNotes.save();
             }
             note.save();
         }
@@ -86,7 +88,8 @@ public class Share extends Controller {
             Notebook notebook = Notebook.findById(id);
 
             for (int i = 0; i < jsonArray.size(); i++) {
-                notebook.contributors.add(User.findByEmail(jsonArray.get(i).getAsString()));
+                user  = User.findByEmail(jsonArray.get(i).getAsString());
+                notebook.contributors.add(user);
             }
             notebook.save();
         }
