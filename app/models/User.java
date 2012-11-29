@@ -39,9 +39,9 @@ public class User extends Model {
 //    public List<Note> ownedNotes = new LinkedList<Note>();
     
     
-    /* poznamky, ktore su pouyivatelovi vyzdielane od inych pouzivatelov
-     * on nie je ich vlastnik, on i ch iba vidi, nemoze ich editovat  */
-    @ManyToMany
+    /* poznamky, ktore su pouzivatelovi vyzdielane od inych pouzivatelov
+     * on nie je ich vlastnik, on ich iba vidi, nemoze ich editovat  */
+    @ManyToMany (mappedBy="sharedWith")
     public Set<Note> notOwnedNotes = new HashSet<Note>(); 
     
     
