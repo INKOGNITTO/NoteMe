@@ -25,12 +25,6 @@ public class Share extends Controller {
             forbidden();
         }
         Note note = Note.findById(id);
-        
-        //TODO: json vrati vsetkych sharewith<user> - ich emailov a odosle (render)
-//        Gson jshareWith = new GsonBuilder().create();
-        //jshareWith.toJson(note.sharedWith, array);
-        
-     //   renderArgs.put("jshareWith",jshareWith);
         renderArgs.put("note", note);
         render("dialogs/sharenote.html");
     }
