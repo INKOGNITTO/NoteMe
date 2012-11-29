@@ -153,4 +153,6 @@ public class NoteManager extends Controller {
         ((Tag) Tag.findById(tagId)).removeFromNote(noteId);
 
     }
+    
+    public static void search() {} 
 }

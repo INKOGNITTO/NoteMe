@@ -35,6 +35,9 @@ public class User extends Model {
     @OrderColumn
     public List<Notebook> notebooks = new LinkedList<Notebook>();
     
+    @OneToOne
+    public Notebook defaultNbSharedNotes;
+    
 //    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
 //    public List<Note> ownedNotes = new LinkedList<Note>();
     
