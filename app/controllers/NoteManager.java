@@ -155,10 +155,11 @@ public class NoteManager extends Controller {
     }
 
     public static void search(String exp) {
+        System.out.println("-----serach--------");
         User usr = User.findByEmail(session.get("username"));
         List<Note> notes = usr.getAllNotes();
         for (Note note : notes) {
-            System.out.println(note.find("content", exp));
+            System.out.println(exp + "> "+ note.find("content", exp));
         }
     }
 }
