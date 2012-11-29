@@ -160,23 +160,21 @@ public class NoteManager extends Controller {
         User usr = User.findByEmail(session.get("username"));
         List<Tag> matchTags = Tag.find("name like ?", exp).fetch();
         matchTags.retainAll(usr.getTags());
-        List<Note> out = new ArrayList<Note>();
-
+        List<Long> out = new ArrayList<Long>();
         GenericModel.JPAQuery jpaq = Note.find("name like ? or content like ?", "%" + exp + "%", "%" + exp + "%");
         List<Note> ol = jpaq.fetch();
 
         for (Note o : ol) {
-            System.out.println("enterning note> " + o.name);
             for (Notebook n : usr.notebooks) {
                 if (o.notebooks.contains(n)) {
-                    out.add(o);
+                    out.add(o.id);
                 }
             }
         }
         for (Note o : usr.getAllNotes()) {
             for (Tag t : matchTags) {
                 if (o.tags.contains(t) && !out.contains(o)) {
-                    out.add(o);
+                    out.add(o.id);
                 }
             }
         }
