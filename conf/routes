@@ -25,6 +25,7 @@ POST    /manage/remove                  NoteManager.remove
 POST    /manage/saveNewTag              NoteManager.saveNewTag
 POST    /manage/removeTagFromNote       NoteManager.removeTagFromNote
 POST    /manage/addTagToNote            NoteManager.addTagToNote
+POST    /manage/search                  NoteManager.search
 
 # Edit
 GET	/edit                           Edit.index
@@ -33,8 +34,10 @@ POST    /edit/saveNote                  Edit.saveNote
 
 #Share
 POST 	/sharenote                      Share.shareNote
-POST    /sharenote/sharePublic         Share.sharePublic
-POST    /sharenote/unsharePublic       Share.unsharePublic
+POST    /sharenote/sharePublic          Share.sharePublic
+POST    /sharenote/unsharePublic        Share.unsharePublic
+POST    /sharenote/knownMail            Share.knownMail
+POST    /sharenote/sharing              Share.sharing
 
 #Public note
 GET     /publicnote/{uuid}              PublicNote.index

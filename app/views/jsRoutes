@@ -19,9 +19,15 @@ var noteMe = noteMe || {};
         saveNewNotebook: makeRoute(#{jsRoute @NoteManager.saveNewNotebook() /}),
         newNote: makeRoute(#{jsRoute @NoteManager.newNote() /}),
         saveNewNote: makeRoute(#{jsRoute @NoteManager.saveNewNote() /}),
+
+        search: makeRoute(#{jsRoute @NoteManager.search() /}),
+
         shareNote: makeRoute(#{jsRoute @Share.shareNote() /}),
         sharePublic: makeRoute(#{jsRoute @Share.sharePublic() /}),
         unsharePublic: makeRoute(#{jsRoute @Share.unsharePublic() /}),
+        knownMail: makeRoute(#{jsRoute @Share.knownMail() /}),
+        sharing: makeRoute(#{jsRoute @Share.sharing() /}),
+
         orderNotebooks: makeRoute(#{jsRoute @NoteManager.orderNotebooks() /}),
         orderNotes: makeRoute(#{jsRoute @NoteManager.orderNotes() /}),
         rename: makeRoute(#{jsRoute @NoteManager.rename() /}),
@@ -29,6 +35,7 @@ var noteMe = noteMe || {};
         removeTagFromNote: makeRoute(#{jsRoute @NoteManager.removeTagFromNote() /}),
         addTagToNote: makeRoute(#{jsRoute @NoteManager.addTagToNote() /}),
         saveNewTag: makeRoute(#{jsRoute @NoteManager.saveNewTag() /}),
+
         saveNote: makeRoute(#{jsRoute @Edit.saveNote() /}),
         editNote: makeRoute(#{jsRoute @Edit.editNote(':id') /})
 
