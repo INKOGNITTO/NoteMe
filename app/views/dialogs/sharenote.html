@@ -3,7 +3,11 @@
             <fieldset>
                 <legend>Zdieľať s používateľom noteMe</legend>
                 <input type="hidden" name="share-with" id="share-with-hidden">
-                <div class="add-multiple ui-adder"></div>
+                <div class="add-multiple ui-adder">
+                    #{list items:note.sharedWith, as:'user'}
+                    <div>${user.email}</div>
+                    #{/list}
+                </div>
             </fieldset>
             <fieldset>
                     <legend>Verejné zdieľanie</legend>

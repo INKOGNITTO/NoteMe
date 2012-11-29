@@ -814,7 +814,6 @@ $(function() {
                     inputLabel:"Pridať email používateľa",
                     addCheck: function(value,item) {
                         var self = this;
-                        console.log(noteMe.jsRoutes.knownMail.ajax);
                         noteMe.jsRoutes.knownMail.ajax({
                             data: {
                                 email: value
@@ -1028,7 +1027,8 @@ $(function(){
         },
         _init : function() {
             var element = $(this.element),
-                self = this;
+                self = this,
+                initVaues = element.children().detach();
     
             this.params = {
                 adder: $("<div>").addClass("ui-adder-adder"),
@@ -1057,6 +1057,10 @@ $(function(){
 
             element.addClass("ui-adder");
             //return this;
+            initVaues.each(function(){
+                var val = $(this).text();
+                $.noanim(function(){self.add(val)});
+            });
         },
         add : function(value) {
             var index = this.params.values.length,
