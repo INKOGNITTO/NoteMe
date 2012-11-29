@@ -340,8 +340,8 @@ $(function() {
             data: {
                 exp: $(this).find("input[type='search']").val()
             },
-            success: function(){
-                
+            success: function(data){
+                filterNotes(data);
             },
             error: function(err) {
                 console.log(err);
@@ -349,6 +349,30 @@ $(function() {
         });
         return false;
     });
+
+    function filterNotes(noteIdArray) {
+        var notesContainer = $(".notebooks").first(),
+            i;
+        
+        cancelFilterNotes();
+        
+        notesContainer.find(".note").hide();
+        
+        for (i in noteIdArray) {
+            notesContainer.find(".note[data-id='"+noteIdArray[i]+"']").show();
+        }
+        
+        notesContainer.find(".notebook").each(function(){
+            if(!$(this).find(".note:visible").length){
+                $(this).hide();
+            }
+        });
+    }
+
+    function cancelFilterNotes(){
+        $(".notebooks .notebook").show();
+        $(".notebook .note").show();
+    }
 
     //iconbar
     /*$(".notebook .note .iconbar").each(function() {
@@ -510,7 +534,9 @@ $(function() {
     tagHook();
     noteMe.addTagHooks.push(tagHook);
     
-    $(".tag .title").live("dblclick", function(){
+    $(".tag .title").singleDoubleClick(function(){
+        
+    }, function(){
         noteMe.manage.rename.call($(this),function(result){
             if(!result.saved){
                 return;
