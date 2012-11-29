@@ -33,8 +33,10 @@ POST    /edit/saveNote                  Edit.saveNote
 
 #Share
 POST 	/sharenote                      Share.shareNote
-POST    /sharenote/sharePublic         Share.sharePublic
-POST    /sharenote/unsharePublic       Share.unsharePublic
+POST    /sharenote/sharePublic          Share.sharePublic
+POST    /sharenote/unsharePublic        Share.unsharePublic
+POST    /sharenote/knownMail            Share.knownMail
+POST    /sharenote/sharing              Share.sharing
 
 #Public note
 GET     /publicnote/{uuid}              PublicNote.index

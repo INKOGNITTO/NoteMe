@@ -35,8 +35,14 @@ public class User extends Model {
     @OrderColumn
     public List<Notebook> notebooks = new LinkedList<Notebook>();
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
-    public List<Note> ownedNotes = new LinkedList<Note>();
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
+//    public List<Note> ownedNotes = new LinkedList<Note>();
+    
+    
+    /* poznamky, ktore su pouyivatelovi vyzdielane od inych pouzivatelov
+     * on nie je ich vlastnik, on i ch iba vidi, nemoze ich editovat  */
+    @ManyToMany
+    public Set<Note> notOwnedNotes = new HashSet<Note>(); 
     
     
     //@ManyToMany(fetch = FetchType.LAZY)

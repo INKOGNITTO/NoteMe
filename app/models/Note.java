@@ -32,6 +32,9 @@ public class Note extends Model {
     
     @ManyToMany
     public Set<Tag> tags = new HashSet<Tag>();
+    
+    @ManyToMany
+    public Set<User> sharedWith = new HashSet<User>();
 	
     @ManyToMany(mappedBy = "notes")
     @Required
