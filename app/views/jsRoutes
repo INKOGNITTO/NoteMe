@@ -20,11 +20,13 @@ var noteMe = noteMe || {};
         newNote: makeRoute(#{jsRoute @NoteManager.newNote() /}),
         saveNewNote: makeRoute(#{jsRoute @NoteManager.saveNewNote() /}),
 
+        search: makeRoute(#{jsRoute @NoteManager.search() /}),
+
         shareNote: makeRoute(#{jsRoute @Share.shareNote() /}),
         sharePublic: makeRoute(#{jsRoute @Share.sharePublic() /}),
         unsharePublic: makeRoute(#{jsRoute @Share.unsharePublic() /}),
-        knownMail:(#{jsRoute @Share.knownMail() /}),
-        sharing: (#{jsRoute @Share.sharing() /}),
+        knownMail: makeRoute(#{jsRoute @Share.knownMail() /}),
+        sharing: makeRoute(#{jsRoute @Share.sharing() /}),
 
         orderNotebooks: makeRoute(#{jsRoute @NoteManager.orderNotebooks() /}),
         orderNotes: makeRoute(#{jsRoute @NoteManager.orderNotes() /}),

@@ -12,7 +12,7 @@ import play.db.jpa.JPA;
 @Entity
 @Table(name = "users")
 public class User extends Model {
-
+    
     @Required (message = "E-mail je požadovaný")
     @Email (message = "Zadajte platný email")
     @Unique (message = "Na zadaný email je už registrovaný používateľ")
@@ -34,6 +34,9 @@ public class User extends Model {
     @ManyToMany (cascade = CascadeType.ALL)
     @OrderColumn
     public List<Notebook> notebooks = new LinkedList<Notebook>();
+    
+    @OneToOne
+    public Notebook defaultNbSharedNotes;
     
 //    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
 //    public List<Note> ownedNotes = new LinkedList<Note>();
@@ -85,6 +88,8 @@ public class User extends Model {
         Query noteQuery = JPA.em().createQuery("select note from Note note where note.owner = :owner").setParameter("owner", this);
         return noteQuery.getResultList();
     }
+    
+    
     
     public Note getFirstNote() {
         return null; //TODO

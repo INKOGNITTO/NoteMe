@@ -25,6 +25,7 @@ POST    /manage/remove                  NoteManager.remove
 POST    /manage/saveNewTag              NoteManager.saveNewTag
 POST    /manage/removeTagFromNote       NoteManager.removeTagFromNote
 POST    /manage/addTagToNote            NoteManager.addTagToNote
+POST    /manage/search                  NoteManager.search
 
 # Edit
 GET	/edit                           Edit.index
