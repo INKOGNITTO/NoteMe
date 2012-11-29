@@ -14,25 +14,25 @@ import play.mvc.*;
 
 @With(Secure.class)
 public class NoteManager extends Controller {
-
+    
     public static void index() {
         renderArgs.put("user", User.findByEmail(session.get("username")));
         render("manage.html");
     }
-
+    
     public static void viewNote(long id) {
         notFoundIfNull(Note.findById(id));
         renderArgs.put("note", Note.findById(id));
         render("tags/noteDetail.html");
     }
-
+    
     public static void newNotebook() {
         renderArgs.put("notebook",
                 new Notebook(Play.configuration.getProperty("notebook.defaultName"),
                 User.findByEmail(session.get("username"))));
         render("tags/notebook.html");
     }
-
+    
     public static void saveNewNotebook(String name) {
         User user = User.findByEmail(session.get("username"));
         Notebook notebook = Notebook.create(name, user.id);
@@ -40,14 +40,14 @@ public class NoteManager extends Controller {
         user.save();
         renderText(notebook.id);
     }
-
+    
     public static void saveNewTag(String name) {
         User user = User.findByEmail(session.get("username"));
         Tag tag = Tag.create(name, user.id);
         renderArgs.put("tag", tag);
         render("tags/tag.html");
     }
-
+    
     public static void newNote() {
         try {
             Long nbid = Long.valueOf(params.get("notebookId")).longValue();
@@ -59,7 +59,7 @@ public class NoteManager extends Controller {
             error(Http.StatusCode.BAD_REQUEST, "Error while creating new note");
         }
     }
-
+    
     public static void saveNewNote() {
         User user = User.findByEmail(session.get("username"));
         //try {
@@ -75,7 +75,7 @@ public class NoteManager extends Controller {
          //error(Http.StatusCode.BAD_REQUEST, "Error while creating new note");
          }*/
     }
-
+    
     public static void orderNotebooks(long notebookId, int newPosition) {
         User user = User.findByEmail(session.get("username"));
         try {
@@ -90,39 +90,39 @@ public class NoteManager extends Controller {
             error(Http.StatusCode.BAD_REQUEST, "Error while reordering notebooks");
         }
     }
-
+    
     public static void orderNotes(long noteId, long toNotebookId, long fromNotebookId, int newPosition) {
         try {
             User user = User.findByEmail(session.get("username"));
             Notebook destinationNotebook = Notebook.findById(toNotebookId);
             Notebook sourceNotebook = destinationNotebook;
             Note note = Note.findById(noteId);
-
+            
             if (fromNotebookId > 0) {
                 sourceNotebook = Notebook.findById(fromNotebookId);
             }
-
+            
             if (!user.notebooks.contains(destinationNotebook) || !user.notebooks.contains(sourceNotebook)) {
                 error(Http.StatusCode.FORBIDDEN, "No access");
             }
-
+            
             sourceNotebook.notes.remove(note);
             sourceNotebook.save();
             destinationNotebook.notes.add(newPosition, note);
             destinationNotebook.save();
-
+            
         } catch (Exception ex) {
             error(Http.StatusCode.BAD_REQUEST, "Error while reordering notes");
         }
     }
-
+    
     public static void addTagToNote(Long noteId, Long tagId) {
         Note note = (Note) Note.findById(noteId);
         note.tags.add((Tag) Tag.findById(tagId));
         note.save();
-
+        
     }
-
+    
     public static void rename(String type, Long id, String newName) {
         if (!newName.isEmpty()) {
             if (type.equals("notebook")) {
@@ -137,7 +137,7 @@ public class NoteManager extends Controller {
             error(Http.StatusCode.BAD_REQUEST, "Empty name");
         }
     }
-
+    
     public static void remove(String type, Long id) {
         if (type.equals("notebook")) {
             //renderText(((Notebook) Notebook.findById(id)).);
@@ -149,21 +149,21 @@ public class NoteManager extends Controller {
             error(Http.StatusCode.BAD_REQUEST, "Bad object type");
         }
     }
-
+    
     public static void removeTagFromNote(Long noteId, Long tagId) {
         ((Tag) Tag.findById(tagId)).removeFromNote(noteId);
-
+        
     }
-
+    
     public static void search(String exp) {
-
+        
         User usr = User.findByEmail(session.get("username"));
         List<Tag> matchTags = Tag.find("name like ?", exp).fetch();
         matchTags.retainAll(usr.getTags());
         List<Long> out = new ArrayList<Long>();
         GenericModel.JPAQuery jpaq = Note.find("name like ? or content like ?", "%" + exp + "%", "%" + exp + "%");
         List<Note> ol = jpaq.fetch();
-
+        
         for (Note o : ol) {
             for (Notebook n : usr.notebooks) {
                 if (o.notebooks.contains(n)) {
@@ -176,6 +176,18 @@ public class NoteManager extends Controller {
                 if (o.tags.contains(t) && !out.contains(o)) {
                     out.add(o.id);
                 }
+            }
+        }
+        renderJSON(out);
+    }
+    
+    public static void seachForTags(Long id) {
+        Tag tag = Tag.findById(id);
+        List<Note> notes = User.findByEmail(session.get("username")).getAllNotes();
+        List<Long> out = new ArrayList<Long>();
+        for (Note nt : notes) {
+            if (nt.tags.contains(tag)) {
+                out.add(nt.id);
             }
         }
         renderJSON(out);
