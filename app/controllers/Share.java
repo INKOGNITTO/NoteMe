@@ -8,6 +8,7 @@ import com.google.gson.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.Query;
 import models.*;
 import play.db.jpa.JPA;
@@ -23,8 +24,14 @@ public class Share extends Controller {
         if (!Security.checkNoteOwnership(id)) {
             forbidden();
         }
-        //json vrati vsetkych sharewith<user> a odosle (render)
-        renderArgs.put("note", Note.findById(id));
+        Note note = Note.findById(id);
+        
+        //TODO: json vrati vsetkych sharewith<user> - ich emailov a odosle (render)
+//        Gson jshareWith = new GsonBuilder().create();
+        //jshareWith.toJson(note.sharedWith, array);
+        
+     //   renderArgs.put("jshareWith",jshareWith);
+        renderArgs.put("note", note);
         render("dialogs/sharenote.html");
     }
 
@@ -68,18 +75,20 @@ public class Share extends Controller {
         if (type.equals("note")) {
             Note note = Note.findById(id);
             
-            //TODO: premazat notOwnedNotes, lebo sa vytvori druhy
+            note.sharedWith.clear();
             for (int i = 0; i < jsonArray.size(); i++) {
-                User.findByEmail(jsonArray.get(i).toString()).notOwnedNotes.add(note);
+                note.sharedWith.add(User.findByEmail(jsonArray.get(i).getAsString()));
             }
+            note.save();
         }
 
         if (type.equals("notebook")) {
             Notebook notebook = Notebook.findById(id);
 
             for (int i = 0; i < jsonArray.size(); i++) {
-                notebook.contributors.add(User.findByEmail(jsonArray.get(i).toString()));
+                notebook.contributors.add(User.findByEmail(jsonArray.get(i).getAsString()));
             }
+            notebook.save();
         }
     }
     
