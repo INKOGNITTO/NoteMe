@@ -336,6 +336,17 @@ $(function() {
 
     $("form#search").submit(function(){
         console.log("hľadané "+$(this).find("input[type='search']").val());
+        noteMe.jsRoutes.search.ajax({
+            data: {
+                exp: $(this).find("input[type='search']").val()
+            },
+            success: function(){
+                
+            },
+            error: function(err) {
+                console.log(err);
+            }
+        });
         return false;
     });
 
@@ -799,15 +810,56 @@ $(function() {
                         $(this).remove();
                     }
                 });
-                $("#sharenote .add-multiple").adder({inputLabel:"Pridať email používateľa"});
+                var adder = $("#sharenote .add-multiple").adder({
+                    inputLabel:"Pridať email používateľa",
+                    addCheck: function(value,item) {
+                        var self = this;
+                        console.log(noteMe.jsRoutes.knownMail.ajax);
+                        noteMe.jsRoutes.knownMail.ajax({
+                            data: {
+                                email: value
+                            },
+                            success: function(data) {
+                                if (data === "found") {
+                                    
+                                } else {
+                                    noteMe.message.error("Používateľ "+data+" nebol nájdený.");
+                                    $(item).addClass("ui-state-highlight").removeClass("ui-state-highlight",500).promise().done(function(){
+                                        self.remove($(this));
+                                    });
+                                }
+                            },
+                            error: function(err) {
+                                console.log(err);
+                                noteMe.message.error("Chyba pri kontrole emailu používateľa");
+                            }
+                        });
+                    }
+                });
                 if(!$("#sharenote #publicId-dest").text()){
                     $("#sharenote #share-public").hide();
                 } else {
                     $("#sharenote #publicId").attr('checked', true); 
                 }
                 $("#sharenote form").submit(function(event) {
-                    console.log("posiela sa zdielanie");
+                    console.log(adder.adder("getValues"));
                     event.preventDefault();
+                    console.log(JSON.stringify(adder.adder("getValues")));
+                    noteMe.jsRoutes.sharing.ajax({
+                        data: {
+                            json: JSON.stringify(adder.adder("getValues")),
+                            id: $(this).parents(".dialog").attr("data-id"),
+                            type: "note"
+                        },
+                        success: function(data) {
+                            noteMe.message.info("Zdieľanie uložené")
+                        },
+                        error: function(err) {
+                            console.log(err);
+                            noteMe.message.error("Chyba pri ukladaní zdieľania");
+                        }
+                    });
+                    //adder.adder("destroy");
                     $("#sharenote").dialog("close");
                 }); 
                 $("#sharenote #publicId").on("click",function(){
@@ -972,85 +1024,82 @@ $(function(){
             addCheck : null
         },
         _internal : {
-            values: [],
-            adder : null,
-            added : null,
-            inputID : null,
             itemClass : "ui-adder-item"
         },
         _init : function() {
             var element = $(this.element),
-                self = this,
-                adder,
-                added,
-                inputID = "input-add-"+this.uuid;
+                self = this;
+    
+            this.params = {
+                adder: $("<div>").addClass("ui-adder-adder"),
+                added: $("<div>").addClass("ui-adder-added"),
+                inputID: "input-add-"+this.uuid,
+                values: []
+            };
 
-            adder = $("<div>").addClass("ui-adder-adder"),
-            added = $("<div>").addClass("ui-adder-added");
-
-            this._internal.adder = adder;
-            this._internal.added = added;
-            this._internal.inputID = inputID;
-
-            $("<label>").text(this.options.inputLabel).appendTo(adder);
-            $("<input>").attr("id",inputID).attr("type","email").appendTo(adder);
-            adder.append("&nbsp;");
-            $("<button>").text(this.options.inputLabel).appendTo(adder).button({
+            $("<label>").text(this.options.inputLabel).appendTo(this.params.adder);
+            $("<input>").attr("id",this.params.inputID).attr("type","email").appendTo(this.params.adder);
+            this.params.adder.append("&nbsp;");
+            $("<button>").text(this.options.inputLabel).appendTo(this.params.adder).button({
                 icons: {
                     primary: "ui-icon-plus"
                 },
                 text: false
             }).click(function(event) {
                 event.preventDefault();
-                self.add($("#"+inputID).val());
+                self.add($("#"+self.params.inputID).val());
             });
 
 
 
-            adder.prependTo(element);
-            $("<div class='ui-adder-added-scroll'>").appendTo(element).append(added);
+            this.params.adder.prependTo(element);
+            $("<div class='ui-adder-added-scroll'>").appendTo(element).append(this.params.added);
 
             element.addClass("ui-adder");
+            //return this;
         },
         add : function(value) {
-            var index = this._internal.values.length,
+            var index = this.params.values.length,
                 self = this,
                 newItem;
             if(value===""){
-                $("#"+this._internal.inputID).addClass("ui-state-highlight").removeClass("ui-state-highlight",500);
+                console.log($("#"+this.params.inputID));
+                $("#"+this.params.inputID).addClass("ui-state-highlight").removeClass("ui-state-highlight",500);
                 return;
             }
-            if(this.options.addCheck && !this.options.addCeck()){
-                var addCheck = this.options.addCeck();
-                if(addCheck){
-                    return addCheck;
-                }
-            }
-            this._internal.values.push(value);
+            this.params.values.push(value);
             newItem = $("<div>").text(value).addClass(this._internal.itemClass).button({
                 icons: {
                     secondary: "ui-icon-close"
                 }
-            }).prependTo(this._internal.added)
-            .slideDown("slow");
+            }).prependTo(this.params.added).hide();
 
-            $(newItem).find(".ui-icon-close").click(function(event) {
-                self._internal.values[index] = null;
-                $(this).parent().remove();
-                console.log(self.getValues());
-                event.preventDefault();
-            });
+            $(newItem).data("index",index)
+                .slideDown("slow")
+                .find(".ui-icon-close").click(function(event) {
+                    self.remove(this);
+                    event.preventDefault();
+                });
 
-            $("#"+this._internal.inputID).val("");
+            $("#"+this.params.inputID).val("");
+            
+            if(this.options.addCheck && typeof this.options.addCheck === "function"){  // add check callback
+                this.options.addCheck.call(this, value, newItem); 
+            }
         },
-        remove : function() {
-
+        remove : function(item) {
+            var index = $(item).parent().data("index");
+            this.params.values[index] = null;
+            $(item).parent().slideUp(function(){
+                $(this).remove();
+            });
+            console.log(this.getValues());
         },
         getValues : function() {
             var val = [];
-            for(i in this._internal.values){
-                if(this._internal.values[i]){
-                    val.push(this._internal.values[i]);
+            for(i in this.params.values){
+                if(this.params.values[i]){
+                    val.push(this.params.values[i]);
                 }
             }
             return val;

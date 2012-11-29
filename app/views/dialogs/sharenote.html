@@ -1,19 +1,18 @@
 <div class="dialog" title="Zdieľanie poznámky: ${note.name}" id="sharenote" data-id="${note.id}">
 	<form>
-		<fieldset>
-			<legend>Zdieľať s používateľom noteMe</legend>
-            <input type="hidden" name="share-with" id="share-with-hidden">
-            <div class="add-multiple ui-adder">
-            </div>
-		</fieldset>
-		<fieldset>
-			<legend>Verejné zdieľanie</legend>
-                        <input type="checkbox" value="public" id="publicId">
-                        <label for="publicId">Povoliť verejné zdieľanie</label>
-			<div id="share-public">
-				<p>Verejný odkaz:</p>
-				<div id="publicId-dest">#{if note.publicID!=null}@@{PublicNote.index(note.publicID)}#{/if}</div>
-			</div>
-		</fieldset>
+            <fieldset>
+                <legend>Zdieľať s používateľom noteMe</legend>
+                <input type="hidden" name="share-with" id="share-with-hidden">
+                <div class="add-multiple ui-adder"></div>
+            </fieldset>
+            <fieldset>
+                    <legend>Verejné zdieľanie</legend>
+                    <input type="checkbox" value="public" id="publicId">
+                    <label for="publicId">Povoliť verejné zdieľanie</label>
+                    <div id="share-public">
+                            <p>Verejný odkaz:</p>
+                            <div id="publicId-dest">#{if note.publicID!=null}@@{PublicNote.index(note.publicID)}#{/if}</div>
+                    </div>
+            </fieldset>
 	</form>
 </div>
