@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 import models.Note;
 import models.Notebook;
@@ -153,6 +154,30 @@ public class NoteManager extends Controller {
         ((Tag) Tag.findById(tagId)).removeFromNote(noteId);
 
     }
-    
-    public static void search() {} 
+
+    public static void search(String exp) {
+
+        User usr = User.findByEmail(session.get("username"));
+        List<Tag> matchTags = Tag.find("name like ?", exp).fetch();
+        matchTags.retainAll(usr.getTags());
+        List<Long> out = new ArrayList<Long>();
+        GenericModel.JPAQuery jpaq = Note.find("name like ? or content like ?", "%" + exp + "%", "%" + exp + "%");
+        List<Note> ol = jpaq.fetch();
+
+        for (Note o : ol) {
+            for (Notebook n : usr.notebooks) {
+                if (o.notebooks.contains(n)) {
+                    out.add(o.id);
+                }
+            }
+        }
+        for (Note o : usr.getAllNotes()) {
+            for (Tag t : matchTags) {
+                if (o.tags.contains(t) && !out.contains(o)) {
+                    out.add(o.id);
+                }
+            }
+        }
+        renderJSON(out);
+    }
 }
