@@ -22,8 +22,12 @@ public class NoteManager extends Controller {
     
     public static void viewNote(long id) {
         notFoundIfNull(Note.findById(id));
-        renderArgs.put("note", Note.findById(id));
-        render("snippets/noteDetail.html");
+        if(Security.checkNoteAccessibility(id)){
+            renderArgs.put("note", Note.findById(id));
+            render("snippets/noteDetail.html");
+        } else {
+            forbidden();
+        }
     }
     
     public static void newNotebook() {
@@ -128,7 +132,11 @@ public class NoteManager extends Controller {
             if (type.equals("notebook")) {
                 renderText(((Notebook) Notebook.findById(id)).rename(newName));
             } else if (type.equals("note")) {
-                renderText(((Note) Note.findById(id)).rename(newName));
+                if(Security.checkNoteOwnership(id)){
+                    renderText(((Note) Note.findById(id)).rename(newName));
+                } else {
+                    forbidden();
+                }
             } else if (type.equals("tag")) {
                 renderText(((Tag) Tag.findById(id)).rename(newName));
             }
@@ -140,7 +148,11 @@ public class NoteManager extends Controller {
     
     public static void remove(String type, Long id) {
         if (type.equals("notebook")) {
-            ((Notebook) Notebook.findById(id)).remove();
+            if(Security.checkNotebookAccessibility(id)) {
+                ((Notebook) Notebook.findById(id)).remove();
+            } else {
+                forbidden();
+            }
         } else if (type.equals("note")) {
             ((Note) Note.findById(id)).remove();
         } else if (type.equals("tag")) {

@@ -66,7 +66,11 @@ $(function() {
         };
         this.opened  = {
             note: {
-                id: null
+                id: null,
+                close: function() {
+                    this.id = null;
+                    $(".right-column.note").remove();
+                }
             }
         };
         this.addNoteHooks = [];
@@ -89,7 +93,7 @@ $(function() {
                     success : function(data){
                         $("#right-column-wrapper .note").remove();
                         $("#right-column-wrapper").prepend(data);
-                        noteMe.opened.note.id = $("#right-column-wrapper .note").attr("data-id");
+                        noteMe.opened.note.id = $("#right-column-wrapper .note").data("id");
                         noteMe.edit.init();
                     },
                     error : function(err) {
@@ -105,7 +109,7 @@ $(function() {
                         $("#right-column-wrapper .note").remove();
                         $("#right-column-wrapper").prepend(data);
                         $(".right-column button, .right-column a").iconButton();
-                        noteMe.opened.note.id = $("#right-column-wrapper .note").attr("data-id");
+                        noteMe.opened.note.id = $("#right-column-wrapper .note").data("id");
                         noteMe.executeHooks(noteMe.showNoteHooks);
                     },
                     error : function(err) {
@@ -122,6 +126,7 @@ $(function() {
             }
             var editorPanel = $("#editor-panel"),
                 editorSpace = $("#editor-space"),
+                newBlockGrid = [10,10],
                 draggableSettings = {
                     cancel: ".note-block",
                     handle: "> .handle",
@@ -146,7 +151,7 @@ $(function() {
                             content.find(".note-block").removeAttr("contenteditable");
                             noteMe.jsRoutes.saveNote.ajax({
                                 data : {
-                                    id: $(".right-column h2").attr("data-id"),
+                                    id: $(".right-column h2").data("id"),
                                     content: content.html()
                                 },
                                 success : function(data) {
@@ -174,12 +179,13 @@ $(function() {
                     blockCount++;
                     var block = $("<div>").addClass("note-block").attr("id","note-block-"+blockCount),
                         handle = $("<div>").addClass("handle"),  
-                        wrapper = $("<div>").addClass("note-block-wrapper").append(handle).append(block).addClass("ui-corner-all");
+                        wrapper = $("<div>").addClass("note-block-wrapper").append(handle).append(block).addClass("ui-corner-all"),
+                        offset = [x-(x%newBlockGrid[0]), y-(y%newBlockGrid[1])];
                     editorSpace.append(wrapper);
                     wrapper.position({
                         my: "left-5 center",
                         at: "left top",
-                        offset: x + " " + y,
+                        offset: offset[0] + " " + offset[1],
                         of: document,
                         collision:"none"
                     }).draggable(draggableSettings).resizable(resizebleSettings);
@@ -346,7 +352,6 @@ $(function() {
             .bind("ajaxSend", noteMe.loadAnim.start)
             .bind("ajaxComplete", noteMe.loadAnim.stop)
             .bind("ajaxComplete", function(event,xhr) {
-                
                 if(xhr.status === 0) {
                     noteMe.message.error("Server nedostupný");
                 }
@@ -388,6 +393,21 @@ $(function() {
 
     hashChange(null,true);
     
+    // klavesove skratky
+    $(document).bind("keydown", "alt+b", function(event){
+        event.preventDefault();
+        $("#new-notebook").click();
+    }).bind("keydown", "alt+z", function(){
+        event.preventDefault();
+        $(".new-tag").first().click();
+    }).bind("keydown", "alt+p", function(){
+        event.preventDefault();
+        $(".notebooks .notebook").first().find(".new-note").click();
+    }).bind("keydown", "alt+h", function(){
+        event.preventDefault();
+        $("#search input[type=\"search\"]").focus();
+    });
+    
  
     $("form#search input").live("focus",function(){
         $(this).select();
@@ -397,7 +417,7 @@ $(function() {
         var searchTerm = $(this).find("input[type='search']").val();
         if (!searchTerm) {
             event.preventDefault();
-            $(this).find("input[type='search']").highlightWithClass(300,"ui-state-highlight");
+            note
             //event.preventDefault();
             return false;
         }
@@ -489,7 +509,7 @@ $(function() {
             console.log(ui.item.parent().children().index(ui.item));
             noteMe.jsRoutes.orderNotebooks.ajax({
                 data: {
-                    notebookId: ui.item.attr("data-id"),
+                    notebookId: ui.item.data("id"),
                     newPosition: ui.item.parent().children().index(ui.item)
                 },
                 success: function(data) {
@@ -520,9 +540,9 @@ $(function() {
             console.log(sourceNotebook);
             noteMe.jsRoutes.orderNotes.ajax({
                 data: {
-                    noteId: ui.item.attr("data-id"),
-                    fromNotebookId: sourceNotebook?sourceNotebook.attr("data-id"):-1,
-                    toNotebookId: targetNotebook.attr("data-id"),
+                    noteId: ui.item.data("id"),
+                    fromNotebookId: sourceNotebook?sourceNotebook.data("id"):-1,
+                    toNotebookId: targetNotebook.data("id"),
                     newPosition: ui.item.parent().children().index(ui.item)
                 },
                 success: function(data) {
@@ -567,7 +587,7 @@ $(function() {
         var tagName = $(this).parents(".tag").find(".title").text()
         noteMe.jsRoutes.searchForTags.ajax({
             data: {
-                id: $(this).parents(".tag").attr("data-id")
+                id: $(this).parents(".tag").data("id")
             },
             success: function(data){
                 noteMe.search(data,tagName);
@@ -578,22 +598,26 @@ $(function() {
         });
     }, function(){
         noteMe.manage.rename.call($(this),function(result){
+            var self = this;
+            var tag = $(this).parents(".tag");
             if(!result.saved){
                 return;
             }
             noteMe.jsRoutes.rename.ajax({
                 data: {
                     type:"tag",
-                    id: $(this).parents(".tag").attr("data-id"),
+                    id: tag.data("id"),
                     newName: $(this).text()
                 },
-                success: function(){},
+                success: function(){
+                    $(".tag[data-id=\""+tag.data("id")+"\"] .title").text($(self).text());
+                },
                 error: function(err){
                     console.log(err);
                     noteMe.message.error("Chyba premenovania");
                 }
             });
-        })
+        });
     });
 
     /*$("#tag-sidebar .tag .ui-icon-grip-dotted-vertical").mousedown(function() {
@@ -607,11 +631,11 @@ $(function() {
             noteMe.jsRoutes.remove.ajax({
                 data: {
                     type: "tag",
-                    id: $(this).parents(".tag").attr("data-id")
+                    id: $(this).parents(".tag").data("id")
                 },
                 success : function(data) {
                     noteMe.message.info("Zmazaná značka "+$(self).find(".title").text());
-                    $('.tag[data-id="'+$(self).parents(".tag").attr("data-id")+'"]').animate({width:0}).promise().done(function(){
+                    $('.tag[data-id="'+$(self).parents(".tag").data("id")+'"]').animate({width:0}).promise().done(function(){
                          $(this).remove();
                     });
                 },
@@ -622,8 +646,8 @@ $(function() {
         } else if ($(this).parents("#notetags").length){
             noteMe.jsRoutes.removeTagFromNote.ajax({
                 data: {
-                    noteId: $(this).parents("#right-column-wrapper .note").attr("data-id"),
-                    tagId: $(this).parents(".tag").attr("data-id")
+                    noteId: $(this).parents("#right-column-wrapper .note").data("id"),
+                    tagId: $(this).parents(".tag").data("id")
                 },
                 success: function(data){
                     $(self).parents(".tag").animate({width:0}).promise().done(function(){
@@ -646,13 +670,13 @@ $(function() {
                 $(this).highlightWithClass(1000);
                 noteMe.jsRoutes.addTagToNote.ajax({
                     data: {
-                        tagId: ui.draggable.attr("data-id"),
-                        noteId: $(this).attr("data-id")
+                        tagId: ui.draggable.data("id"),
+                        noteId: $(this).data("id")
                     },
                     success: function(data) {
                         var tag;
-                        console.log($('#notetags .tag[data-id="'+ui.draggable.attr("data-id")+'"]'));
-                        if($(self).attr("data-id")===noteMe.opened.note.id && !$('#notetags .tag[data-id="'+ui.draggable.attr("data-id")+'"]').length){
+                        console.log($('#notetags .tag[data-id="'+ui.draggable.data("id")+'"]'));
+                        if($(self).data("id")===noteMe.opened.note.id && !$('#notetags .tag[data-id="'+ui.draggable.data("id")+'"]').length){
                             tag = ui.draggable.clone().removeClass("ui-draggable");
                             $(".right-column").find("#notetags").prepend(tag);
                         }
@@ -716,12 +740,12 @@ $(function() {
             noteMe.jsRoutes.rename.ajax({
                 data: {
                     type: type,
-                    id: self.parents("."+type).attr("data-id"),
+                    id: self.parents("."+type).data("id"),
                     newName: self.text()
                 },
                 success: function(data){
-                    if(type === "note" && noteMe.opened.note.id === self.parents(".note").attr("data-id")) {
-                        $(".note[data-id=\""+self.parents(".note").attr("data-id")+"\"]").each(function(){
+                    if(type === "note" && noteMe.opened.note.id === self.parents(".note").data("id")) {
+                        $(".note[data-id=\""+self.parents(".note").data("id")+"\"]").each(function(){
                             $(this).find(".title").first().text(data);
                         });
                     }
@@ -773,7 +797,7 @@ $(function() {
         var notebook = $(this).parents(".notebook");
            noteMe.jsRoutes.newNote.ajax({
             data: {
-                notebookId: $(notebook).attr("data-id")
+                notebookId: $(notebook).data("id")
             },
             success: function(data) {
                 var note = $(data).prependTo($(notebook).children("div.notes").first());
@@ -785,7 +809,7 @@ $(function() {
                     }
                     noteMe.jsRoutes.saveNewNote.ajax({
                         data: {
-                            notebookId: $(notebook).attr("data-id"),
+                            notebookId: $(notebook).data("id"),
                             name: $(this).text()
                         },
                         success: function(data) {
@@ -805,13 +829,34 @@ $(function() {
            });
     });
 
-    
+    $(".notebook h2 .ui-icon-close").live("click", function(event){
+        var notebook = $(this).parents(".notebook");
+        noteMe.jsRoutes.remove.ajax({
+            data: {
+                type: "notebook",
+                id: notebook.data("id")
+            },
+            success: function(data){
+                noteMe.message.info("Poznámkový blok \""+notebook.find("h2 .title").text()+"\" bol zmazaný");
+                if(notebook.find(".note[data-id=\""+noteMe.opened.note.id+"\"]").length) {
+                    noteMe.opened.note.close(); // ak je v mazanom bloku poznamka, ktora je momentalne otvorena, zavri poznamku
+                }
+                notebook.slideUp(function() {
+                   $(this).remove(); 
+                });
+            },
+            error: function(err) {
+                noteMe.message.error("Chbyba pri mazaní poznámkového bloku");
+                console.log(err);
+            }
+        });
+    });
 
 
 
     $(".note").singleDoubleClick(function(){
-        window.location.hash=$(this).attr("data-id");
-        //noteMe.showNote($(this).attr("data-id"));
+        window.location.hash=$(this).data("id");
+        //noteMe.showNote($(this).data("id"));
     });
     $(".note .ui-icon").live("click", function(event){
         // neklikni, ak sa robil sort
@@ -824,9 +869,13 @@ $(function() {
         noteMe.jsRoutes.remove.ajax({
             data: {
                 type: "note",
-                id: note.attr("data-id")
+                id: note.data("id")
             },
             success: function(data) {
+                if(note.data("id")===noteMe.opened.note.id) {
+                    noteMe.opened.note.close();
+                }
+                noteMe.message.info("Poznámka \""+note.find(".title").text()+"\" bola zmazaná");
                 note.slideUp("slow",function(){$(this).remove();});
             },
             error: function(err) {
@@ -860,7 +909,7 @@ $(function() {
     $(".sharenote-button, .note .ui-icon-link").live("click",function() {
     	noteMe.jsRoutes.shareNote.ajax({
             data: {
-                id: $(this).parents(".note").attr("data-id")
+                id: $(this).parents(".note").data("id")
             },
             dataType: "html",
             context: $("body"),
@@ -916,7 +965,7 @@ $(function() {
                     noteMe.jsRoutes.sharing.ajax({
                         data: {
                             json: JSON.stringify(adder.adder("getValues")),
-                            id: $(this).parents(".dialog").attr("data-id"),
+                            id: $(this).parents(".dialog").data("id"),
                             type: "note"
                         },
                         success: function(data) {
@@ -934,7 +983,7 @@ $(function() {
                     if($(this).is(":checked")){
                         noteMe.jsRoutes.sharePublic.ajax({
                             data: {
-                                id: $(this).parents(".ui-dialog").find(".ui-dialog-content").attr("data-id")
+                                id: $(this).parents(".ui-dialog").find(".ui-dialog-content").data("id")
                             },
                             success: function(data) {
                                 $("#sharenote #publicId-dest").text(data);
@@ -947,7 +996,7 @@ $(function() {
                     } else {
                         noteMe.jsRoutes.unsharePublic.ajax({
                             data: {
-                                id: $(this).parents(".ui-dialog").find(".ui-dialog-content").attr("data-id")
+                                id: $(this).parents(".ui-dialog").find(".ui-dialog-content").data("id")
                             },
                             success: function(){
                                 $("#sharenote #publicId-dest").text("");

@@ -50,15 +50,21 @@ public class Notebook extends Model {
         //vymazat poznamky =>
         //vsetky poznamky vlastnene prihlasenym pouzivatelom -> odstranit
         //z poznamok nevlastnenych prihlasenym pouzivatelom odobrat z sharedWith pouzivatela 
+        List<Note> notesToRemove = new ArrayList();
         for (Note note : notes) {
             if (note.owner.equals(actualUser)) {
-                note.remove();
+                notesToRemove.add(note);
             } else {
                 note.sharedWith.remove(actualUser);
+                note.save();
             }
-            note.save();
         }
-        this.contributors.remove(actualUser);
+        for (Note note: notesToRemove) {
+            note.remove();
+        }
+        
+        actualUser.notebooks.remove(this);
+        actualUser.save();
         this.refresh();
         //ak uz nema ziadneho contributora -> zmazat z databazy
         if (this.contributors.isEmpty()) {

@@ -38,12 +38,11 @@ public class User extends Model {
     @OneToOne
     public Notebook defaultNbSharedNotes;
     
-//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
-//    public List<Note> ownedNotes = new LinkedList<Note>();
-    
-    
-    /* poznamky, ktore su pouzivatelovi vyzdielane od inych pouzivatelov
-     * on nie je ich vlastnik, on ich iba vidi, nemoze ich editovat  */
+   
+    /**
+     * poznamky, ktore su pouzivatelovi vyzdielane od inych pouzivatelov
+     * on nie je ich vlastnik, on ich iba vidi, nemoze ich editovat
+     */
     @ManyToMany (mappedBy="sharedWith")
     public Set<Note> notOwnedNotes = new HashSet<Note>(); 
     

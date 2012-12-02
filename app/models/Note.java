@@ -1,5 +1,6 @@
 package models;
 
+import controllers.Security;
 import java.util.*;
 
 import javax.persistence.*;
@@ -53,12 +54,10 @@ public class Note extends Model {
 
     public Note(String name, Long notebookID, User owner) {
         this.name = name;
-        //this.notebooks.add((Notebook)Notebook.findById(notebookID));
         this.owner = owner;
         this.creationDate = new Date();
         this.updateDate = new Date();
         this.isPulbic = false;
-        //this.publicID = generatePublicId();
     }
 
     public String generatePublicId() {
@@ -98,7 +97,7 @@ public class Note extends Model {
     public List<Tag> getOwnedTags() {
         Query q = JPA.em().createQuery("select tag from Tag tag where :n member of tag.notes and tag.owner = :o")
                 .setParameter("n", this)
-                .setParameter("o", this.owner);
+                .setParameter("o", (User)User.findByEmail(Scope.Session.current.get().get("username")));
         List<Tag> ownedTags = q.getResultList();
         return ownedTags;
     }
@@ -138,11 +137,11 @@ public class Note extends Model {
                 n.notes.remove(this);
                 n.save();
             }
-            this.refresh();
-            
-            // zmaze sa z notOwnedNotes
-            actualUser.notOwnedNotes.remove(this);
-            actualUser.save();
+            // odstran vsetky znacky aktualneho pouzivatela
+            tags.removeAll(actualUser.getTags());
+            // odzdiela sa od pouzivatela
+            sharedWith.remove(actualUser);
+            save();
         }
 
 

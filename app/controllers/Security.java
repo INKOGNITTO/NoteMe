@@ -31,20 +31,18 @@ public class Security extends Secure.Security {
     
     public static boolean checkNoteAccessibility(long noteId) {
         User user = User.findByEmail(session.get("username"));
-        List<Note> notes = user.getAllNotes();
-        if(notes.contains((Note)Note.findById(noteId))){
-            return true;
-        }
-        return false;
+        return user.getAllNotes().contains((Note)Note.findById(noteId));
     }
     
     public static boolean checkNoteOwnership(long noteId){
         User user = User.findByEmail(session.get("username"));
-        List<Note> notes = user.getOwnedNotes();
-        if(notes.contains((Note)Note.findById(noteId))){
-            return true;
-        }
-        return false;
+        return user.getOwnedNotes().contains((Note)Note.findById(noteId));
+    }
+    
+    public static boolean  checkNotebookAccessibility(long nbId) {
+        User user = User.findByEmail(Security.connected());
+        return user.notebooks.contains((Notebook)Notebook.findById(nbId));
+        
     }
     
     public static boolean check(String what) {

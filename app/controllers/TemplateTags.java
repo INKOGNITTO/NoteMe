@@ -10,7 +10,7 @@ import java.util.Map;
 import play.templates.GroovyTemplate.ExecutableTemplate;
 import play.templates.*;
 
-public class HtmlTags extends FastTags{
+public class TemplateTags extends FastTags{
     
     public static void _ifNoteOwner(Map<?, ?> args, Closure body, PrintWriter out, 
       ExecutableTemplate template, int fromLine) {

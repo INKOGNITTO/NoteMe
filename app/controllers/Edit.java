@@ -11,6 +11,13 @@ import play.mvc.*;
 @With(Secure.class)
 public class Edit extends Controller {
     
+    @Before(unless = "index")
+    public static void checkNoteOwnership(long id){
+        if(!Security.checkNoteOwnership(id)){
+            forbidden();
+        }
+    }
+    
     public static void index() {
         renderArgs.put("user", User.findByEmail(session.get("username")));
         render("edit.html");
@@ -20,11 +27,10 @@ public class Edit extends Controller {
         User user = User.findByEmail(session.get("username"));
         Note note = Note.findById(id);
         notFoundIfNull(note);
-        if(!user.getAllNotes().contains(note)){
-            forbidden("You do not have permission to edit this note.");
-        }
         renderArgs.put("note",note);
-        render("snippets/noteEdit.html");     
+        render("snippets/noteEdit.html"); 
+        
+            
     }
     
     public static void saveNote(long id, String content) {
