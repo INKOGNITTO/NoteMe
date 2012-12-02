@@ -140,7 +140,7 @@ public class NoteManager extends Controller {
     
     public static void remove(String type, Long id) {
         if (type.equals("notebook")) {
-            //renderText(((Notebook) Notebook.findById(id)).);
+            ((Notebook) Notebook.findById(id)).remove();
         } else if (type.equals("note")) {
             ((Note) Note.findById(id)).remove();
         } else if (type.equals("tag")) {
