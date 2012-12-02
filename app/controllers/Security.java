@@ -12,16 +12,16 @@ import play.mvc.Http.*;
 
 public class Security extends Secure.Security {
 	
-    static boolean authenticate(String email, String password) {
+    public static boolean authenticate(String email, String password) {
         User user = User.findByEmail(email);
         return user != null && Passwords.matches(password, user.password);
     }
     
-    static void onDisconnected() {
+    public static void onDisconnected() {
         App.index();
     }
     
-    static void onAuthenticated() {
+    public static void onAuthenticated() {
         try {
             Secure.login();
         } catch (Throwable ex) {
@@ -29,7 +29,7 @@ public class Security extends Secure.Security {
         }
     }
     
-    static boolean checkNoteAccessibility(long noteId) {
+    public static boolean checkNoteAccessibility(long noteId) {
         User user = User.findByEmail(session.get("username"));
         List<Note> notes = user.getAllNotes();
         if(notes.contains((Note)Note.findById(noteId))){
@@ -38,7 +38,7 @@ public class Security extends Secure.Security {
         return false;
     }
     
-    static boolean checkNoteOwnership(long noteId){
+    public static boolean checkNoteOwnership(long noteId){
         User user = User.findByEmail(session.get("username"));
         List<Note> notes = user.getOwnedNotes();
         if(notes.contains((Note)Note.findById(noteId))){
@@ -47,7 +47,7 @@ public class Security extends Secure.Security {
         return false;
     }
     
-    static boolean check(String what) {
+    public static boolean check(String what) {
         User user = User.findByEmail(connected());
         if ("admin".equals(what)) {
             return user.isAdmin;

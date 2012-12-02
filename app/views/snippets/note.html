@@ -2,7 +2,12 @@
 	<span class="ui-icon ui-icon-grip-dotted-vertical handle"></span>
 	<span class="title">${note.name}</span>
 	<span class="iconbar">
-		<a href="@{Edit.index()}#${note.id}" class="ui-icon ui-icon-pencil" title="Editovať poznámku"></a>
+		#{if section=="manage"}
+                    <a href="@{Edit.index()}#${note.id}" class="ui-icon ui-icon-pencil" title="Editovať poznámku"></a>
+                #{/if}
+                #{elseif section=="edit"}
+                    <a href="@{NoteManager.index()}#${note.id}" class="ui-icon ui-icon-folder-collapsed" title="Správa poznámky"></a>
+                #{/elseif}
 		<span class="ui-icon ui-icon-link" title="Zdieľať poznámku"></span>
 		<span class="ui-icon ui-icon-close" title="Zmazať poznámku"></span>
 	</span>

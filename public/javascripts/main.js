@@ -78,7 +78,6 @@ $(function() {
             }
         };
         this.showNote = function(noteId){
-            //window.location.hash = noteId;
             if($("body").hasClass("section-edit")){
                 noteMe.jsRoutes.editNote.ajax({
                     urlParams : {
@@ -237,6 +236,58 @@ $(function() {
             info: gtFunction(""),
             error: gtFunction("ui-state-error")
         };
+        this.search = (function() {
+            var searchInfoElement = $("<div>").appendTo("header").css({
+                    width: 200,
+                    maxWidth:300,
+                    padding:5,
+                    border: "1px solid #2e2e2e",
+                    boxShadow: "0px 0px 4px #757575",
+                    cursor: "pointer",
+                    zIndex:10
+                 }).addClass("ui-state-highlight ui-widget ui-corner-all ui-button-text-icon-secondary").position({
+                     my: "left top",
+                     at: "left bottom+3",
+                     of: "#header-bar #search input[type=\"search\"]"
+                 }).append($("<span class='title ui-button-text'>"))
+                   .append($("<span class='ui-icon ui-icon-close ui-button-icon-secondary'>")).attr("title","Zrušiť vyhľadávanie").hide(),
+                cancelNoteSearch = function(){
+                    $(".notebooks .notebook").show();
+                    $(".notebook .note").show();
+                    if(searchInfoElement.is(":visible")){
+                        searchInfoElement.slideUp("fast").find(".title").text("");
+                    }
+                };
+            searchInfoElement.click(function(){
+                cancelNoteSearch();
+            });
+            return function (noteIdArray,tag) {
+                var notesContainer = $(".notebooks").first(),
+                    i;
+
+                cancelNoteSearch();
+
+                notesContainer.find(".note").hide();
+
+                for (i in noteIdArray) {
+                    notesContainer.find(".note[data-id='"+noteIdArray[i]+"']").show();
+                }
+
+                notesContainer.find(".notebook").each(function(){
+                    if(!$(this).find(".note:visible").length){
+                        $(this).hide();
+                    }
+                });
+
+                var text;
+                if(tag) {
+                    text = "Hľadaná značka: "+ tag;
+                } else {
+                    text = "Hľadané: " + $("#header-bar #search input[type=\"search\"]").val();
+                }
+                searchInfoElement.slideDown("fast").find(".title").text(text);
+            };
+        }());
         this.loadAnim = (function(){
             var animUrl = "/public/images/load-anim.gif",
                 staticUrl = "/public/images/logo-under-circles.png",
@@ -268,16 +319,13 @@ $(function() {
     $("header #user-account a").iconButton();
     $("input[type='submit']").button();
     $("form#search input[type='submit']").each(function(){
-        var button = $("<button>").text($(this).val()),
-            submit = this;
-        $(this).parent().append(button);
-        $(button).button({
+        $("<button>").text($(this).val()).insertAfter($(this)).button({
             icons : {
                 primary: "ui-icon-search"
             },
             text: false
         });
-        $(this).hide();
+        $(this).remove();
     });
     $("#new-notebook").button({
         icons : {
@@ -345,14 +393,20 @@ $(function() {
         $(this).select();
     });
 
-    $("form#search").submit(function(){
-        console.log("hľadané "+$(this).find("input[type='search']").val());
+    $("form#search").submit(function(event){
+        var searchTerm = $(this).find("input[type='search']").val();
+        if (!searchTerm) {
+            event.preventDefault();
+            $(this).find("input[type='search']").highlightWithClass(300,"ui-state-highlight");
+            //event.preventDefault();
+            return false;
+        }
         noteMe.jsRoutes.search.ajax({
             data: {
-                exp: $(this).find("input[type='search']").val()
+                exp: searchTerm
             },
             success: function(data){
-                filterNotes(data);
+                noteMe.search(data);
             },
             error: function(err) {
                 console.log(err);
@@ -360,42 +414,6 @@ $(function() {
         });
         return false;
     });
-
-    function filterNotes(noteIdArray) {
-        var notesContainer = $(".notebooks").first(),
-            i;
-        
-        cancelFilterNotes();
-        
-        notesContainer.find(".note").hide();
-        
-        for (i in noteIdArray) {
-            notesContainer.find(".note[data-id='"+noteIdArray[i]+"']").show();
-        }
-        
-        notesContainer.find(".notebook").each(function(){
-            if(!$(this).find(".note:visible").length){
-                $(this).hide();
-            }
-        });
-    }
-
-    function cancelFilterNotes(){
-        $(".notebooks .notebook").show();
-        $(".notebook .note").show();
-    }
-
-    //iconbar
-    /*$(".notebook .note .iconbar").each(function() {
-            $(this).css({
-                    paddingTop: ($(this).parent().height() - $(this).children().height())/2 + 1,
-                    right: -$(this).outerWidth()+40,
-            }).hover(function() {
-                    $(this).animate({right:0});
-            }, function() {
-                    $(this).animate({right:-$(this).outerWidth()+40});
-            });
-    })*/
 
     // scrollbary
     $("#left-column-scroll").scrollbar();
@@ -546,12 +564,13 @@ $(function() {
     noteMe.addTagHooks.push(tagHook);
     
     $(".tag .title").singleDoubleClick(function(){
+        var tagName = $(this).parents(".tag").find(".title").text()
         noteMe.jsRoutes.searchForTags.ajax({
             data: {
                 id: $(this).parents(".tag").attr("data-id")
             },
             success: function(data){
-                filterNotes(data);
+                noteMe.search(data,tagName);
             },
             error: function(err) {
                 console.log(err);

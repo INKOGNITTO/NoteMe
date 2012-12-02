@@ -141,7 +141,7 @@ header,
 }
 
 #header-bar {
-    margin-left: 180px;
+    margin-left: 160px;
     height:100%;
 }
 #header-bar .float-left, #header-bar nav {
@@ -184,7 +184,7 @@ header,
 }
 
 #header-bar form {
-    margin-left:205px;
+    margin-left:195px;
     position: relative;
     width: 300px;
     top:-6px;
@@ -909,7 +909,7 @@ fieldset legend {
 /* ==========================================================================
    Media Queries
    ========================================================================== */
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 1200px) {
     .page-side-paddings {
         padding-left:10px;
         padding-right:10px;
