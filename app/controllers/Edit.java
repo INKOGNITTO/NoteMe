@@ -24,7 +24,7 @@ public class Edit extends Controller {
             forbidden("You do not have permission to edit this note.");
         }
         renderArgs.put("note",note);
-        render("tags/noteEdit.html");     
+        render("snippets/noteEdit.html");     
     }
     
     public static void saveNote(long id, String content) {

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.Query;
 import models.*;
+import play.Play;
 import play.db.jpa.JPA;
 import play.mvc.*;
 
@@ -64,17 +65,22 @@ public class Share extends Controller {
 
     public static void sharing(String json, Long id, String type) {
         JsonElement jsonElement = new JsonParser().parse(json);
-        JsonArray jsonArray = jsonElement.getAsJsonArray();
+        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        JsonArray arrayNew = jsonObject.getAsJsonArray("new");
+        JsonArray arrayRemoved = jsonObject.getAsJsonArray("removed");
         User user;
 
         if (type.equals("note")) {
             Note note = Note.findById(id);
             note.sharedWith.clear();
-            for (int i = 0; i < jsonArray.size(); i++) {
-                user  = User.findByEmail(jsonArray.get(i).getAsString());
+            for (int i = 0; i < arrayNew.size(); i++) {
+                if(arrayNew.get(i).getAsString().equals(session.get("username"))) {
+                    continue;  // pouzivatel nemoze zdielat poznamku sam so sebou
+                }
+                user  = User.findByEmail(arrayNew.get(i).getAsString());
                 note.sharedWith.add(user);
                 if(user.defaultNbSharedNotes==null){
-                    user.defaultNbSharedNotes = Notebook.create("Zdieľané", user.id);
+                    user.defaultNbSharedNotes = Notebook.create(Play.configuration.getProperty("notebook.defaultShareName"), user.id);
                     user.notebooks.add(user.defaultNbSharedNotes);
                     user.save();
                 }
@@ -87,8 +93,8 @@ public class Share extends Controller {
         if (type.equals("notebook")) {
             Notebook notebook = Notebook.findById(id);
 
-            for (int i = 0; i < jsonArray.size(); i++) {
-                user  = User.findByEmail(jsonArray.get(i).getAsString());
+            for (int i = 0; i < arrayNew.size(); i++) {
+                user  = User.findByEmail(arrayNew.get(i).getAsString());
                 notebook.contributors.add(user);
             }
             notebook.save();

@@ -23,14 +23,14 @@ public class NoteManager extends Controller {
     public static void viewNote(long id) {
         notFoundIfNull(Note.findById(id));
         renderArgs.put("note", Note.findById(id));
-        render("tags/noteDetail.html");
+        render("snippets/noteDetail.html");
     }
     
     public static void newNotebook() {
         renderArgs.put("notebook",
                 new Notebook(Play.configuration.getProperty("notebook.defaultName"),
                 User.findByEmail(session.get("username"))));
-        render("tags/notebook.html");
+        render("snippets/notebook.html");
     }
     
     public static void saveNewNotebook(String name) {
@@ -45,7 +45,7 @@ public class NoteManager extends Controller {
         User user = User.findByEmail(session.get("username"));
         Tag tag = Tag.create(name, user.id);
         renderArgs.put("tag", tag);
-        render("tags/tag.html");
+        render("snippets/tag.html");
     }
     
     public static void newNote() {
@@ -54,7 +54,7 @@ public class NoteManager extends Controller {
             renderArgs.put("note",
                     new Note(Play.configuration.getProperty("note.defaultName"),
                     nbid, User.findByEmail(session.get("username"))));
-            render("tags/note.html");
+            render("snippets/note.html");
         } catch (Exception e) {
             error(Http.StatusCode.BAD_REQUEST, "Error while creating new note");
         }
@@ -181,7 +181,7 @@ public class NoteManager extends Controller {
         renderJSON(out);
     }
     
-    public static void seachForTags(Long id) {
+    public static void searchForTags(Long id) {
         Tag tag = Tag.findById(id);
         List<Note> notes = User.findByEmail(session.get("username")).getAllNotes();
         List<Long> out = new ArrayList<Long>();

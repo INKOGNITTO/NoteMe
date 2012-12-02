@@ -88,8 +88,9 @@ $(function() {
                         noteMe.edit.removeAllInstances();
                     },
                     success : function(data){
-                        $(".right-column").first().html(data);
-                        noteMe.opened.note.id = $(".right-column").find("h2").attr("data-id");
+                        $("#right-column-wrapper .note").remove();
+                        $("#right-column-wrapper").prepend(data);
+                        noteMe.opened.note.id = $("#right-column-wrapper .note").attr("data-id");
                         noteMe.edit.init();
                     },
                     error : function(err) {
@@ -102,9 +103,10 @@ $(function() {
                         id: noteId
                     },
                     success : function(data){
-                        $(".right-column").first().html(data);
+                        $("#right-column-wrapper .note").remove();
+                        $("#right-column-wrapper").prepend(data);
                         $(".right-column button, .right-column a").iconButton();
-                        noteMe.opened.note.id = $(".right-column").find("h2").attr("data-id");
+                        noteMe.opened.note.id = $("#right-column-wrapper .note").attr("data-id");
                         noteMe.executeHooks(noteMe.showNoteHooks);
                     },
                     error : function(err) {
@@ -294,7 +296,13 @@ $(function() {
 
     $(document)
             .bind("ajaxSend", noteMe.loadAnim.start)
-            .bind("ajaxComplete", noteMe.loadAnim.stop);
+            .bind("ajaxComplete", noteMe.loadAnim.stop)
+            .bind("ajaxComplete", function(event,xhr) {
+                
+                if(xhr.status === 0) {
+                    noteMe.message.error("Server nedostupný");
+                }
+            });
     
     
     
@@ -332,7 +340,10 @@ $(function() {
 
     hashChange(null,true);
     
-    $.datepicker.setDefaults( $.datepicker.regional[ "sk" ] );
+ 
+    $("form#search input").live("focus",function(){
+        $(this).select();
+    });
 
     $("form#search").submit(function(){
         console.log("hľadané "+$(this).find("input[type='search']").val());
@@ -535,7 +546,17 @@ $(function() {
     noteMe.addTagHooks.push(tagHook);
     
     $(".tag .title").singleDoubleClick(function(){
-        
+        noteMe.jsRoutes.searchForTags.ajax({
+            data: {
+                id: $(this).parents(".tag").attr("data-id")
+            },
+            success: function(data){
+                filterNotes(data);
+            },
+            error: function(err) {
+                console.log(err);
+            }
+        });
     }, function(){
         noteMe.manage.rename.call($(this),function(result){
             if(!result.saved){
@@ -582,7 +603,7 @@ $(function() {
         } else if ($(this).parents("#notetags").length){
             noteMe.jsRoutes.removeTagFromNote.ajax({
                 data: {
-                    noteId: $(this).parents(".right-column").find("h2").attr("data-id"),
+                    noteId: $(this).parents("#right-column-wrapper .note").attr("data-id"),
                     tagId: $(this).parents(".tag").attr("data-id")
                 },
                 success: function(data){
@@ -662,7 +683,7 @@ $(function() {
 
     
     // premenovania
-    $('.notebook h2 .title, .note .title, .right-column > h2').live("dblclick",function() {
+    $('.notebook h2 .title, .notebook .note .title').live("dblclick",function() {
         noteMe.manage.rename.call($(this),function(result){
             if(!result.saved){return;}
             var parents = $(this).parents(),
@@ -680,9 +701,14 @@ $(function() {
                     newName: self.text()
                 },
                 success: function(data){
-                    console.log("premenovane",data);
+                    if(type === "note" && noteMe.opened.note.id === self.parents(".note").attr("data-id")) {
+                        $(".note[data-id=\""+self.parents(".note").attr("data-id")+"\"]").each(function(){
+                            $(this).find(".title").first().text(data);
+                        });
+                    }
                 },
                 error: function(err) {
+                    noteMe.message.error("Chyba pri premenovaní");
                     console.log("chyba premenovania",err);
                 }
             });
@@ -734,7 +760,6 @@ $(function() {
                 var note = $(data).prependTo($(notebook).children("div.notes").first());
                 noteMe.manage.rename.call($(note).find("span.title"), function(result) {
                     var self = this;
-                    console.log(result.saved);
                     if (!result.saved) {
                         $(note).remove();
                         return;
@@ -765,7 +790,7 @@ $(function() {
 
 
 
-    $(".note").live("click",function(){
+    $(".note").singleDoubleClick(function(){
         window.location.hash=$(this).attr("data-id");
         //noteMe.showNote($(this).attr("data-id"));
     });
@@ -813,11 +838,10 @@ $(function() {
     
     
     // zdielanie
-    // tlacidlo pod poznamkou
-    $(".sharenote-button").live("click",function() {
+    $(".sharenote-button, .note .ui-icon-link").live("click",function() {
     	noteMe.jsRoutes.shareNote.ajax({
             data: {
-                id: $(this).parents(".right-column").find("h2").attr("data-id")
+                id: $(this).parents(".note").attr("data-id")
             },
             dataType: "html",
             context: $("body"),
@@ -848,7 +872,7 @@ $(function() {
                                 if (data === "found") {
                                     
                                 } else {
-                                    noteMe.message.error("Používateľ "+data+" nebol nájdený.");
+                                    noteMe.message.error("Používateľ "+value+" nebol nájdený.");
                                     $(item).addClass("ui-state-highlight").removeClass("ui-state-highlight",500).promise().done(function(){
                                         self.remove($(this));
                                     });
@@ -917,6 +941,12 @@ $(function() {
                     }
                 });
                 $("#sharenote #publicId-dest").click(function(){$(this).selectText();});
+            },
+            error: function(err) {
+                console.log(err);
+                if(err.status===403){
+                    noteMe.message.error("Túto poznámku nemôžete ďalej zdieľať");
+                }
             }
     	});
     });
@@ -928,7 +958,7 @@ $(function() {
 
 jQuery.fn.singleDoubleClick = function(single_click_callback, double_click_callback, timeout) {
     var clicks = 0;
-    jQuery(this.selector).live("singleClick",single_click_callback).live("doubleClick",double_click_callback);
+    jQuery(this.selector).live("singleClick",single_click_callback || function(){}).live("doubleClick",double_click_callback || function(){});
     jQuery(this.selector).live("click",function(event){
         var self = $(this);
         clicks++;
@@ -1054,15 +1084,16 @@ $(function(){
         _init : function() {
             var element = $(this.element),
                 self = this,
-                initVaues = element.children().detach();
+                initValues = element.children().detach();
     
             this.params = {
-                adder: $("<div>").addClass("ui-adder-adder"),
+                adder: $("<form>").addClass("ui-adder-adder"),
                 added: $("<div>").addClass("ui-adder-added"),
                 inputID: "input-add-"+this.uuid,
-                values: []
+                values: [],
+                removed: []
             };
-
+        
             $("<label>").text(this.options.inputLabel).appendTo(this.params.adder);
             $("<input>").attr("id",this.params.inputID).attr("type","email").appendTo(this.params.adder);
             this.params.adder.append("&nbsp;");
@@ -1076,19 +1107,17 @@ $(function(){
                 self.add($("#"+self.params.inputID).val());
             });
 
-
-
             this.params.adder.prependTo(element);
             $("<div class='ui-adder-added-scroll'>").appendTo(element).append(this.params.added);
 
             element.addClass("ui-adder");
-            //return this;
-            initVaues.each(function(){
+
+            initValues.each(function(){
                 var val = $(this).text();
-                $.noanim(function(){self.add(val)});
+                $.noanim(function(){self.add(val,"default");});
             });
         },
-        add : function(value) {
+        add : function(value,type) {
             var index = this.params.values.length,
                 self = this,
                 newItem;
@@ -1097,7 +1126,7 @@ $(function(){
                 $("#"+this.params.inputID).addClass("ui-state-highlight").removeClass("ui-state-highlight",500);
                 return;
             }
-            this.params.values.push(value);
+            this.params.values.push({value: value, type: type || "new"});
             newItem = $("<div>").text(value).addClass(this._internal.itemClass).button({
                 icons: {
                     secondary: "ui-icon-close"
@@ -1107,32 +1136,39 @@ $(function(){
             $(newItem).data("index",index)
                 .slideDown("slow")
                 .find(".ui-icon-close").click(function(event) {
-                    self.remove(this);
+                    self.remove($(this).parent());
                     event.preventDefault();
                 });
 
-            $("#"+this.params.inputID).val("");
+            $("#"+this.params.inputID).val("").focus();
             
             if(this.options.addCheck && typeof this.options.addCheck === "function"){  // add check callback
                 this.options.addCheck.call(this, value, newItem); 
             }
         },
         remove : function(item) {
-            var index = $(item).parent().data("index");
+            var index = $(item).data("index");
+            if(this.params.values[index].type === "default"){
+                this.params.removed.push(this.params.values[index].value);
+            }
             this.params.values[index] = null;
-            $(item).parent().slideUp(function(){
+            $(item).slideUp(function(){
                 $(this).remove();
             });
             console.log(this.getValues());
         },
         getValues : function() {
-            var val = [];
+            var newValues = [],
+                removedValues = this.params.removed;
             for(i in this.params.values){
                 if(this.params.values[i]){
-                    val.push(this.params.values[i]);
+                    newValues.push(this.params.values[i].value);
                 }
             }
-            return val;
+            return {
+                "new" : newValues,
+                removed: removedValues
+            };
         },
         size: function(s) {
             if (s && typeof s === "number"){

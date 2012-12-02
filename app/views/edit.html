@@ -2,7 +2,6 @@
 #{set section:'edit' /}
 
 <div id="toolbar">
-    <!-- <button id="new-notebook">Nový poznámkový blok</button> -->
     <button id="hide-notebooks" data-ui-icon-primary="ui-icon-carat-1-w">Skryť bloky</button>
 </div>
 <div id="main" class="fill">
@@ -10,15 +9,12 @@
         <div id="left-column-scroll">
             <div class="left-column notebooks">
                 #{list items:user.notebooks, as:'notebook'}
-                    #{include 'tags/notebook.html' /}
+                    #{include 'snippets/notebook.html' /}
                 #{/list}
             </div>
         </div>
     </div>
     <div id="right-column-wrapper" class="column-wrapper fill">
-        <div class="right-column">
-
-        </div>
         <div style="clear:both;"></div>
     </div>
 </div>

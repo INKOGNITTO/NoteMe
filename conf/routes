@@ -13,7 +13,7 @@ GET     /logout                         Secure.logout
 
 # Manage
 GET     /manage                         NoteManager.index
-GET     /manage/viewNote/{id}           NoteManager.viewNote
+POST    /manage/viewNote/{id}           NoteManager.viewNote
 POST    /manage/newNotebook             NoteManager.newNotebook
 POST    /manage/saveNewNotebook         NoteManager.saveNewNotebook
 POST    /manage/newNote                 NoteManager.newNote
@@ -25,7 +25,9 @@ POST    /manage/remove                  NoteManager.remove
 POST    /manage/saveNewTag              NoteManager.saveNewTag
 POST    /manage/removeTagFromNote       NoteManager.removeTagFromNote
 POST    /manage/addTagToNote            NoteManager.addTagToNote
-POST    /manage/search                  NoteManager.search
+
+POST    /search                         NoteManager.search
+POST    /searchForTags                  NoteManager.searchForTags
 
 # Edit
 GET	/edit                           Edit.index

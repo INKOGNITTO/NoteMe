@@ -11,7 +11,7 @@
     		<span class="title"><input type="text"></span>
     	</div>
             #{list items:user.getTags(), as:'tag'}
-                #{include 'tags/tag.html' /}
+                #{include 'snippets/tag.html' /}
             #{/list}
     </div>
 </div>
@@ -20,15 +20,12 @@
         <div id="left-column-scroll">
             <div class="left-column notebooks">
                 #{list items:user.notebooks, as:'notebook'}
-                    #{include 'tags/notebook.html' /}
+                    #{include 'snippets/notebook.html' /}
                 #{/list}
             </div>
         </div>
     </div>
     <div id="right-column-wrapper" class="column-wrapper fill">
-        <div class="right-column">
-
-        </div>
         <div style="clear:both;"></div>
     </div>
 </div>

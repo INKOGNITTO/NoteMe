@@ -21,6 +21,7 @@ var noteMe = noteMe || {};
         saveNewNote: makeRoute(#{jsRoute @NoteManager.saveNewNote() /}),
 
         search: makeRoute(#{jsRoute @NoteManager.search() /}),
+        searchForTags: makeRoute(#{jsRoute @NoteManager.searchForTags() /}),
 
         shareNote: makeRoute(#{jsRoute @Share.shareNote() /}),
         sharePublic: makeRoute(#{jsRoute @Share.sharePublic() /}),
