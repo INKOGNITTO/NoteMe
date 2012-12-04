@@ -50,5 +50,10 @@ GET     /jsRoutes                       App.jsRoutes
 # Admin 
 *       /admin                          module:crud
 
+# Account Manager
+POST    /accountManager/save            App.manageAccount                 
+POST    /accountManager                 App.accountManager
+
 # Map static resources
 GET     /public/                        staticDir:public
+

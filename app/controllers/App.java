@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.gson.*;
+import hash.Passwords;
 import java.util.logging.Level;
 import models.User;
 import play.data.validation.*;
@@ -94,6 +95,46 @@ public class App extends Controller{
             java.util.logging.Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+  
+    public static void manageAccount(String name, String oldPass, String newPass, String newPassCheck){
+        User actualUser = User.findByEmail(session.get("username"));
+        
+        // test zhody zadaneho hesla s heslom pouzivatela
+        if (!Passwords.matches(oldPass, actualUser.password)){
+            validation.addError("oldPass", "Chybné heslo");
+        }
+        
+        //test ak bolo zadane nove heslo, ci ma aspon 6 znakov
+        if( (!newPass.equals(null))&&(newPass.length() < 6) ){
+            validation.addError("newPPass", "Heslo je krátke, zadajte aspoň 6 znakov");
+        }
+        
+        // test zhody novych hesiel
+        if (!newPass.equals(newPassCheck)){
+            validation.addError("newPassCheck", "Heslá sa nezhodujú");
+        }
+        
+        // ak nastala nejaka chyba, zasle sa error a neide sa dalej
+        if(validation.hasErrors()){
+            Gson gson = new Gson();
+            error(StatusCode.BAD_REQUEST,gson.toJson(validation.errorsMap()));
+        }
+        
+        if (!name.equals(null)){
+            actualUser.name = name;
+        }
+        if (!newPass.equals(null)){
+            actualUser.password = newPass;
+        }
+        actualUser.save();
+    }
+    
+    public static void accountManager(){
+        renderArgs.put("user", User.findByEmail(session.get("username")));
+        render("dialogs/accountmanager.html");
+    }
+    
     
     public static void index() {
         NoteManager.index();
