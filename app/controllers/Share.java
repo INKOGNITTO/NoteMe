@@ -72,14 +72,30 @@ public class Share extends Controller {
 
         if (type.equals("note")) {
             Note note = Note.findById(id);
-            note.sharedWith.clear();
+
+            //vymazanie pouzivatelov z note.shareddWidth
+            for (int i = 0; i < arrayRemoved.size(); i++) {
+                user = User.findByEmail(arrayRemoved.get(i).getAsString());
+                note.sharedWith.remove(user);
+                //odstranenie z notebooku od nevlastnika
+                Query q = JPA.em().createQuery("select notebook from Notebook notebook where :u member of notebook.contributors and :n member of notebook.notes")
+                        .setParameter("u", user)
+                        .setParameter("n", note);
+                Notebook notebook = (Notebook) q.getSingleResult();
+                notebook.notes.remove(note);
+                notebook.save();
+                
+
+            }
+
             for (int i = 0; i < arrayNew.size(); i++) {
-                if(arrayNew.get(i).getAsString().equals(session.get("username"))) {
+                if (arrayNew.get(i).getAsString().equals(session.get("username"))) {
                     continue;  // pouzivatel nemoze zdielat poznamku sam so sebou
                 }
-                user  = User.findByEmail(arrayNew.get(i).getAsString());
+                user = User.findByEmail(arrayNew.get(i).getAsString());
                 note.sharedWith.add(user);
-                if(user.defaultNbSharedNotes==null){
+                // ak pouzivatel nema Defaultny notebook pre zdielanie, tak sa mu to vytvori
+                if (user.defaultNbSharedNotes == null) {
                     user.defaultNbSharedNotes = Notebook.create(Play.configuration.getProperty("notebook.defaultShareName"), user.id);
                     user.notebooks.add(user.defaultNbSharedNotes);
                     user.save();
@@ -94,11 +110,13 @@ public class Share extends Controller {
             Notebook notebook = Notebook.findById(id);
 
             for (int i = 0; i < arrayNew.size(); i++) {
-                user  = User.findByEmail(arrayNew.get(i).getAsString());
-                notebook.contributors.add(user);
+                user = User.findByEmail(arrayNew.get(i).getAsString());
+                //kontrola duplicity
+                if (!notebook.contributors.contains(user)) {
+                    user.notebooks.add(notebook);
+                    user.save();
+                }
             }
-            notebook.save();
         }
     }
-    
 }
