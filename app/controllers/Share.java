@@ -94,12 +94,13 @@ public class Share extends Controller {
                 }
                 user = User.findByEmail(arrayNew.get(i).getAsString());
                 note.sharedWith.add(user);
-                // ak pouzivatel nema Defaultny notebook pre zdielanie, tak sa mu to vytvori
+                // ak pouzivatel nema defaultny notebook pre zdielanie, tak sa mu to vytvori
                 if (user.defaultNbSharedNotes == null) {
                     user.defaultNbSharedNotes = Notebook.create(Play.configuration.getProperty("notebook.defaultShareName"), user.id);
                     user.notebooks.add(user.defaultNbSharedNotes);
                     user.save();
                 }
+                //pridanie poznamy do defaultneho notebooka
                 user.defaultNbSharedNotes.notes.add(note);
                 user.defaultNbSharedNotes.save();
             }

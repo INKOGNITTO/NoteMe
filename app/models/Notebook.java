@@ -45,29 +45,41 @@ public class Notebook extends Model {
         return newName;
     }
 
+    /**
+     * Vsetky poznamky vlastnene prihlasenym pouzivatelom -> odstranit 
+     * Z poznamok nevlastnenych prihlasenym pouzivatelom odobrat z sharedWith
+     * pouzivatela
+     */
     public void remove() {
         User actualUser = User.findByEmail(Scope.Session.current.get().get("username"));
-        //vymazat poznamky =>
-        //vsetky poznamky vlastnene prihlasenym pouzivatelom -> odstranit
-        //z poznamok nevlastnenych prihlasenym pouzivatelom odobrat z sharedWith pouzivatela 
+
         List<Note> notesToRemove = new ArrayList();
         for (Note note : notes) {
-            if (note.owner.equals(actualUser)) {
-                notesToRemove.add(note);
-            } else {
-                note.sharedWith.remove(actualUser);
-                note.save();
+            // ak pouzivatel nie je vlastnik, treba odstranit referenciu User.notOwnedNotes
+            if (!note.owner.equals(actualUser)) {
+                actualUser.notOwnedNotes.remove(note);
+                actualUser.save();
             }
+            notesToRemove.add(note);
         }
-        for (Note note: notesToRemove) {
+        // zmaze vsetky poznamky zoznamu do ktoreho sa povkladali poznamky na zmazanie
+        for (Note note : notesToRemove) {
             note.remove();
         }
-        
+        // zmazanie poznamky z pozn. bloku
         actualUser.notebooks.remove(this);
         actualUser.save();
         this.refresh();
         //ak uz nema ziadneho contributora -> zmazat z databazy
         if (this.contributors.isEmpty()) {
+            /* Ak notebook, ktory chce pouzivatel zmazat je defaultny nb
+             * t.j. nb do ktoreho sa mu ukladaju poznamky ktore mu vyzdielavaju iny pouzivatelia
+             * treba ho odobrat z User.defaultNbSharedNotes
+             */
+            if (actualUser.defaultNbSharedNotes.equals(this)) {
+                actualUser.defaultNbSharedNotes = null;
+                actualUser.save();
+            }
             this.delete();
         }
     }
