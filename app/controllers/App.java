@@ -5,6 +5,7 @@ import hash.Passwords;
 import java.util.logging.Level;
 import models.NoteImage;
 import models.User;
+import play.Logger;
 import play.data.validation.*;
 import play.data.validation.Check;
 import play.db.jpa.Blob;
@@ -113,12 +114,11 @@ public class App extends Controller{
         }
         
         //test ak bolo zadane nove heslo, ci ma aspon 6 znakov
-        if( (!newPass.equals(null))&&(newPass.length() < 6) ){
-            validation.addError("newPPass", "Heslo je krátke, zadajte aspoň 6 znakov");
+        if( (!newPass.equals("")) && (newPass.length() < 6) ){
+            validation.addError("newPass", "Heslo je krátke, zadajte aspoň 6 znakov");
         }
-        
         // test zhody novych hesiel
-        if (!newPass.equals(newPassCheck)){
+        if ((!newPassCheck.equals("") || !newPass.equals("")) && !newPass.equals(newPassCheck)){
             validation.addError("newPassCheck", "Heslá sa nezhodujú");
         }
         
@@ -128,11 +128,10 @@ public class App extends Controller{
             error(StatusCode.BAD_REQUEST,gson.toJson(validation.errorsMap()));
         }
         
-        if (!name.equals(null)){
-            actualUser.name = name;
-        }
-        if (!newPass.equals(null)){
-            actualUser.password = newPass;
+        actualUser.name = name;
+        
+        if (!newPass.equals("")){
+            actualUser.password = Passwords.hashPassword(newPass);
         }
         actualUser.save();
     }

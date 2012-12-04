@@ -649,7 +649,9 @@ $(function() {
         $("#tag-sidebar").sortable("option","disabled",false);
     });*/
     
-    $(".tag .ui-icon-close").live("click",function() {
+    $(".tag .ui-icon-close").live("click",function(event) {
+        event.stopPropagation();
+        event.stopImmediatePropagation();
         var self = this;
         if($(this).parents("#tag-sidebar").length){
             noteMe.jsRoutes.remove.ajax({
@@ -728,7 +730,7 @@ $(function() {
     $(".new-tag input").enterKey( function() {
         var self = this;
         if($(this).val()===""){
-            $(this).addClass("ui-state-highlight").removeClass("ui-state-highlight",500);
+            $(this).highlightWithClass(500,"ui-state-highlight");
             return;
         }
         noteMe.jsRoutes.saveNewTag.ajax({
@@ -1061,9 +1063,43 @@ $(function() {
                         $(this).remove();
                     }
                 });
-                $(data).find("form").submit(function(){
+                $("#accountmanager.dialog form").submit(function(event){
+                    event.preventDefault();
+                    var dialog = $(this);
                     noteMe.jsRoutes.manageAccount.ajax({
-                        data: $(this).serialize()
+                        data: $(this).serialize(),
+                        success: function(data){
+                            acmDialog.dialog("close");
+                        },
+                        error: function(err){
+                            var resp = $.parseJSON(err.responseText),
+                                selector = "input[type='text'], input[type='password']",
+                                tooltips;
+
+                            try {
+                                $(selector).tooltip("destroy");
+                            } catch (e) {
+                                // ignoruj, sluzi len na zatvorenie pripadnych tooltipov
+                            }
+
+                            tooltips = $(dialog).find(selector).tooltip({
+                                items: "input",
+                                content: function() {
+                                    if(resp && resp[$(this).attr("name")]) {
+                                        return resp[$(this).attr("name")][0].message;
+                                    }
+                                },
+                                open: function(){
+                                    var self = $(this);
+                                    setTimeout(function(){self.tooltip("close");}, 10000);
+                                },
+                                close: function(){
+                                    $(this).tooltip("destroy");
+                                },
+                                tooltipClass: "ui-state-error"
+                            });
+                            tooltips.tooltip("open");
+                        }
                         
                     });
                 });
@@ -1306,51 +1342,22 @@ $(function(){
 
 if(typeof nicEditors !== "undefined"){
     
-    var imgUploadOptions = {
-        buttons: {
-            "upload": {name: "Nahraj obrázok", type: "imgUpload"}
-        }
-    };
+    
 
-    var imgUpload = nicEditorAdvancedButton.extend({
-        init: function() {
-        },
-        addPane: function() {
-        }
+
+    $(function(){
+
+
+        noteMe.showNoteEditorHooks.push(function(){
+            document.ondragover = function () { return false; };
+            document.ondragend = function () { return false; }; 
+            document.ondrop = function(event){
+                event.preventDefault();
+                console.log("dropped");
+            };
+
+        } ); 
+
     });
 
-nicEditors.registerPlugin(nicPlugin,imgUploadOptions);
-
-
-$(function(){
-    
-    document.addEventListener("drop",function(event){
-        event.preventDefault();
-        event.stopPropagation();
-        alert("medved");
-    },true);
-    
-    noteMe.showNoteEditorHooks.push(function(){
-        document.getElementById("editor-space").addEventListener("drop", function(event){
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            console.log("tot noce");
-        }, true);
-
-    } ); 
-    
-});
-
-    
-    /*
-    $("#editor-space, .note-block").live("dragover", function(event){
-        event.preventDefault();
-        console.log("regitrovany dragover");
-    }).on("drop", function(event){
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        console.log("registrovany drop");
-    });*/
 }

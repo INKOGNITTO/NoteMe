@@ -41,6 +41,6 @@ var noteMe = noteMe || {};
         editNote: makeRoute(#{jsRoute @Edit.editNote(':id') /}),
 
         manageAccount: makeRoute(#{jsRoute @App.manageAccount() /}),
-        accountManager: : makeRoute(#{jsRoute @App.accountManager() /})
+        accountManager: makeRoute(#{jsRoute @App.accountManager() /})
     };
 }());

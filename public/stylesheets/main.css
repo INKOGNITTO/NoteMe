@@ -277,7 +277,7 @@ footer{
     line-height:0.9em;
 }
 #section-login footer {
-    height:100px;
+    height:150px;
 }
 
 .noise-dark {
@@ -358,7 +358,7 @@ footer{
  /* Login page */
 #section-login .content {
     margin: 75px auto 0px auto;
-    padding-bottom: 100px;
+    padding-bottom: 150px;
     width: 450px;
     height: 300px;
 }

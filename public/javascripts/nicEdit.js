@@ -1388,6 +1388,31 @@ nicEditors.registerPlugin(nicPlugin,nicImageOptions);
     nicEditors.registerPlugin(nicPlugin,nicSaveOptions);
     
     
+    var imgUploadOptions = {
+        buttons: {
+            "upload": {name: "Nahraj obrázok", type: "imgUpload"}
+        }
+    };
+
+    var imgUpload = nicEditorAdvancedButton.extend({
+        init: function() {
+        },
+        addPane: function() {
+            if (typeof window.formData === "undefined") {
+                return;
+            }
+        
+            this.im = this.ne.selectedInstance.selElm().parentTag('IMG');
+            
+            console.log($(this.pane.pane));
+            
+            var container = $("<div>").css({padding: 10}).appendTo($(this.pane.pane));
+        }
+    });
+
+    nicEditors.registerPlugin(nicPlugin,imgUploadOptions);
+    
+    
     
 /* START CONFIG */
 var nicUploadOptions = {
@@ -1485,15 +1510,15 @@ var nicUploadButton = nicEditorAdvancedButton.extend({
     var w = parseInt(this.ne.selectedInstance.elm.getStyle('width'));
     if(this.im) {
       this.im.setAttributes({
-        src : src,
-        width : (w && options.image.width) ? Math.min(w, options.image.width) : ''
+        src : src
+        //width : (w && options.image.width) ? Math.min(w, options.image.width) : ''
       });
     }
   }
 });
 
 //----!!!!!!!!!!!!!!!!!!!!!!!!!! =================================
-nicEditors.registerPlugin(nicPlugin,nicUploadOptions);
+//nicEditors.registerPlugin(nicPlugin,nicUploadOptions);
 
 
 

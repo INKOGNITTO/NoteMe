@@ -1,12 +1,18 @@
-<div class="dialog" title="Správa konta používateľa ${user.name}" id="accountmanager">
-	<form>
+<div class="dialog" title="Správa konta používateľa ${user}" id="accountmanager">
+	<form style="text-align: right;">
+            <fieldset>
+                <legend>Zmena používateľského mena</legend>
             <label for="acm-name">Meno:</label>
             <input type="text" id="acm-name" name="name" value="${user.name}">
-            <label for="acm-oldPass">Staré heslo:</label>
-            <input type="password" id="acm-oldPass" name="oldPass">
+            </fieldset>
+            <fieldset>
+                <legend>Zmena hesla</legend>
             <label for="acm-newPass">Nové heslo:</label>
-            <input type="password" id="acm-newPass" name="newPass">
+            <input type="password" id="acm-newPass" name="newPass"><br>
             <label for="acm-newPassCheck">Kontrola hesla:</label>
             <input type="password" id="acm-newPassCheck" name="newPassCheck">
+            </fieldset>
+            <br><label for="acm-oldPass">Aktuálne heslo:</label>
+            <input type="password" id="acm-oldPass" name="oldPass"><br>
 	</form>
 </div>
