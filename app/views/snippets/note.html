@@ -6,7 +6,7 @@
                     <a href="@{NoteManager.index()}#${note.id}" class="ui-icon ui-icon-folder-collapsed" title="Správa poznámky"></a>
                 #{/if}
 		#{else}
-                    <a href="@{Edit.index()}#${note.id}" class="ui-icon ui-icon-pencil" title="Editovať poznámku"></a>
+                    #{ifNoteOwner noteId:note.id}<a href="@{Edit.index()}#${note.id}" class="ui-icon ui-icon-pencil" title="Editovať poznámku"></a>#{/ifNoteOwner}
                 #{/else}
 		<span class="ui-icon ui-icon-link" title="Zdieľať poznámku"></span>
 		<span class="ui-icon ui-icon-close" title="Zmazať poznámku"></span>
