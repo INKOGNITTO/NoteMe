@@ -1317,7 +1317,7 @@ $(function(){
             var newValues = [],
                 removedValues = this.params.removed;
             for(i in this.params.values){
-                if(this.params.values[i]){
+                if(this.params.values[i] && this.params.values[i].type==="new"){
                     newValues.push(this.params.values[i].value);
                 }
             }
