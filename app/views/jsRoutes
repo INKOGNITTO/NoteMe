@@ -38,7 +38,9 @@ var noteMe = noteMe || {};
         saveNewTag: makeRoute(#{jsRoute @NoteManager.saveNewTag() /}),
 
         saveNote: makeRoute(#{jsRoute @Edit.saveNote() /}),
-        editNote: makeRoute(#{jsRoute @Edit.editNote(':id') /})
+        editNote: makeRoute(#{jsRoute @Edit.editNote(':id') /}),
 
+        manageAccount: makeRoute(#{jsRoute @App.manageAccount() /}),
+        accountManager: : makeRoute(#{jsRoute @App.accountManager() /})
     };
 }());
