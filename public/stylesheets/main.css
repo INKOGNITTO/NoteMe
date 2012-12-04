@@ -225,8 +225,9 @@ header,
         vertical-align:middle;
 }
 #user-account {
-    position:relative;
+    position:absolute;
     text-align:right;
+    right: 0px;
 }
 
 #user-account #header-menu {

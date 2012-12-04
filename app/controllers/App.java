@@ -2,9 +2,11 @@ package controllers;
 
 import com.google.gson.*;
 import java.util.logging.Level;
+import models.NoteImage;
 import models.User;
 import play.data.validation.*;
 import play.data.validation.Check;
+import play.db.jpa.Blob;
 import play.mvc.*;
 import play.mvc.Http.StatusCode;
 
@@ -62,7 +64,12 @@ public class App extends Controller{
     	} 
         
         session.put("username",user.email);
-        renderJSON("{\"next\":\"/manage\"}");
+        //presmeruj na povodnu URL
+        String url = flash.get("url");
+        if(url == null) {
+            url = Router.reverse("NoteManager.index").url; //default url
+        }
+        renderJSON("{\"next\":\""+url+"\"}");
     }
 
     /**
@@ -109,6 +116,16 @@ public class App extends Controller{
         } else {
             error(StatusCode.FORBIDDEN, "Nie ste prihlásený");
         }
+    }
+    
+    /**
+     * Obrazky v poznamkach
+     * @param uuid identifikator obrazka
+     */
+    public static void getNoteImage(String uuid) {
+        Blob image = NoteImage.fidByUuid(uuid).image;
+        response.setContentTypeIfNotSet(image.type());
+        renderBinary(image.get());
     }
     
 }

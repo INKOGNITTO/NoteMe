@@ -33,6 +33,7 @@ POST    /searchForTags                  NoteManager.searchForTags
 GET	/edit                           Edit.index
 POST    /edit/{<[0-9]+>id}              Edit.editNote
 POST    /edit/saveNote                  Edit.saveNote
+POST    /edit/imageUpload               Edit.imageUpload
 
 #Share
 POST 	/sharenote                      Share.shareNote
@@ -43,6 +44,9 @@ POST    /sharenote/sharing              Share.sharing
 
 #Public note
 GET     /publicnote/{uuid}              PublicNote.index
+
+#Note image
+GET     /noteImage/{uuid}               App.getNoteImage
 
 # jsRoutes
 GET     /jsRoutes                       App.jsRoutes

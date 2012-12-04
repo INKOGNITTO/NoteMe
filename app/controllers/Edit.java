@@ -1,7 +1,11 @@
 package controllers;
 
+import com.google.gson.*;
+import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.Query;
 import models.*;
 import play.Logger;
@@ -45,5 +49,17 @@ public class Edit extends Controller {
         note.save();
         ok();
     }
+    
+    public static void imageUpload(Long id, File image) {
+        Note note = Note.findById(id);
+        NoteImage ni = new NoteImage(note, image);
+        ni.save();
+        Map<String,String> json = new HashMap();
+        Map<String, Object> args = new HashMap();
+        args.put("uuid", ni.uuid);
+        json.put("imageUrl", Router.reverse("App.getNoteImage",args).url);
+        renderJSON(json);
+    }
+    
 
 }

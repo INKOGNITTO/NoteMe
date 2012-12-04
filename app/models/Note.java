@@ -16,6 +16,9 @@ import play.mvc.Scope;
 @Entity
 @Table(name = "notes")
 public class Note extends Model {
+    
+    @Required
+    public String name;
 
     @ManyToOne
     public User owner;
@@ -41,9 +44,6 @@ public class Note extends Model {
     @Required
     public Set<Notebook> notebooks = new HashSet<Notebook>();
    
-    @Required
-    public String name;
-    
     @Temporal(TemporalType.TIMESTAMP)
     @As("dd.MM.yyyy hh:mm:ss")
     public Date creationDate = new Date();
@@ -51,6 +51,9 @@ public class Note extends Model {
     @Temporal(TemporalType.TIMESTAMP)
     @As("dd.MM.yyyy hh:mm:ss")
     public Date updateDate = new Date();
+    
+    @OneToMany(mappedBy = "note", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    public Set<NoteImage> images = new HashSet();
 
     public Note(String name, Long notebookID, User owner) {
         this.name = name;
@@ -123,6 +126,11 @@ public class Note extends Model {
                 n.save();
             }
             this.refresh();
+            //zmaz vsetky obrazky asociovane s poznamkou
+            for (NoteImage noteImage : this.images) {
+                noteImage.image.getFile().delete();
+                noteImage.delete();
+            }
             // uz poznamka nie je v ziadnom bloku, zmaz ju z db
             this.delete();
             

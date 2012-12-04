@@ -1,5 +1,12 @@
 <div class="dialog" title="Správa konta používateľa ${user.name}" id="accountmanager">
 	<form>
-            //TODO
+            <label for="acm-name">Meno:</label>
+            <input type="text" id="acm-name" name="name" value="${user.name}">
+            <label for="acm-oldPass">Staré heslo:</label>
+            <input type="password" id="acm-oldPass" name="oldPass">
+            <label for="acm-newPass">Nové heslo:</label>
+            <input type="password" id="acm-newPass" name="newPass">
+            <label for="acm-newPassCheck">Kontrola hesla:</label>
+            <input type="password" id="acm-newPassCheck" name="newPassCheck">
 	</form>
 </div>

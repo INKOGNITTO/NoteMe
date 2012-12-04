@@ -657,7 +657,7 @@ var nicEditorPanel = bkClass.extend({
 		this.buttonList = bkExtend([],this.ne.options.buttonList);
 		
 		this.panelContain = new bkElement('DIV').setStyle({overflow : 'hidden', width : '100%'}).addClass('panelContain');
-		this.panelElm = new bkElement('DIV').setStyle({margin : '2px', marginTop : '0px', zoom : 1, overflow : 'hidden'}).addClass('panel').appendTo(this.panelContain);
+		this.panelElm = new bkElement('DIV').setStyle({margin : '0px', marginTop : '0px', zoom : 1, overflow : 'hidden'}).addClass('panel').appendTo(this.panelContain);
 		this.panelContain.appendTo(e);
 
 		var opt = this.ne.options;
@@ -710,7 +710,8 @@ var nicEditorButton = bkClass.extend({
 		this.ne = nicEditor;
 		this.elm = e;
 
-		this.margin = new bkElement('DIV').setStyle({'float' : 'left', marginTop : '2px'}).appendTo(e);
+		//this.margin = new bkElement('DIV').setStyle({'float' : 'left', marginTop : '2px'}).appendTo(e);
+                this.margin = new bkElement('DIV').setStyle({display: "inline-block", marginTop : '2px'}).appendTo(e);
 		this.contain = new bkElement('DIV').addClass('buttonContain').appendTo(this.margin);
 		this.border = new bkElement('DIV').setStyle({ border : '1px solid transparent'}).appendTo(this.contain);
 		this.button = new bkElement('DIV').setStyle({width : '20px', height : '20px', overflow : 'hidden', zoom : 1, cursor : 'pointer'}).addClass('button').setStyle(this.ne.getIcon(buttonName,options)).appendTo(this.border);
@@ -969,7 +970,8 @@ var nicEditorAdvancedButton = nicEditorButton.extend({
 			} else {
 				var contain = new bkElement('div').setStyle({overflow : 'hidden', clear : 'both'}).appendTo(this.form);
 				if(field.txt) {
-					new bkElement('label').setAttributes({'for' : itm}).setContent(field.txt).setStyle({margin : '2px 4px', fontSize : '13px', width: '50px', lineHeight : '20px', textAlign : 'right', 'float' : 'left'}).appendTo(contain);
+					//new bkElement('label').setAttributes({'for' : itm}).setContent(field.txt).setStyle({margin : '2px 4px', fontSize : '13px', width: '50px', lineHeight : '20px', textAlign : 'right', 'float' : 'left'}).appendTo(contain);
+                                        new bkElement('label').setAttributes({'for' : itm}).setContent(field.txt).setStyle({margin : '2px 4px', fontSize : '13px', width: '50px', lineHeight : '20px', textAlign : 'right', display : 'inline-block'}).appendTo(contain);
 				}
 				
 				switch(type) {
@@ -1063,7 +1065,8 @@ var nicEditorSelect = bkClass.extend({
 		this.name = buttonName;
 		this.selOptions = new Array();
 		
-		this.margin = new bkElement('div').setStyle({'float' : 'left', margin : '2px 1px 0 1px'}).appendTo(this.elm);
+		//this.margin = new bkElement('div').setStyle({'float' : 'left', margin : '2px 1px 0 1px'}).appendTo(this.elm);
+                this.margin = new bkElement('div').setStyle({display : "inline-block", margin : '2px 1px 0 1px'}).appendTo(this.elm);
 		this.contain = new bkElement('div').setStyle({width: '90px', height : '20px', cursor : 'pointer', overflow: 'hidden'}).addClass('selectContain').addEvent('click',this.toggle.closure(this)).appendTo(this.margin);
 		this.items = new bkElement('div').setStyle({overflow : 'hidden', zoom : 1, border: '1px solid #ccc', paddingLeft : '3px', backgroundColor : '#fff'}).appendTo(this.contain);
 		this.control = new bkElement('div').setStyle({overflow : 'hidden', 'float' : 'right', height: '18px', width : '16px'}).addClass('selectControl').setStyle(this.ne.getIcon('arrow',options)).appendTo(this.items);
@@ -1288,7 +1291,7 @@ nicEditors.registerPlugin(nicPlugin,nicColorOptions);
 /* START CONFIG */
 var nicImageOptions = {
 	buttons : {
-		'image' : {name : 'Add Image', type : 'nicImageButton', tags : ['IMG']}
+		'image' : {name : 'Pridaj obrázok', type : 'nicImageButton', tags : ['IMG']}
 	}
 	
 };
@@ -1329,7 +1332,7 @@ var nicImageButton = nicEditorAdvancedButton.extend({
 });
 
 //----!!!!!!!!!!!!!!!!!!!!!!!!!! =================================
-//nicEditors.registerPlugin(nicPlugin,nicImageOptions);
+nicEditors.registerPlugin(nicPlugin,nicImageOptions);
 
 
 
@@ -1368,9 +1371,10 @@ var nicImageButton = nicEditorAdvancedButton.extend({
 
     var nicEditorSaveButton = nicEditorButton.extend({
             init : function() {
-                $(this.margin).css({display : 'block'});
+                $(this.margin).css({display : 'inline-block'});
             },
             mouseClick : function() {
+                    if(this.isDisabled) {return;}
                     var onSave = this.ne.options.onSave;
                     var allContent = [];
                     
@@ -1382,9 +1386,9 @@ var nicImageButton = nicEditorAdvancedButton.extend({
     });
 
     nicEditors.registerPlugin(nicPlugin,nicSaveOptions);
-
-
-
+    
+    
+    
 /* START CONFIG */
 var nicUploadOptions = {
 	buttons : {
@@ -1395,7 +1399,7 @@ var nicUploadOptions = {
 /* END CONFIG */
 
 var nicUploadButton = nicEditorAdvancedButton.extend({	
-	nicURI : 'http://api.imgur.com/2/upload.json',
+	nicURI : '/edit/imageUpload',
   errorText : 'Failed to upload image',
 
 	addPane : function() {
@@ -1441,7 +1445,7 @@ var nicUploadButton = nicEditorAdvancedButton.extend({
 
     var fd = new FormData(); // https://hacks.mozilla.org/2011/01/how-to-develop-a-html5-image-uploader/
     fd.append("image", file);
-    fd.append("key", "b7ea18a4ecbda8e92203fa4968d10660");
+    fd.append("id", "1");
     var xhr = new XMLHttpRequest();
     xhr.open("POST", this.ne.options.uploadURI || this.nicURI);
 
@@ -1451,7 +1455,7 @@ var nicUploadButton = nicEditorAdvancedButton.extend({
       } catch(e) {
         return this.onError();
       }
-      this.onUploaded(res.upload);
+      this.onUploaded(res.imageUrl);
     }.closure(this);
     xhr.onerror = this.onError.closure(this);
     xhr.upload.onprogress = function(e) {
@@ -1469,9 +1473,9 @@ var nicUploadButton = nicEditorAdvancedButton.extend({
     }
   },
 
-  onUploaded : function(options) {
+  onUploaded : function(url) {
     this.removePane();
-    var src = options.links.original;
+    var src = url;
     if(!this.im) {
       this.ne.selectedInstance.restoreRng();
       var tmp = 'javascript:nicImTemp();';
@@ -1489,7 +1493,7 @@ var nicUploadButton = nicEditorAdvancedButton.extend({
 });
 
 //----!!!!!!!!!!!!!!!!!!!!!!!!!! =================================
-//nicEditors.registerPlugin(nicPlugin,nicUploadOptions);
+nicEditors.registerPlugin(nicPlugin,nicUploadOptions);
 
 
 

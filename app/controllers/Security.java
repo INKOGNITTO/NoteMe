@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import models.*;
 import play.mvc.*;
 import play.mvc.Http.*;
@@ -17,15 +16,15 @@ public class Security extends Secure.Security {
         return user != null && Passwords.matches(password, user.password);
     }
     
-    public static void onDisconnected() {
+    static void onDisconnected() {
         App.index();
     }
     
-    public static void onAuthenticated() {
+    static void onAuthenticated() {
         try {
             Secure.login();
         } catch (Throwable ex) {
-            Logger.getLogger(Security.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace(System.err);
         }
     }
     

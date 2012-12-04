@@ -76,6 +76,7 @@ $(function() {
         this.addNoteHooks = [];
         this.addTagHooks = [];
         this.showNoteHooks = [];
+        this.showNoteEditorHooks = [];
         this.executeHooks = function(hooks){
             for (var i in hooks){
                 hooks[i]();
@@ -95,6 +96,7 @@ $(function() {
                         $("#right-column-wrapper").prepend(data);
                         noteMe.opened.note.id = $("#right-column-wrapper .note").data("id");
                         noteMe.edit.init();
+                        noteMe.executeHooks(noteMe.showNoteEditorHooks);
                     },
                     error : function(err) {
                         console.log(err);
@@ -151,7 +153,7 @@ $(function() {
                             content.find(".note-block").removeAttr("contenteditable");
                             noteMe.jsRoutes.saveNote.ajax({
                                 data : {
-                                    id: $(".right-column h2").data("id"),
+                                    id: $(".right-column.note").data("id"),
                                     content: content.html()
                                 },
                                 success : function(data) {
@@ -166,8 +168,8 @@ $(function() {
                 },
                 blockCount = null;
                 
-            editor = createEditor();    
-        
+            editor = createEditor();  
+            
             return {
                 removeAllInstances : function(){
                     for(var i in editorInstances){
@@ -206,7 +208,7 @@ $(function() {
                         if(this.selectedInstance) {
                             var jqe = $(this.selectedInstance.elm);
                             jqe.parent().removeClass("selected-editor");
-                            if(!jqe.text()){
+                            if(!jqe.text() && !jqe.find("img").length){
                                 editor.removeInstance(jqe.attr("id"));
                                 jqe.parent().remove();
                             }
@@ -228,7 +230,7 @@ $(function() {
                         editorInstances.push($(this));
                     });
                     
-                    editorSpace.click(function(e){
+                    editorSpace.on("click",function(e){
                         if(e.target!==this){
                             e.stopPropagation();
                             return;
@@ -256,42 +258,44 @@ $(function() {
                      at: "left bottom+3",
                      of: "#header-bar #search input[type=\"search\"]"
                  }).append($("<span class='title ui-button-text'>"))
-                   .append($("<span class='ui-icon ui-icon-close ui-button-icon-secondary'>")).attr("title","Zrušiť vyhľadávanie").hide(),
-                cancelNoteSearch = function(){
+                   .append($("<span class='ui-icon ui-icon-close ui-button-icon-secondary'>")).attr("title","Zrušiť vyhľadávanie").hide();
+            searchInfoElement.click(function(){
+                noteMe.search.cancel();
+            });
+            return {
+                search: function (noteIdArray,tag) {
+                    var notesContainer = $(".notebooks").first(),
+                        i;
+
+                    this.cancel();
+
+                    notesContainer.find(".note").hide();
+
+                    for (i in noteIdArray) {
+                        notesContainer.find(".note[data-id='"+noteIdArray[i]+"']").show();
+                    }
+
+                    notesContainer.find(".notebook").each(function(){
+                        if(!$(this).find(".note:visible").length){
+                            $(this).hide();
+                        }
+                    });
+
+                    var text;
+                    if(tag) {
+                        text = "Hľadaná značka: "+ tag;
+                    } else {
+                        text = "Hľadané: " + $("#header-bar #search input[type=\"search\"]").val();
+                    }
+                    searchInfoElement.slideDown("fast").find(".title").text(text);
+                },
+                cancel : function(){
                     $(".notebooks .notebook").show();
                     $(".notebook .note").show();
                     if(searchInfoElement.is(":visible")){
                         searchInfoElement.slideUp("fast").find(".title").text("");
                     }
-                };
-            searchInfoElement.click(function(){
-                cancelNoteSearch();
-            });
-            return function (noteIdArray,tag) {
-                var notesContainer = $(".notebooks").first(),
-                    i;
-
-                cancelNoteSearch();
-
-                notesContainer.find(".note").hide();
-
-                for (i in noteIdArray) {
-                    notesContainer.find(".note[data-id='"+noteIdArray[i]+"']").show();
                 }
-
-                notesContainer.find(".notebook").each(function(){
-                    if(!$(this).find(".note:visible").length){
-                        $(this).hide();
-                    }
-                });
-
-                var text;
-                if(tag) {
-                    text = "Hľadaná značka: "+ tag;
-                } else {
-                    text = "Hľadané: " + $("#header-bar #search input[type=\"search\"]").val();
-                }
-                searchInfoElement.slideDown("fast").find(".title").text(text);
             };
         }());
         this.loadAnim = (function(){
@@ -397,13 +401,13 @@ $(function() {
     $(document).bind("keydown", "alt+b", function(event){
         event.preventDefault();
         $("#new-notebook").click();
-    }).bind("keydown", "alt+z", function(){
+    }).bind("keydown", "alt+z", function(event){
         event.preventDefault();
         $(".new-tag").first().click();
-    }).bind("keydown", "alt+p", function(){
+    }).bind("keydown", "alt+p", function(event){
         event.preventDefault();
         $(".notebooks .notebook").first().find(".new-note").click();
-    }).bind("keydown", "alt+h", function(){
+    }).bind("keydown", "alt+h", function(event){
         event.preventDefault();
         $("#search input[type=\"search\"]").focus();
     });
@@ -414,11 +418,11 @@ $(function() {
     });
 
     $("form#search").submit(function(event){
-        var searchTerm = $(this).find("input[type='search']").val();
+        var searchTerm = $(this).find("input[type='search']").val(),
+            self = this;
         if (!searchTerm) {
             event.preventDefault();
-            note
-            //event.preventDefault();
+            noteMe.search.cancel();
             return false;
         }
         noteMe.jsRoutes.search.ajax({
@@ -426,13 +430,18 @@ $(function() {
                 exp: searchTerm
             },
             success: function(data){
-                noteMe.search(data);
+                noteMe.search.search(data);
+                $(self).find("input[type='search']").select();
             },
             error: function(err) {
                 console.log(err);
             }
         });
         return false;
+    }).find("input[type='search']").bind("keydown","esc",function(event){
+        event.preventDefault();
+        noteMe.search.cancel();
+        $(this).val("");
     });
 
     // scrollbary
@@ -446,10 +455,10 @@ $(function() {
     var noteResize = function() {
         $("#about, .right-column > h2").on("resize",function(){
             var noteScroll = $("#note"),
-                    about = $("#about"),
-                    header = $(".right-column > h2"),
-                    aboutHeight = about.outerHeight(true),
-                    headerHeight = header.outerHeight(true);
+                about = $("#about"),
+                header = $(".right-column > h2"),
+                aboutHeight = about.outerHeight(true),
+                headerHeight = header.outerHeight(true);
             noteScroll.css({
                     "margin-top": headerHeight,
                     "margin-bottom": aboutHeight
@@ -458,6 +467,21 @@ $(function() {
         $("#about").trigger("resize");
     };
     noteMe.showNoteHooks.push(noteResize);
+    
+    var editorSpaceResize = function() {
+        $(".nicEdit-panel, .right-column > h2").on("resize", function(){
+            var editor = $("#editor-space"),
+                panel = $("#editor-panel"),
+                header = $(".right-column > h2"),
+                panelHeight = panel.outerHeight(true),
+                headerHeight = header.outerHeight(true);
+            editor.css({
+                "margin-top" : panelHeight + headerHeight
+            });
+        });
+        $(".nicEdit-panel").trigger("resize");
+    };
+    noteMe.showNoteEditorHooks.push(editorSpaceResize);
 
 
     // vertikalna zmena velkosti
@@ -590,7 +614,7 @@ $(function() {
                 id: $(this).parents(".tag").data("id")
             },
             success: function(data){
-                noteMe.search(data,tagName);
+                noteMe.search.search(data,tagName);
             },
             error: function(err) {
                 console.log(err);
@@ -712,7 +736,7 @@ $(function() {
                 name: $(this).val()
             },
             success: function(data) {
-                $("#tag-sidebar .new-tag").first().after(data);
+                $("#tag-sidebar .new-tag").first().after(data).hide().slideDown();
                 noteMe.message.info("Vytvorená značka \""+$(self).val()+"\"");
                 closeNewTag.call(self);
                 noteMe.executeHooks(noteMe.addTagHooks);
@@ -969,7 +993,7 @@ $(function() {
                             type: "note"
                         },
                         success: function(data) {
-                            noteMe.message.info("Zdieľanie uložené")
+                            noteMe.message.info("Zdieľanie uložené");
                         },
                         error: function(err) {
                             console.log(err);
@@ -1017,6 +1041,34 @@ $(function() {
                 }
             }
     	});
+    });
+
+    $("#account").click(function(){
+        var acmDialog;
+        noteMe.jsRoutes.accountManager.ajax({
+            success: function(data){
+                acmDialog = $(data).appendTo("header").dialog({
+                    buttons: {
+                        "Zavrieť": function() {
+                            $(this).dialog("close");
+                        },
+                        "OK": function(){
+                            $(this).find("form").submit();
+                        }
+                    },
+                    close:function() {
+                        $(this).dialog("destroy");
+                        $(this).remove();
+                    }
+                });
+                $(data).find("form").submit(function(){
+                    noteMe.jsRoutes.manageAccount.ajax({
+                        data: $(this).serialize()
+                        
+                    });
+                });
+            }
+        });
     });
 
 
@@ -1252,3 +1304,53 @@ $(function(){
     $.widget("ui.adder", adderPrototype);
 });
 
+if(typeof nicEditors !== "undefined"){
+    
+    var imgUploadOptions = {
+        buttons: {
+            "upload": {name: "Nahraj obrázok", type: "imgUpload"}
+        }
+    };
+
+    var imgUpload = nicEditorAdvancedButton.extend({
+        init: function() {
+        },
+        addPane: function() {
+        }
+    });
+
+nicEditors.registerPlugin(nicPlugin,imgUploadOptions);
+
+
+$(function(){
+    
+    document.addEventListener("drop",function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        alert("medved");
+    },true);
+    
+    noteMe.showNoteEditorHooks.push(function(){
+        document.getElementById("editor-space").addEventListener("drop", function(event){
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            console.log("tot noce");
+        }, true);
+
+    } ); 
+    
+});
+
+    
+    /*
+    $("#editor-space, .note-block").live("dragover", function(event){
+        event.preventDefault();
+        console.log("regitrovany dragover");
+    }).on("drop", function(event){
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        console.log("registrovany drop");
+    });*/
+}
