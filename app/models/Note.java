@@ -122,7 +122,8 @@ public class Note extends Model {
             List<Notebook> notebookWithNote = q.getResultList();
             //v tychto pozn. blokoch zmaz tuto (this) poznamku
             for (Notebook n : notebookWithNote) {
-                n.notes.remove(this);
+                //n.notes.remove(this);
+                n.removeNote(this);
                 n.save();
             }
             this.refresh();
@@ -142,7 +143,8 @@ public class Note extends Model {
                     .setParameter("v", this.owner);
             List<Notebook> notebookWithNote = q.getResultList();
             for (Notebook n : notebookWithNote) {
-                n.notes.remove(this);
+                //n.notes.remove(this);
+                n.removeNote(this);
                 n.save();
             }
             // odstran vsetky znacky aktualneho pouzivatela

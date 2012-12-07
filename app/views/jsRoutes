@@ -2,14 +2,17 @@ var noteMe = noteMe || {};
 (function() {
 
     var makeRoute = function(jsr) {
-        var urlMethod = jsr.url;
+        var urlMethod = jsr.url,
+            url = jsr.url();
         jsr.type = jsr.method;
         delete(jsr.method);
         return {
             ajax: function(obj) {
                 jsr.url = urlMethod.call({},obj?obj.urlParams:{});
                 $.ajax($.extend(jsr,obj));
-            }   
+            },
+            url: url,
+            type: jsr.type
         };
     };
     
@@ -24,6 +27,7 @@ var noteMe = noteMe || {};
         searchForTags: makeRoute(#{jsRoute @NoteManager.searchForTags() /}),
 
         shareNote: makeRoute(#{jsRoute @Share.shareNote() /}),
+        shareNotebook: makeRoute(#{jsRoute @Share.shareNotebook() /}),
         sharePublic: makeRoute(#{jsRoute @Share.sharePublic() /}),
         unsharePublic: makeRoute(#{jsRoute @Share.unsharePublic() /}),
         knownMail: makeRoute(#{jsRoute @Share.knownMail() /}),
@@ -40,7 +44,11 @@ var noteMe = noteMe || {};
         saveNote: makeRoute(#{jsRoute @Edit.saveNote() /}),
         editNote: makeRoute(#{jsRoute @Edit.editNote(':id') /}),
 
-        manageAccount: makeRoute(#{jsRoute @App.manageAccount() /}),
-        accountManager: makeRoute(#{jsRoute @App.accountManager() /})
+        manageAccount: makeRoute(#{jsRoute @AccountManager.manageAccount() /}),
+        accountManager: makeRoute(#{jsRoute @AccountManager.accountManager() /}),
+        deleteAccountDialog: makeRoute(#{jsRoute @AccountManager.deleteAccountDialog() /}),
+        deleteAccount: makeRoute(#{jsRoute @AccountManager.deleteAccount() /}),
+
+        imageUpload: makeRoute(#{jsRoute @Edit.imageUpload() /})
     };
 }());

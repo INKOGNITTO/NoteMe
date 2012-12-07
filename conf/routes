@@ -36,11 +36,12 @@ POST    /edit/saveNote                  Edit.saveNote
 POST    /edit/imageUpload               Edit.imageUpload
 
 #Share
-POST 	/sharenote                      Share.shareNote
-POST    /sharenote/sharePublic          Share.sharePublic
-POST    /sharenote/unsharePublic        Share.unsharePublic
-POST    /sharenote/knownMail            Share.knownMail
-POST    /sharenote/sharing              Share.sharing
+POST 	/share/note                      Share.shareNote
+POST    /share/note/sharePublic          Share.sharePublic
+POST    /share/note/unsharePublic        Share.unsharePublic
+POST    /share/knownMail                 Share.knownMail
+POST    /sharing                         Share.sharing
+POST    /share/notebook                  Share.shareNotebook
 
 #Public note
 GET     /publicnote/{uuid}              PublicNote.index
@@ -55,8 +56,10 @@ GET     /jsRoutes                       App.jsRoutes
 *       /admin                          module:crud
 
 # Account Manager
-POST    /accountManager/save            App.manageAccount                 
-POST    /accountManager                 App.accountManager
+POST    /accountManager/save            AccountManager.manageAccount                 
+POST    /accountManager                 AccountManager.accountManager
+POST    /accountManager/delete          AccountManager.deleteAccountDialog
+POST    /accoutManager/delete/delete    AccountManager.deleteAccount
 
 # Map static resources
 GET     /public/                        staticDir:public

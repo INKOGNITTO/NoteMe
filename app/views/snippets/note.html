@@ -1,6 +1,17 @@
 <div class="note" data-id="${note.id}">
 	<span class="ui-icon ui-icon-grip-dotted-vertical handle"></span>
 	<span class="title">${note.name}</span>
+        <span class="flags">
+            #{ifNotNoteOwner noteId:note.id}
+            <span class="ui-icon ui-icon-flag" title="Zdieľaná poznámka<br>Vlastník: ${note.owner.email}"></span>
+            #{/ifNotNoteOwner}
+            #{noteHasTags noteId:note.id}
+            <span class="ui-icon ui-icon-tag" title="Obsahuje značky"></span>
+            #{/noteHasTags}
+            #{ifSharedNote noteId:note.id}
+            <span class="ui-icon ui-icon-link" title="Zdieľaná poznámka"></span>
+            #{/ifSharedNote}
+        </span>  
 	<span class="iconbar">
                 #{if section=="edit"}
                     <a href="@{NoteManager.index()}#${note.id}" class="ui-icon ui-icon-folder-collapsed" title="Správa poznámky"></a>
@@ -8,7 +19,10 @@
 		#{else}
                     #{ifNoteOwner noteId:note.id}<a href="@{Edit.index()}#${note.id}" class="ui-icon ui-icon-pencil" title="Editovať poznámku"></a>#{/ifNoteOwner}
                 #{/else}
-		<span class="ui-icon ui-icon-link" title="Zdieľať poznámku"></span>
+		#{ifNoteOwner noteId:note.id}
+                <span class="ui-icon ui-icon-link" title="Zdieľať poznámku"></span>
+                <span style="width:0px;height:4px;display:inline-block;"></span><!-- medzera pred ikonou zmazania-->
+                #{/ifNoteOwner}
 		<span class="ui-icon ui-icon-close" title="Zmazať poznámku"></span>
 	</span> 
 </div>

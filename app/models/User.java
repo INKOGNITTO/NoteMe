@@ -7,6 +7,7 @@ import hash.Passwords;
 import play.data.validation.*;
 import play.db.jpa.Model;
 import controllers.CRUD;
+import play.db.jpa.GenericModel;
 import play.db.jpa.JPA;
 
 @Entity
@@ -28,6 +29,7 @@ public class User extends Model {
     public Boolean isAdmin;
     
     @Transient
+    @CRUD.Exclude
     @CheckWith(controllers.App.PasswordCheckCheck.class)
     public String passwordCheck;
     
@@ -35,7 +37,7 @@ public class User extends Model {
     @OrderColumn
     public List<Notebook> notebooks = new LinkedList<Notebook>();
     
-    @OneToOne
+    @OneToOne (cascade = CascadeType.ALL)
     public Notebook defaultNbSharedNotes;
     
    
@@ -102,6 +104,18 @@ public class User extends Model {
     @Override
     public String toString() {
         return email + " (" + name + ")";
+    }
+    
+    public void remove(){
+        List<Tag> tags = getTags();
+        for(Tag tag: tags){
+            tag.remove();
+        }
+        List<Note> notes = getAllNotes();
+        for(Note note: notes){
+            note.remove();
+        }
+        this.delete();
     }
 
 }

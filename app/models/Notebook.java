@@ -26,6 +26,9 @@ public class Notebook extends Model {
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @OrderColumn
     public List<Note> notes = new LinkedList<Note>();
+    
+    @ManyToMany
+    public Set<Notebook> linkedNotebooks = new HashSet<Notebook>();
 
 
     public Notebook(String name, User user) {
@@ -43,6 +46,24 @@ public class Notebook extends Model {
         this.name = newName;
         this.save();
         return newName;
+    }
+    
+    public void addNote(Note note, int position) {
+        if(position>=0){
+            notes.add(position, note);
+        } else {
+            notes.add(note);
+        }
+        for(Notebook nb : linkedNotebooks) {
+            nb.addNote(note, 0);
+        }
+    }
+    
+    public void removeNote(Note note){
+        notes.remove(note);
+        for(Notebook nb : linkedNotebooks) {
+            nb.removeNote(note);
+        }
     }
 
     /**
@@ -76,11 +97,18 @@ public class Notebook extends Model {
              * t.j. nb do ktoreho sa mu ukladaju poznamky ktore mu vyzdielavaju iny pouzivatelia
              * treba ho odobrat z User.defaultNbSharedNotes
              */
-            if (actualUser.defaultNbSharedNotes.equals(this)) {
+            if (actualUser.defaultNbSharedNotes != null && actualUser.defaultNbSharedNotes.equals(this)) {
                 actualUser.defaultNbSharedNotes = null;
                 actualUser.save();
             }
             this.delete();
+        }
+    }
+    
+    public void linkNotebook(Notebook notebook) {
+        linkedNotebooks.add(notebook);
+        for(int i = 0; i< notes.size(); i++) {
+            notebook.addNote(notes.get(i), i);
         }
     }
 }

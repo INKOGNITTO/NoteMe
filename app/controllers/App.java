@@ -33,7 +33,12 @@ public class App extends Controller{
         @Override
         public boolean isSatisfied(Object user, Object passwordcheck) {
             setMessage("Heslá sa nezhodujú");
-            return (((User)user).password).equals((String)passwordcheck);
+            // tuto kontrolu vykonavaj iba ak je volana z tohoto controllera
+            if(request.controller.contains(App.class.getSimpleName())){
+                return (((User)user).password).equals((String)passwordcheck);
+            } else {
+                return true;
+            }
         }
     }
     
@@ -105,43 +110,6 @@ public class App extends Controller{
     }
     
   
-    public static void manageAccount(String name, String oldPass, String newPass, String newPassCheck){
-        User actualUser = User.findByEmail(session.get("username"));
-        
-        // test zhody zadaneho hesla s heslom pouzivatela
-        if (!Passwords.matches(oldPass, actualUser.password)){
-            validation.addError("oldPass", "Chybné heslo");
-        }
-        
-        //test ak bolo zadane nove heslo, ci ma aspon 6 znakov
-        if( (!newPass.equals("")) && (newPass.length() < 6) ){
-            validation.addError("newPass", "Heslo je krátke, zadajte aspoň 6 znakov");
-        }
-        // test zhody novych hesiel
-        if ((!newPassCheck.equals("") || !newPass.equals("")) && !newPass.equals(newPassCheck)){
-            validation.addError("newPassCheck", "Heslá sa nezhodujú");
-        }
-        
-        // ak nastala nejaka chyba, zasle sa error a neide sa dalej
-        if(validation.hasErrors()){
-            Gson gson = new Gson();
-            error(StatusCode.BAD_REQUEST,gson.toJson(validation.errorsMap()));
-        }
-        
-        actualUser.name = name;
-        
-        if (!newPass.equals("")){
-            actualUser.password = Passwords.hashPassword(newPass);
-        }
-        actualUser.save();
-    }
-    
-    public static void accountManager(){
-        renderArgs.put("user", User.findByEmail(session.get("username")));
-        render("dialogs/accountmanager.html");
-    }
-    
-    
     public static void index() {
         NoteManager.index();
     }

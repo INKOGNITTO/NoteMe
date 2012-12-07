@@ -70,7 +70,8 @@ public class NoteManager extends Controller {
         Long nbid = Long.valueOf(params.get("notebookId")).longValue();
         Note note = Note.create(params.get("name"), nbid, user.id);
         Notebook notebook = Notebook.findById(nbid);
-        notebook.notes.add(0, note);
+        //notebook.notes.add(0, note);
+        notebook.addNote(note, 0);
         notebook.save();
         note.save();
         renderText(note.id);
@@ -110,9 +111,11 @@ public class NoteManager extends Controller {
                 error(Http.StatusCode.FORBIDDEN, "No access");
             }
             
-            sourceNotebook.notes.remove(note);
+            //sourceNotebook.notes.remove(note);
+            sourceNotebook.removeNote(note);
             sourceNotebook.save();
-            destinationNotebook.notes.add(newPosition, note);
+            //destinationNotebook.notes.add(newPosition, note);
+            destinationNotebook.addNote(note, newPosition);
             destinationNotebook.save();
             
         } catch (Exception ex) {
@@ -164,7 +167,10 @@ public class NoteManager extends Controller {
     
     public static void removeTagFromNote(Long noteId, Long tagId) {
         ((Tag) Tag.findById(tagId)).removeFromNote(noteId);
-        
+        // ak je odstranena posledna znacka, posli info pre odstranenie ikony z poznamkys
+        if(((Note)Note.findById(noteId)).getOwnedTags().isEmpty()){
+            renderText("lastTagRemoved");
+        }
     }
     
     public static void search(String exp) {

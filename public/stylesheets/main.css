@@ -737,6 +737,10 @@ h2 {
 	visibility:visible;
 }
 
+.notebook .note .flags .ui-icon {
+    background-image: url(noteMe-dark/images/ui-icons_c3c3c3_256x240.png);
+}
+
 #note-scroll {
     margin-top:48px;
     margin-bottom:132px;
@@ -794,6 +798,11 @@ fieldset legend {
 }
 #share-public > div {
     border: 1px dashed #638631;
+}
+.ui-dialog-buttonset .account-delete-button {
+    position:absolute !important;
+    left:1.5em !important;
+    height:auto !important;
 }
 
 #editor-panel {
@@ -860,6 +869,13 @@ fieldset legend {
     color: #fafafa;
     max-width: 180px;
     text-align: center;
+}
+
+.ui-tooltip.tooltip {
+    font-size: 90%;
+    background: #81ae40 url(noteMe-dark/images/ui-bg_fine-grain_40_4589be_60x60.png);
+    paddin:3px;
+    text-align: left;
 }
 
 .ui-tooltip.ui-state-error{

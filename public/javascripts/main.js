@@ -1,10 +1,10 @@
-var noteMe = noteMe || {};
+var noteMe = noteMe || {}; // namespace aplikacie
 
 $(function() {
 
     // aplikacia :)
 
-    (function() {
+    (function() {  // .apply(noteMe)
         var _self = this,
             gtClass = "global-message ",
             globalTooltip = $("body").tooltip({
@@ -29,9 +29,19 @@ $(function() {
                     globalTooltip.tooltip({tooltipClass: gtClass+type});
                     globalTooltip.tooltip({content: message, items: "body"}).tooltip("open");
                 };
+            },
+            lastRename = {
+                element: null,
+                value: null
             };
     
         this.manage = {
+            /**
+             * Funkcia umoznuje premenovanie nazvov objektov (poznamka, blok, znacka)
+             * @param {type} cb callback funkcia po premenovani - ako argument ziska objekt obshujuci boolean saved, ktory
+             * je true, ak novy nazov bol potvrdeny a false, ak bolo premenovavanie pouzivatelom zrusene
+             * @returns vylsedok premenovania {saved: true/false} 
+             */
             rename : function(cb) {
                 var oldText = $(this).text(),
                     result = {
@@ -39,16 +49,20 @@ $(function() {
                     };
                 $(this).off(".rename").off("keydown");
                 $(this).on("focus.rename", function() {
-                    $(this).selectText();
                     if($.browser.opera){
                         // opera zrusi selekciu kvoli zmene stylu elementu, treba ju preto zopakovat
                         var self = $(this);
                         setTimeout(function(){self.selectText();},10);
+                    } else {
+                        // inak vyber text hned
+                        $(this).selectText();
                     }
                 }).on("blur.rename", function() {
                     if(!result.saved){
                         $(this).text(oldText);
-                    }
+                    } 
+                    lastRename.element = $(this);
+                    lastRename.value = oldText;
                     $(this).removeAttr("contenteditable");
                     if(typeof cb === "function"){
                         cb.call($(this),result);
@@ -62,6 +76,12 @@ $(function() {
                 },"on");
 
                 $(this).attr("contenteditable",true).focus();
+            },
+            /**
+             * Zmeni text posledneho premenovania spat na text pre premenovanim (akcia sa tyka len UI)
+             */
+            revertLastRename: function(){
+                lastRename.element.text(lastRename.value);
             }
         };
         this.opened  = {
@@ -73,6 +93,9 @@ $(function() {
                 }
             }
         };
+        /**
+         * Hooks objekty - polia pre ukladanie funkcí, tore sa maju vykonat po urcitej udalosti
+         */
         this.addNoteHooks = [];
         this.addTagHooks = [];
         this.showNoteHooks = [];
@@ -82,6 +105,11 @@ $(function() {
                 hooks[i]();
             }
         };
+        /**
+         * Zobrazi bud detail poznamky (sekcia spravy) alebo editor (sekcia editacie)
+         * vykonava showNoteEditorHooks (pre zobrazenie editora) a showNoteHooks (pre zobrazenie detailu)
+         * @param {type} noteId id poznamky
+         */
         this.showNote = function(noteId){
             if($("body").hasClass("section-edit")){
                 noteMe.jsRoutes.editNote.ajax({
@@ -122,6 +150,9 @@ $(function() {
                 return;
             }   
         };
+        /**
+         * vytvara podporne funkcie pre editor poznamok
+         */
         this.edit = (function(){
             if(typeof nicEditor === "undefined"){
                 return null;
@@ -237,14 +268,54 @@ $(function() {
                         }
                         noteMe.edit.createBlock(e.pageX,e.pageY).focus();
                     }); 
+                },
+                uploadImage: function(image, noteId,callback){
+                    var formData = new FormData();
+                    formData.append("image",image);
+                    formData.append("id", noteId || noteMe.opened.note.id);
+                    var progressHandler = function(){
+                        console.log("idem");
+                    };
+                    
+                    noteMe.jsRoutes.imageUpload.ajax({
+                        xhr: function(){
+                            var myXhr =$.ajaxSettings.xhr();
+                            if(myXhr.upload) {
+                                myXhr.upload.addEventListener("progress",progressHandler);
+                            }
+                            return myXhr;
+                        },
+                        data: formData,
+                        processData: false,
+                        cache: false,
+                        contentType: false,
+                        success: function(data) {
+                            if(typeof callback === "function"){
+                                callback(data);
+                            }
+                        },
+                        error: function(){
+                            noteMe.message.error("Nepodarilo sa nahrať obrázok na server.");
+                            if(typeof callback === "function"){
+                                callback(null);
+                            }
+                            console.log(xhr.responseText);
+                        }
+                    });
                 }
             };
         }());
+        /**
+         * funkcie pre zobrazenie globalnych sprav v rozhrani
+         */
         this.message = {
             info: gtFunction(""),
             error: gtFunction("ui-state-error")
         };
         this.search = (function() {
+            /**
+             * konstrukcia panela s informaciami o aktualnom hladani 
+             */
             var searchInfoElement = $("<div>").appendTo("header").css({
                     width: 200,
                     maxWidth:300,
@@ -263,6 +334,11 @@ $(function() {
                 noteMe.search.cancel();
             });
             return {
+                /**
+                 * Vyhladavanie
+                 * @param {array} noteArray pole s id-ckami poznamok, ktore sa maju vyfiltrovat s akt. zobrazenia
+                 * @param {boolean} tag true, ak sa hlada podla znacky
+                 */
                 search: function (noteIdArray,tag) {
                     var notesContainer = $(".notebooks").first(),
                         i;
@@ -289,6 +365,9 @@ $(function() {
                     }
                     searchInfoElement.slideDown("fast").find(".title").text(text);
                 },
+                /**
+                 * Zrusi filter vyhladavanie
+                 */
                 cancel : function(){
                     $(".notebooks .notebook").show();
                     $(".notebook .note").show();
@@ -298,6 +377,9 @@ $(function() {
                 }
             };
         }());
+        /**
+         * animacia pocas ajax requestov
+         */
         this.loadAnim = (function(){
             var animUrl = "/public/images/load-anim.gif",
                 staticUrl = "/public/images/logo-under-circles.png",
@@ -312,9 +394,16 @@ $(function() {
             buffer.append($("<img>").attr("src",staticUrl));
             
             return {
+                /**
+                 * Start animacie
+                 * @param {event} e event
+                 */
                 start : function(e){
                     elem.attr("src",animUrl);
                 },
+                /**
+                 * Ukoncenie animacie
+                 */
                 stop : function(){
                     elem.attr("src",staticUrl);
                 }
@@ -323,7 +412,7 @@ $(function() {
         }());
     }.apply(noteMe));
 
-    // tlacidla pred jsRoutes, lebo ten je synchronny
+    // tlacidla pred volanim jsRoutes, lebo ten je synchronny
     $("button").iconButton();
     $("header nav a").button();
     $("header #user-account a").iconButton();
@@ -352,6 +441,7 @@ $(function() {
         async: false
     });
 
+    // bind pre ajax animaciu a globalna sprava pre nedostupny server
     $(document)
             .bind("ajaxSend", noteMe.loadAnim.start)
             .bind("ajaxComplete", noteMe.loadAnim.stop)
@@ -362,7 +452,7 @@ $(function() {
             });
     
     
-    
+    // navigacia v aplikacii pomocou  url hash zmeny ===========================
     var hashChange = function (event,noanim) {
         var action = window.location.hash.slice(1),
             returnValue;
@@ -396,9 +486,10 @@ $(function() {
     $(window).bind("hashchange",hashChange);
 
     hashChange(null,true);
+    // koniec hash navigacie ===================================================
     
     // klavesove skratky
-    $(document).bind("keydown", "alt+b", function(event){
+  /*  $(document).bind("keydown", "alt+b", function(event){
         event.preventDefault();
         $("#new-notebook").click();
     }).bind("keydown", "alt+z", function(event){
@@ -412,11 +503,12 @@ $(function() {
         $("#search input[type=\"search\"]").focus();
     });
     
- 
+    // vyber textu vo vyhladavacom poli pri focuse
     $("form#search input").live("focus",function(){
         $(this).select();
-    });
+    });*/
 
+    // vyhladavanie
     $("form#search").submit(function(event){
         var searchTerm = $(this).find("input[type='search']").val(),
             self = this;
@@ -484,7 +576,7 @@ $(function() {
     noteMe.showNoteEditorHooks.push(editorSpaceResize);
 
 
-    // vertikalna zmena velkosti
+    // vertikalna zmena velkosti informacii o poznamke
     $(".vertical-resize").live("mousedown",function(event) {
             var self = this,
                     resize = true,
@@ -505,6 +597,7 @@ $(function() {
             $(this).parent().height("");
     }).disableSelection();
 
+    // zobrazovanie pouzivatelskeho menu
     (function() {
         var timeout;
         $("#user-account #header-menu").removeClass("visuallyhidden").hide();
@@ -580,19 +673,6 @@ $(function() {
     };
     $(".notebook >  div").sortable(sortNotesSettings);
 
-    /*$("#tag-sidebar").sortable({
-        axis: "y",
-        items: ".tag",
-        placeholder: "sortable-placeholder",
-        forcePlaceholderSize: true,
-        disabled: true,
-        stop: function(event, ui) {
-            $("#tag-sidebar .tag").draggable("option","disabled",false);
-            $("#tag-sidebar").sortable("option","disabled",true);
-        }
-    });*/
-
-
     var tagHook = function(){
         $("#tag-sidebar .tag").draggable({
             helper: "clone",
@@ -644,11 +724,6 @@ $(function() {
         });
     });
 
-    /*$("#tag-sidebar .tag .ui-icon-grip-dotted-vertical").mousedown(function() {
-        $("#tag-sidebar .tag").draggable("option","disabled",true);
-        $("#tag-sidebar").sortable("option","disabled",false);
-    });*/
-    
     $(".tag .ui-icon-close").live("click",function(event) {
         event.stopPropagation();
         event.stopImmediatePropagation();
@@ -670,15 +745,20 @@ $(function() {
                 }
             });
         } else if ($(this).parents("#notetags").length){
+            var noteId = $(this).parents("#right-column-wrapper .note").data("id"),
+                tagId = $(this).parents(".tag").data("id");
             noteMe.jsRoutes.removeTagFromNote.ajax({
                 data: {
-                    noteId: $(this).parents("#right-column-wrapper .note").data("id"),
-                    tagId: $(this).parents(".tag").data("id")
+                    noteId: noteId,
+                    tagId: tagId
                 },
                 success: function(data){
                     $(self).parents(".tag").animate({width:0}).promise().done(function(){
                          $(this).remove();
                     });
+                    if(data==="lastTagRemoved"){
+                        $(".notebook .note[data-id=\""+noteId+"\"] .flags .ui-icon-tag").remove();
+                    }
                 },
                 error: function(err) {
                 console.log(err);
@@ -701,7 +781,16 @@ $(function() {
                     },
                     success: function(data) {
                         var tag;
-                        console.log($('#notetags .tag[data-id="'+ui.draggable.data("id")+'"]'));
+                        
+                        // pridaj symbol znacky na poznamku v zozname
+                        if(!$(self).find(".flags .ui-icon-tag").length){
+                            if($(self).find(".flags .ui-icon-flag").length){
+                                $(self).find(".flags .ui-icon-flag").after("<span class=\"ui-icon ui-icon-tag\" title=\"Obsahuje značky\"></span>");
+                            } else {
+                                $(self).find(".flags").prepend("<span class=\"ui-icon ui-icon-tag\" title=\"Obsahuje značky\"></span>");
+                            }
+                        }
+                        // zobraz znacku v poznamke ak je otvorena
                         if($(self).data("id")===noteMe.opened.note.id && !$('#notetags .tag[data-id="'+ui.draggable.data("id")+'"]').length){
                             tag = ui.draggable.clone().removeClass("ui-draggable");
                             $(".right-column").find("#notetags").prepend(tag);
@@ -778,6 +867,7 @@ $(function() {
                 },
                 error: function(err) {
                     noteMe.message.error("Chyba pri premenovaní");
+                    noteMe.manage.revertLastRename();
                     console.log("chyba premenovania",err);
                 }
             });
@@ -844,18 +934,19 @@ $(function() {
                             noteMe.executeHooks(noteMe.addNoteHooks);
                         },
                         error: function(err) {
-                            console.log(err);
+                            noteMe.message.error("Novú poznámku sa nepodarilo uložiť");
+                            note.remove();
                         }
                     });
                 });
             },
             error: function(err) {
-                console.log(err);
+                noteMe.message.error("Chyba pri vytváraní novej poznámky");
             }
            });
     });
 
-    $(".notebook h2 .ui-icon-close").live("click", function(event){
+    $(".notebook h2 .iconbar .ui-icon-close").live("click", function(event){
         var notebook = $(this).parents(".notebook");
         noteMe.jsRoutes.remove.ajax({
             data: {
@@ -884,13 +975,13 @@ $(function() {
         window.location.hash=$(this).data("id");
         //noteMe.showNote($(this).data("id"));
     });
-    $(".note .ui-icon").live("click", function(event){
+    $(".note .iconbar .ui-icon").live("click", function(event){
         // neklikni, ak sa robil sort
         //event.preventDefault();
         event.stopPropagation();
         //event.stopImmediatePropagation();
     });
-    $(".note .ui-icon-close").live("click", function(event){
+    $(".note .iconbar .ui-icon-close").live("click", function(event){
         var note = $(this).parents(".note");
         noteMe.jsRoutes.remove.ajax({
             data: {
@@ -913,6 +1004,17 @@ $(function() {
     $(".right-column #note-toolbar button").iconButton();
     
     
+    
+    $(document).tooltip({
+        selector: "[title]",
+        position: {
+            my: "left top",
+            at: "left+5 bottom+20"
+        },
+        tooltipClass: "tooltip"
+    });
+    
+    
     // =========== Edit
     $("#hide-notebooks").iconButton().toggle(function() {
     	$("#left-column-wrapper").hide("slow");
@@ -932,7 +1034,7 @@ $(function() {
     
     
     // zdielanie
-    $(".sharenote-button, .note .ui-icon-link").live("click",function() {
+    $(".sharenote-button, .note .iconbar .ui-icon-link").live("click",function() {
     	noteMe.jsRoutes.shareNote.ajax({
             data: {
                 id: $(this).parents(".note").data("id")
@@ -985,9 +1087,7 @@ $(function() {
                     $("#sharenote #publicId").attr('checked', true); 
                 }
                 $("#sharenote form").submit(function(event) {
-                    console.log(adder.adder("getValues"));
                     event.preventDefault();
-                    console.log(JSON.stringify(adder.adder("getValues")));
                     noteMe.jsRoutes.sharing.ajax({
                         data: {
                             json: JSON.stringify(adder.adder("getValues")),
@@ -1004,6 +1104,7 @@ $(function() {
                     });
                     //adder.adder("destroy");
                     $("#sharenote").dialog("close");
+                    return false;
                 }); 
                 $("#sharenote #publicId").on("click",function(){
                     if($(this).is(":checked")){
@@ -1044,13 +1145,129 @@ $(function() {
             }
     	});
     });
+    $(".notebook h2 .iconbar .ui-icon-link").live("click", function(){
+       noteMe.jsRoutes.shareNotebook.ajax({
+           data:{
+               id: $(this).parents(".notebook").data("id")
+           },
+           dataType: "html",
+           context: $("body"),
+           success: function(data) {
+                $(data).appendTo($(this)).dialog({
+                    buttons: {
+                        "Zavrieť": function() {
+                            $(this).dialog("close");
+                        },
+                        "OK": function(){
+                            $(this).find("form").submit();
+                        }
+                    },
+                    close:function() {
+                        $(this).dialog("destroy");
+                        $(this).remove();
+                    }
+                });
+                var adder = $("#sharenotebook .add-multiple").adder({
+                    inputLabel:"Pridať email používateľa",
+                    addCheck: function(value,item) {
+                        var self = this;
+                        noteMe.jsRoutes.knownMail.ajax({
+                            data: {
+                                email: value
+                            },
+                            success: function(data) {
+                                if (data === "found") {
+                                    
+                                } else {
+                                    noteMe.message.error("Používateľ "+value+" nebol nájdený.");
+                                    $(item).addClass("ui-state-highlight").removeClass("ui-state-highlight",500).promise().done(function(){
+                                        self.remove($(this));
+                                    });
+                                }
+                            },
+                            error: function(err) {
+                                console.log(err);
+                                noteMe.message.error("Chyba pri kontrole emailu používateľa");
+                            }
+                        });
+                    }
+                });
+                $("#sharenotebook form").submit(function(event) {
+                    console.log(adder.adder("getValues"));
+                    event.preventDefault();
+                    console.log(JSON.stringify(adder.adder("getValues")));
+                    noteMe.jsRoutes.sharing.ajax({
+                        data: {
+                            json: JSON.stringify(adder.adder("getValues")),
+                            id: $(this).parents(".dialog").data("id"),
+                            type: "notebook"
+                        },
+                        success: function(data) {
+                            noteMe.message.info("Zdieľanie uložené");
+                        },
+                        error: function(err) {
+                            console.log(err);
+                            noteMe.message.error("Chyba pri ukladaní zdieľania");
+                        }
+                    });
+                    //adder.adder("destroy");
+                    $("#sharenotebook").dialog("close");
+                });
+           }
+       }); 
+    });
 
     $("#account").click(function(){
         var acmDialog;
         noteMe.jsRoutes.accountManager.ajax({
             success: function(data){
                 acmDialog = $(data).appendTo("header").dialog({
+                    modal: true,
                     buttons: {
+                        DelAccount: {
+                            class: "account-delete-button",
+                            text: "Zmazať konto",
+                            click: function(){
+                                var delAccDialog;
+                                noteMe.jsRoutes.deleteAccountDialog.ajax({
+                                    success: function(data){
+                                        delAccDialog = $(data).appendTo("header").dialog({
+                                            dialogClass: "ui-state-error",
+                                            modal: true,
+                                            buttons: {
+                                                "Zrušiť": function(){
+                                                    $(this).dialog("close");
+                                                },
+                                                "Zmazať účet": function(){
+                                                    $(this).find("form").submit();
+                                                }
+                                            },
+                                            close:function() {
+                                                $(this).dialog("destroy");
+                                                $(this).remove();
+                                            }
+                                        });
+                                    }
+                                });  
+                                $("#accountdelete.dialog form").live("submit",function(event){
+                                    event.preventDefault();
+                                    var form = $(this);
+                                    noteMe.jsRoutes.deleteAccount.ajax({
+                                        data: $(this).serialize(),
+                                        success: function(data){
+                                            if(data.next){
+                                                 window.location.assign(data.next);
+                                            }
+                                        },
+                                        error: function(err){
+                                            tooltipsOnError(form,err);
+                                        }
+                                    });
+                                    return false;
+                                });  
+                                $(this).dialog("close");
+                            }
+                        },
                         "Zavrieť": function() {
                             $(this).dialog("close");
                         },
@@ -1065,40 +1282,15 @@ $(function() {
                 });
                 $("#accountmanager.dialog form").submit(function(event){
                     event.preventDefault();
-                    var dialog = $(this);
+                    var form = $(this);
                     noteMe.jsRoutes.manageAccount.ajax({
                         data: $(this).serialize(),
                         success: function(data){
+                            $("#user-name").text(form.find("#acm-name").val());
                             acmDialog.dialog("close");
                         },
                         error: function(err){
-                            var resp = $.parseJSON(err.responseText),
-                                selector = "input[type='text'], input[type='password']",
-                                tooltips;
-
-                            try {
-                                $(selector).tooltip("destroy");
-                            } catch (e) {
-                                // ignoruj, sluzi len na zatvorenie pripadnych tooltipov
-                            }
-
-                            tooltips = $(dialog).find(selector).tooltip({
-                                items: "input",
-                                content: function() {
-                                    if(resp && resp[$(this).attr("name")]) {
-                                        return resp[$(this).attr("name")][0].message;
-                                    }
-                                },
-                                open: function(){
-                                    var self = $(this);
-                                    setTimeout(function(){self.tooltip("close");}, 10000);
-                                },
-                                close: function(){
-                                    $(this).tooltip("destroy");
-                                },
-                                tooltipClass: "ui-state-error"
-                            });
-                            tooltips.tooltip("open");
+                            tooltipsOnError(form,err);
                         }
                         
                     });
@@ -1107,8 +1299,158 @@ $(function() {
         });
     });
 
+    function tooltipsOnError(form,err){
+        var resp = $.parseJSON(err.responseText),
+            selector = "input[type='text'], input[type='password']",
+            tooltips;
+
+        try {
+            $(selector).tooltip("destroy");
+        } catch (e) {
+            // ignoruj, sluzi len na zatvorenie pripadnych tooltipov
+        }
+
+        tooltips = $(form).find(selector).tooltip({
+            items: "input",
+            content: function() {
+                if(resp && resp[$(this).attr("name")]) {
+                    return resp[$(this).attr("name")][0].message;
+                }
+            },
+            open: function(){
+                var self = $(this);
+                setTimeout(function(){self.tooltip("close");}, 10000);
+            },
+            close: function(){
+                $(this).tooltip("destroy");
+            },
+            tooltipClass: "ui-state-error"
+        });
+        tooltips.tooltip("open");
+    }
+
 
 });
+
+if(typeof nicEditors !== "undefined"){
+    
+    var imgUploadOptions = {
+        buttons: {
+            "upload": {name: "Nahrať obrázok", type: "imgUpload"}
+        }
+    };
+
+    var imgUpload = nicEditorAdvancedButton.extend({
+        init: function() {
+        },
+        addPane: function() {
+            if (typeof window.FormData === "undefined") {
+                return;
+            }
+            var self = this;
+            console.log(this);
+            
+            var container = $("<form>").css({padding: 10}).appendTo($(this.pane.pane)).on("submit", function(){
+                var form = $(this)
+                self.submit();
+            });
+            
+            this.label = $("<label for=\"ne-img-upload\">Zvoľte obrázkový súbor:</label>").appendTo(container);
+            this.file = $("<input type=\"file\" id=\"ne-img-upload\">").appendTo(container).focus();
+            this.submitButton = $("<input type=\"submit\" value=\"Nahrať obrázok\">").appendTo(container).button();
+            this.progressBar = $("<progress width=\"100%\">").css({padding:10}).appendTo($(this.pane.pane)).hide();   
+        },
+        submit: function() {
+            if(this.file.val()===""){
+                this.file.highlightWithClass("ui-state-highlight");
+                return;
+            }
+        
+            var file = this.file.get(0).files[0],
+                self = this;
+            
+            if (!file || !file.type.match(/image.*/)) {
+              noteMe.message.error("Možete nahrávať iba obrázkové súbory");
+              return;
+            }
+        
+            this.file.hide();
+            this.label.hide();
+            this.progressBar.show().val(0);
+            
+            noteMe.edit.uploadImage(file,noteMe.opened.note.id,function(obj) {
+                if(!obj || !obj.imageUrl) {
+                    return;
+                }
+                var image = self.ne.selectedInstance.selElm().parentTag('IMG');
+                if (!image) {
+                    self.ne.selectedInstance.restoreRng();
+                    self.ne.nicCommand("insertImage", obj.imageUrl);
+                    image = self.findElm('IMG','src', obj.imageUrl);
+                }
+                if (image) {
+                    $(image).attr("src",obj.imageUrl).attr("width",Math.min(300));
+                }
+            
+            });
+            
+        }
+    });
+
+    nicEditors.registerPlugin(nicPlugin,imgUploadOptions);
+
+
+    $(function(){
+
+        // drag-drop upload obrazkov v editore
+        noteMe.showNoteEditorHooks.push(function(){
+            $(document).live("dragover dragend", function(event){
+                event.preventDefault();
+                
+            }).live("drop", function(event){
+                event.preventDefault();
+            });
+            $(".note-block-wrapper").live("drop", function(event){
+                event.preventDefault();
+                if(typeof event.originalEvent.dataTransfer.files[0] === "undefined") {
+                    return;
+                }
+                noteMe.edit.uploadImage(event.originalEvent.dataTransfer.files[0],noteMe.opened.note.id,function(obj){
+                    if(!obj || !obj.imageUrl) {
+                        return;
+                    }
+                    var selInst = nicEditors.editors[0].selectedInstance ||
+                            nicEditors.editors[0].lastSelectedInstance || 
+                            nicEditors.editors[0].nicInstances[0];
+                    console.log(selInst);
+                    
+                    findElm = function(tag,attr,val) {
+                            var list = selInst.getElm().getElementsByTagName(tag);
+                            for(var i=0;i<list.length;i++) {
+                                    if(list[i].getAttribute(attr) === val) {
+                                            return $BK(list[i]);
+                                    }
+                            }
+                    };
+                    var image = (selInst).selElm().parentTag('IMG');
+                    console.log(image);
+                    if (!image) {
+                        selInst.restoreRng();
+                        nicEditors.editors[0].nicCommand("insertImage", obj.imageUrl);
+                        image = findElm('IMG','src', obj.imageUrl);
+                    }
+                    if (image) {
+                        $(image).attr("src",obj.imageUrl).attr("width",300);
+                    }
+                    });
+            });
+
+        } ); 
+
+    });
+
+}
+
 
 /* ========= jQuery extensions ========= */
 
@@ -1224,9 +1566,9 @@ $.noanim = function(action) {
     return returnValue;
 };
 
-
-// adder
-
+/**
+ * UI widget pre vytvaranie a upravu zoznamov
+ */
 $(function(){
     var adderPrototype = {
         options : {
@@ -1276,11 +1618,18 @@ $(function(){
         add : function(value,type) {
             var index = this.params.values.length,
                 self = this,
-                newItem;
+                newItem,
+                i;
             if(value===""){
-                console.log($("#"+this.params.inputID));
                 $("#"+this.params.inputID).addClass("ui-state-highlight").removeClass("ui-state-highlight",500);
                 return;
+            }
+            //kontrola duplicit
+            for(i in this.params.values){
+                if(this.params.values[i].value === value){
+                    this.params.added.children().filter(function() { return $(this).data("index") === parseInt(i,10); }).addClass("ui-state-highlight").removeClass("ui-state-highlight",500);
+                    return;
+                }
             }
             this.params.values.push({value: value, type: type || "new"});
             newItem = $("<div>").text(value).addClass(this._internal.itemClass).button({
@@ -1339,25 +1688,3 @@ $(function(){
 
     $.widget("ui.adder", adderPrototype);
 });
-
-if(typeof nicEditors !== "undefined"){
-    
-    
-
-
-    $(function(){
-
-
-        noteMe.showNoteEditorHooks.push(function(){
-            document.ondragover = function () { return false; };
-            document.ondragend = function () { return false; }; 
-            document.ondrop = function(event){
-                event.preventDefault();
-                console.log("dropped");
-            };
-
-        } ); 
-
-    });
-
-}

@@ -29,6 +29,15 @@ public class Share extends Controller {
         renderArgs.put("note", note);
         render("dialogs/sharenote.html");
     }
+    
+    public static void shareNotebook(long id) {
+        if(!Security.checkNotebookAccessibility(id)) {
+            forbidden();
+        }
+        Notebook notebook = Notebook.findById(id);
+        renderArgs.put("notebook", notebook);
+        render("dialogs/sharenotebook.html");
+    }
 
     public static void sharePublic(long id) {
         if (!Security.checkNoteOwnership(id)) {
@@ -82,7 +91,8 @@ public class Share extends Controller {
                         .setParameter("u", user)
                         .setParameter("n", note);
                 Notebook notebook = (Notebook) q.getSingleResult();
-                notebook.notes.remove(note);
+                //notebook.notes.remove(note);
+                notebook.removeNote(note);
                 notebook.save();
                 
 
@@ -101,7 +111,8 @@ public class Share extends Controller {
                     user.save();
                 }
                 //pridanie poznamy do defaultneho notebooka
-                user.defaultNbSharedNotes.notes.add(note);
+                //user.defaultNbSharedNotes.notes.add(note);
+                user.defaultNbSharedNotes.addNote(note, -1);
                 user.defaultNbSharedNotes.save();
             }
             note.save();
