@@ -1957,9 +1957,11 @@ $(function(){
             
         };
         if($.browser.opera) {
+            // opera potrebuje specialny pristup :D
             history.navigationMode = 'compatible';
-            window.onunload = function(){alert("ahoj");};
-            document.onunload = function(){alert("doc");};
+            window.onunload = function(){
+                processAction("all",false);
+            };
         }
         $(window).bind("beforeunload unload",function(){
             processAction("all",false);  //spracuj vsetky s async = false
