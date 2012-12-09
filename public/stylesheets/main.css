@@ -893,14 +893,22 @@ fieldset legend {
 .global-message.ui-tooltip.ui-state-error {
     border-color: #ff7624;
 }
+.da-tooltip {
+    box-shadow: none;
+    max-width: 180px;
+    margin:15px;
+    border: 1px solid #c3c3c3;
+    border-style: dashed;
+    box-shadow: 0px 0px 4px #2e2e2e;
+    background: #757575 url(noteMe-dark/images/ui-bg_fine-grain_70_757575_60x60.png);
+}
 
-
-
-
-
-
-
-
+.da-tooltip button{
+    border:none !important;
+}
+.da-tooltip button:hover{
+    background: #81ae40 url(noteMe-dark/images/ui-bg_fine-grain_30_81ae40_60x60.png);
+}
 
 .ui-adder {
     padding:5px;

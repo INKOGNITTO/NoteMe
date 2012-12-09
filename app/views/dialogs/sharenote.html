@@ -15,7 +15,7 @@
                     <label for="publicId">Povoliť verejné zdieľanie</label>
                     <div id="share-public">
                             <p>Verejný odkaz:</p>
-                            <div id="publicId-dest">#{if note.publicID!=null}@@{PublicNote.index(note.publicID)}#{/if}</div>
+                            <div id="publicId-dest">#{if note.isPublic}@@{PublicNote.index(note.publicID)}#{/if}</div>
                     </div>
             </fieldset>
 	</form>

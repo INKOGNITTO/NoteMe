@@ -11,8 +11,10 @@ var noteMe = noteMe || {};
                 jsr.url = urlMethod.call({},obj?obj.urlParams:{});
                 $.ajax($.extend(jsr,obj));
             },
-            url: url,
-            type: jsr.type
+            ajaxSettings: {
+                url: url,
+                type: jsr.type
+            }
         };
     };
     

@@ -34,7 +34,7 @@ $(function() {
                 element: null,
                 value: null
             };
-    
+        
         this.manage = {
             /**
              * Funkcia umoznuje premenovanie nazvov objektov (poznamka, blok, znacka)
@@ -82,11 +82,20 @@ $(function() {
              */
             revertLastRename: function(){
                 lastRename.element.text(lastRename.value);
+            },
+            
+            
+            remove: function(){
+                
+        
             }
+            
+            
         };
         this.opened  = {
             note: {
                 id: null,
+                edited: false,
                 close: function() {
                     this.id = null;
                     $(".right-column.note").remove();
@@ -123,6 +132,7 @@ $(function() {
                         $("#right-column-wrapper .note").remove();
                         $("#right-column-wrapper").prepend(data);
                         noteMe.opened.note.id = $("#right-column-wrapper .note").data("id");
+                        noteMe.opened.note.edited = false;
                         noteMe.edit.init();
                         noteMe.executeHooks(noteMe.showNoteEditorHooks);
                     },
@@ -179,6 +189,7 @@ $(function() {
                     return new nicEditor({
                         onSave : function(c){
                             var content = $(editorSpace).clone(true);
+                            noteMe.opened.note.edited = false;
                             content.find(".note-block-wrapper").attr("class","note-block-wrapper").find(".handle").hide();
                             content.find(".ui-resizable-handle").remove();
                             content.find(".note-block").removeAttr("contenteditable");
@@ -202,6 +213,7 @@ $(function() {
             editor = createEditor();  
             
             return {
+                saveButton: null,
                 removeAllInstances : function(){
                     for(var i in editorInstances){
                         editor.removeInstance(editorInstances[i].attr("id"));
@@ -224,6 +236,10 @@ $(function() {
                     }).draggable(draggableSettings).resizable(resizebleSettings);
                     editor.addInstance(block.attr("id"));
                     editorInstances.push(block);
+                    block.add(wrapper).on("focus resize drag",function(){
+                        // zaregistruj editaciu poznamky
+                        noteMe.opened.note.edited = true;
+                    });
                     return block;
                 },
                 init : function() {
@@ -256,6 +272,10 @@ $(function() {
                 
                     editorSpace.find(".note-block-wrapper").draggable(draggableSettings).resizable(resizebleSettings);
                     editorSpace.find(".handle").show();
+                    editorSpace.find(".note-block-wrapper, .note-block").on("focus resize drag",function(){
+                        // zaregistruj editaciu poznamky
+                        noteMe.opened.note.edited = true;
+                    });
                     editorSpace.find(".note-block").each(function(){
                         editor.addInstance($(this).attr("id"));
                         editorInstances.push($(this));
@@ -310,7 +330,10 @@ $(function() {
          */
         this.message = {
             info: gtFunction(""),
-            error: gtFunction("ui-state-error")
+            error: gtFunction("ui-state-error"),
+            close: function(){
+                globalTooltip.tooltip("close");
+            }
         };
         this.search = (function() {
             /**
@@ -688,7 +711,7 @@ $(function() {
     noteMe.addTagHooks.push(tagHook);
     
     $(".tag .title").singleDoubleClick(function(){
-        var tagName = $(this).parents(".tag").find(".title").text()
+        var tagName = $(this).parents(".tag").find(".title").text();
         noteMe.jsRoutes.searchForTags.ajax({
             data: {
                 id: $(this).parents(".tag").data("id")
@@ -728,20 +751,36 @@ $(function() {
         event.stopPropagation();
         event.stopImmediatePropagation();
         var self = this;
+        var deleted =[];
         if($(this).parents("#tag-sidebar").length){
-            noteMe.jsRoutes.remove.ajax({
-                data: {
-                    type: "tag",
-                    id: $(this).parents(".tag").data("id")
+            $.delayedAction({
+                name: "Odstránenie značky "+$(this).parents(".tag").find(".title").text(),
+                action: noteMe.jsRoutes.remove.ajax,
+                actionParams : {
+                    data: {
+                        type: "tag",
+                        id: $(this).parents(".tag").data("id")
+                    },
+                    success : function(data) {
+                        noteMe.message.info("Zmazaná značka "+$(self).find(".title").text());
+                    },
+                    error: function(err) {
+                        noteMe.message.error("Chyba pri mazaní značky");
+                    }
                 },
-                success : function(data) {
-                    noteMe.message.info("Zmazaná značka "+$(self).find(".title").text());
+                immediateCallback: function(){
                     $('.tag[data-id="'+$(self).parents(".tag").data("id")+'"]').animate({width:0}).promise().done(function(){
-                         $(this).remove();
-                    });
+                            deleted.push({item:$(this),parent:$(this).parent()});
+                            $(this).hide();
+                        });
                 },
-                error: function(err) {
-                    noteMe.message.error("Chyba pri mazaní značky");
+                revertCallback: function(){
+                    var i;
+                    for (i in deleted){
+                        if($(deleted[i].parent).length){
+                            $(deleted[i].item).show().removeAttr("style");
+                        }
+                    }
                 }
             });
         } else if ($(this).parents("#notetags").length){
@@ -948,32 +987,65 @@ $(function() {
 
     $(".notebook h2 .iconbar .ui-icon-close").live("click", function(event){
         var notebook = $(this).parents(".notebook");
-        noteMe.jsRoutes.remove.ajax({
-            data: {
-                type: "notebook",
-                id: notebook.data("id")
+        var removed = {};
+        $.delayedAction({
+            name: "odstránenie poznámkového bloku "+notebook.find("h2 .title").text(),
+            action: noteMe.jsRoutes.remove.ajax,
+            actionParams: {
+                data: {
+                    type: "notebook",
+                    id: notebook.data("id")
+                },
+                success: function(data){
+                    noteMe.message.info("Poznámkový blok \""+notebook.find("h2 .title").text()+"\" bol zmazaný");
+                },
+                error: function(err) {
+                    noteMe.message.error("Chbyba pri mazaní poznámkového bloku");
+                    console.log(err);
+                }
             },
-            success: function(data){
-                noteMe.message.info("Poznámkový blok \""+notebook.find("h2 .title").text()+"\" bol zmazaný");
+            immediateCallback: function(){
                 if(notebook.find(".note[data-id=\""+noteMe.opened.note.id+"\"]").length) {
                     noteMe.opened.note.close(); // ak je v mazanom bloku poznamka, ktora je momentalne otvorena, zavri poznamku
                 }
                 notebook.slideUp(function() {
-                   $(this).remove(); 
+                   removed = $(this);
+                   $(this).hide(); 
                 });
             },
-            error: function(err) {
-                noteMe.message.error("Chbyba pri mazaní poznámkového bloku");
-                console.log(err);
+            revertCallback: function(){
+                removed.slideDown().promise().done(function(){$(this).show();});
             }
+
         });
     });
 
 
 
-    $(".note").singleDoubleClick(function(){
-        window.location.hash=$(this).data("id");
-        //noteMe.showNote($(this).data("id"));
+    $(".notebook .note").singleDoubleClick(function(){
+        var self = $(this);
+        var action = function(){
+            window.location.hash=$(self).data("id");
+        }
+        if (noteMe.opened.note.edited) {
+            $("<p>Poznámka bola zmenená</p>").dialog({
+                modal: true,
+                buttons : {
+                    "Ostať na poznámke": function(){
+                        $(this).dialog("close");
+                        //$(noteMe.edit.saveButton).trigger("mousedown");
+                        //console.log(noteMe.edit.saveButton);
+
+                    },
+                    "Pokračovať bez uloženia": function(){
+                        $(this).dialog("close");
+                        action();
+                    }
+                }
+            });
+            return;
+        }
+        action();
     });
     $(".note .iconbar .ui-icon").live("click", function(event){
         // neklikni, ak sa robil sort
@@ -983,20 +1055,34 @@ $(function() {
     });
     $(".note .iconbar .ui-icon-close").live("click", function(event){
         var note = $(this).parents(".note");
-        noteMe.jsRoutes.remove.ajax({
-            data: {
-                type: "note",
-                id: note.data("id")
+        var removed;
+        $.delayedAction({
+            name: "Odstránenie poznámky "+ note.find(".title").text(),
+            action: noteMe.jsRoutes.remove.ajax,
+            actionParams: {
+                data: {
+                    type: "note",
+                    id: note.data("id")
+                },
+                success: function(data) {
+                    noteMe.message.info("Poznámka \""+note.find(".title").text()+"\" bola zmazaná");
+                },
+                error: function(err) {
+                    console.log(err);
+                }
             },
-            success: function(data) {
+            immediateCallback : function(){
                 if(note.data("id")===noteMe.opened.note.id) {
                     noteMe.opened.note.close();
                 }
-                noteMe.message.info("Poznámka \""+note.find(".title").text()+"\" bola zmazaná");
-                note.slideUp("slow",function(){$(this).remove();});
+                note.slideUp("slow",function(){
+                    removed = $(this)
+                    $(this).slideUp();
+                });
+            
             },
-            error: function(err) {
-                console.log(err);
+            revertCallback: function(){
+                removed.slideDown();
             }
         });
     });
@@ -1687,4 +1773,198 @@ $(function(){
     };
 
     $.widget("ui.adder", adderPrototype);
+});
+
+var delayedAction;
+
+$(function(){
+    
+    delayedAction = (function(){
+        var delay = 15000,
+            qn = "daq",
+            buttonText = "Vrátiť akciu",
+            actions = [],
+            dAtooltipCloseTimeout = 0,
+            /**
+             * @param text text tlacidla
+             * @param index index akcie
+             * @param all true, ak sa ma zobrazit tlacidlo pre zrusenie vsetkych akcii
+             */
+            dAtooltipContent = function(actionName,text,index,all) {
+                var buttonSingleAction  = "", buttonAllActions = "";
+                if(typeof index === "undefined" || index === null) {
+                    index = "";
+                }
+                
+                buttonSingleAction = "<button title=\""+actionName+"\" class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary\""+
+                    " id=\"delayed-ajax-cancel"+index+"\">" +
+                    "<span class=\"ui-button-icon-primary ui-icon ui-icon-arrowrefresh-1-w\"></span>" +
+                    "<span class=\"ui-button-text\">"+text+"</span></button>";
+                if (all){
+                    buttonAllActions = "<button class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary\""+
+                    " id=\"delayed-ajax-cancel-all\">" +
+                    "<span class=\"ui-button-icon-primary ui-icon ui-icon-arrowrefresh-1-w\"></span>" +
+                    "<span class=\"ui-button-text\">Vrátiť všetky akcie</span></button>";
+                }
+                return buttonSingleAction + buttonAllActions;
+                    
+            },
+            dAtooltip = $("header").tooltip({
+                content : dAtooltipContent(buttonText),
+                items : "header",
+                disabled : true,
+                tooltipClass : "da-tooltip",
+                show : {
+                    effect : "slideDown",
+                    duration : 500,
+                    easing : "swing"
+                },
+                hide : {
+                    effect : "slideUp",
+                    duration : 500,
+                    easing:"swing"
+                },
+                position : {
+                    my : "left top+2",
+                    at : "left+720 top",
+                    collision : "none"
+                },
+                open: function() {
+                    var self = $(this);
+                    noteMe.message.close();
+                    clearTimeout(dAtooltipCloseTimeout);
+                    dAtooltipCloseTimeout = setTimeout(function(){
+                        self.tooltip("close");
+                    }, delay-250);
+                },
+                close: function() {
+                    clearTimeout(dAtooltipCloseTimeout);
+                }
+            }),
+            actionNameTooltipSettings = {
+                selector: "[title]",
+                position: {
+                    my: "left top",
+                    at: "left+5 bottom+20"
+                },
+                tooltipClass: "tooltip"
+            },
+            isAnyPending = function(){
+                var i;
+                for (i in actions) {
+                    if(actions[i].deferred.state()==="pending"){
+                        return true;
+                    }
+                }
+                return false;
+            },
+            actionDeferrer = (function(){
+                var deferred = $.Deferred();
+                deferred.resolve();
+                return deferred.promise();
+            }()),
+            processAction = function(actionIndex,async) {
+                var action, i;
+                if (actionIndex === "all") {
+                    for (i in actions) {
+                        action = actions[i];
+                        actionDeferrer = actionDeferrer.done(action.deferred.resolve(async)).promise();
+                    }
+                } else if(actions[actionIndex]) {
+                    action = actions[actionIndex];
+                    actionDeferrer = actionDeferrer.done(action.deferred.resolve(async)).promise();
+                }
+            },
+            cancelAll = function(){
+                var i;
+                for (i in actions) {
+                    actions[i].cancel();
+                }
+            };
+        
+        /**
+         * 
+         * @param {type} args {action, name, actionParams, immediateCallback, revertCallback}
+         * @returns {undefined}
+         */
+        $.delayedAction = function(args) {
+            var action = args.action,
+                actionName = args.name,
+                actionParams = args.actionParams,
+                immediateCallback = args.immediateCallback,
+                revertCallback = args.revertCallback,
+                
+                deferred = $.Deferred(),
+                actionIndex = actions.length,
+                timeout = setTimeout(function(){
+                    processAction(actionIndex);
+                }, delay),
+                cancel = function(){
+                    clearTimeout(timeout);
+                    deferred.reject();
+                    if(!isAnyPending()) {
+                        dAtooltip.tooltip("close");
+                    }
+                };
+            
+                deferred.promise().done(function(async){
+                    if (typeof async === "boolean") {
+                        actionParams.async = async;
+                    }
+                    action.call(document, actionParams);
+                });
+                
+                deferred.promise().fail(function(){
+                    clearTimeout(timeout);
+                });
+                
+                if (typeof revertCallback === "function") {
+                    deferred.promise().fail(revertCallback);
+                }
+                
+                if (typeof immediateCallback === "function") {
+                    immediateCallback();
+                }
+                
+                if (isAnyPending()) {
+                    dAtooltip.tooltip("option",{content: dAtooltipContent(actionName,"Vrátiť poslednú akciu",actionIndex,true),items: "header"}).tooltip("open");
+                    $("#delayed-ajax-cancel"+actionIndex).live("click",function(){
+                        $(this).detach("click");
+                        $(this).slideUp();
+                        cancel();
+                    }).tooltip(actionNameTooltipSettings);
+                    $("#delayed-ajax-cancel-all").live("click",function(){
+                        $(this).detach("click");
+                        cancelAll();
+                    });
+                } else {
+                    dAtooltip.tooltip("option",{content: dAtooltipContent(actionName,buttonText,actionIndex),items: "header"}).tooltip("open");
+                    $("#delayed-ajax-cancel"+actionIndex).live("click",function(){
+                        $(this).detach("click");
+                        cancel();
+                    }).tooltip(actionNameTooltipSettings);
+                }
+            
+                actions.push({
+                    timeout : timeout,
+                    deferred : deferred,
+                    cancel : cancel,
+                    action : action,
+                    actionParams : actionParams
+                });
+                
+            
+            
+        };
+        if($.browser.opera) {
+            history.navigationMode = 'compatible';
+            window.onunload = function(){alert("ahoj");};
+            document.onunload = function(){alert("doc");};
+        }
+        $(window).bind("beforeunload unload",function(){
+            processAction("all",false);  //spracuj vsetky s async = false
+        });
+    
+    }());
+    
 });

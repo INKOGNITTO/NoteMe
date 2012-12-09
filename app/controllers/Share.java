@@ -50,7 +50,7 @@ public class Share extends Controller {
         } else {
             uuid = note.publicID;
         }
-        note.isPulbic = true;
+        note.isPublic = true;
         note.save();
         Map<String, Object> arg = new HashMap<String, Object>();
         arg.put("uuid", uuid);

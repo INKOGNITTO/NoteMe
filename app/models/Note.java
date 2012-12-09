@@ -29,7 +29,7 @@ public class Note extends Model {
     @Column(unique = true)
     public String publicID;
    
-    public Boolean isPulbic;
+    public Boolean isPublic;
     
     @Column(columnDefinition = "TEXT")
     public String content;
@@ -60,7 +60,7 @@ public class Note extends Model {
         this.owner = owner;
         this.creationDate = new Date();
         this.updateDate = new Date();
-        this.isPulbic = false;
+        this.isPublic = false;
     }
 
     public String generatePublicId() {
@@ -75,7 +75,7 @@ public class Note extends Model {
     }
 
     public void unsharePublicId() {
-        this.isPulbic = false;
+        this.isPublic = false;
         this.save();
         this.refresh();
     }

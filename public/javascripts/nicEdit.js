@@ -1023,24 +1023,35 @@ var nicButtonTips = bkClass.extend({
 	},
 	
 	show : function(button) {
-		this.timer = setTimeout(this.create.closure(this,button),400);
+		//this.timer = setTimeout(this.create.closure(this,button),400);
+                                $(button.button).tooltip({
+                            tooltipClass: "tooltip",
+                            items: $(button.button),
+                            content: button.options.name,
+                            position : {
+                                my: "left top",
+                                at: "left+10 bottom+15",
+                                collision: "flipfit"
+                            }
+                        }).tooltip("open");
 	},
 	
 	create : function(button) {
-		this.timer = null;
+		/*this.timer = null;
 		if(!this.pane) {
 			this.pane = new nicEditorPane(button.button,this.ne,{fontSize : '12px', marginTop : '5px'});
+                        console.log($(this.pane),$(button));
 			this.pane.setContent(button.options.name);
-		}		
+		}*/		
 	},
 	
 	hide : function(button) {
-		if(this.timer) {
+		/*if(this.timer) {
 			clearTimeout(this.timer);
 		}
 		if(this.pane) {
 			this.pane = this.pane.remove();
-		}
+		}*/
 	}
 });
 nicEditors.registerPlugin(nicButtonTips);
@@ -1374,7 +1385,7 @@ nicEditors.registerPlugin(nicPlugin,nicImageOptions);
                 $(this.margin).css({display : 'inline-block'});
             },
             mouseClick : function() {
-                    if(this.isDisabled) {return;}
+                    //if(this.isDisabled) {return;}
                     var onSave = this.ne.options.onSave;
                     var allContent = [];
                     
