@@ -63,7 +63,7 @@ public class Notebook extends Model {
     public void removeNote(Note note) {
 
         notes.remove(note);
-        if (owner.equals(User.findByEmail(Scope.Session.current.get().get("username")))) {
+        if (note.owner.equals(User.findByEmail(Scope.Session.current.get().get("username")))) {
             for (Notebook nb : linkedNotebooks) {
                 nb.removeNote(note);
             }
@@ -93,7 +93,7 @@ public class Notebook extends Model {
         for (Note note : notesToRemove) {
             note.remove();
         }
-        // zmazanie poznamky z pozn. bloku
+        // odstrani pozn. blok aktualneho pouzivatela
         actualUser.notebooks.remove(this);
         actualUser.save();
         this.refresh();
