@@ -138,8 +138,10 @@ public class Share extends Controller {
             
             for (int i=0; i<arrayNew.size(); i++){
                 //novy NB (nazov rovnaky, vlastnik arrrayNew), vlozit do DB,zavolat NB link Novy
-                user = User.findByEmail(arrayRemoved.get(i).getAsString());
+                user = User.findByEmail(arrayNew.get(i).getAsString());
                 Notebook newNb = Notebook.create(notebook.name, user.getId());
+                user.notebooks.add(newNb);
+                user.save();
                 notebook.linkNotebook(newNb);
                 
             }

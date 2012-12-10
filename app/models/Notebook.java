@@ -3,7 +3,9 @@ package models;
 import java.util.*;
 import javax.persistence.*;
 import org.hibernate.annotations.Cascade;
+import play.Logger;
 import play.data.validation.Required;
+import play.db.jpa.JPA;
 import play.db.jpa.Model;
 import play.mvc.Scope;
 
@@ -39,7 +41,7 @@ public class Notebook extends Model {
 
     public static Notebook create(String name, Long userID) {
         Notebook notebook = new Notebook(name, User.<User>findById(userID));
-        notebook.save();
+         notebook.save();
         return notebook;
     }
 
@@ -105,14 +107,20 @@ public class Notebook extends Model {
             actualUser.defaultNbSharedNotes = null;
             actualUser.save();
         }
+        Query q = JPA.em().createQuery("select notebook from Notebook notebook where :this member of notebook.linkedNotebooks").setParameter("this", this);
+        Notebook originNotebook = (Notebook)q.getSingleResult();
+        originNotebook.unlinkNotebook(this);
+        originNotebook.save();
         this.delete();
     }
 
     public void linkNotebook(Notebook notebook) {
         linkedNotebooks.add(notebook);
-        for (int i = 0; i < notes.size(); i++) {
-            notebook.addNote(notes.get(i), i);
+        for (Note n : notes) {
+            Logger.info(n.name);
+            notebook.addNote(n,-1);
         }
+        notebook.save();
     }
 
     public void unlinkNotebook(Notebook notebook) {
@@ -123,6 +131,14 @@ public class Notebook extends Model {
             }
         }
         notebook.save();
+    }
+    
+    public Set<Notebook> getConnectedNotebooks() {
+        Set<Notebook> list1 = this.linkedNotebooks;
+        Query ln = JPA.em().createQuery("select nb1 from Notebook nb1 where :this member of nb1.linkedNotebooks").setParameter("this", this);
+        
+         list1.addAll(ln.getResultList());
+         return list1;
     }
         
 }

@@ -1772,7 +1772,7 @@ var delayedAction;
 $(function(){
     
     delayedAction = (function(){
-        var delay = 15000,
+        var delay = 3000,
             qn = "daq",
             buttonText = "Vrátiť akciu",
             actions = [],

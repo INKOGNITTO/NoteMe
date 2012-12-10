@@ -79,8 +79,8 @@ public class User extends Model {
     }
     
     public List<Note> getAllNotes() {
-        Query noteQuery = JPA.em().createQuery("select note from Note note join note.notebooks nb join nb.contributors cont"
-                + " where cont = :user")
+        Query noteQuery = JPA.em().createQuery("select note from Note note join note.notebooks nb join nb.owner owner"
+                + " where owner = :user")
                 .setParameter("user", this);
         return noteQuery.getResultList();
     }
