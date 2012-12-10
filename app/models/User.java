@@ -33,7 +33,7 @@ public class User extends Model {
     @CheckWith(controllers.App.PasswordCheckCheck.class)
     public String passwordCheck;
     
-    @ManyToMany (cascade = CascadeType.ALL)
+    @OneToMany (cascade = CascadeType.ALL)
     @OrderColumn
     public List<Notebook> notebooks = new LinkedList<Notebook>();
     

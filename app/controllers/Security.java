@@ -38,10 +38,12 @@ public class Security extends Secure.Security {
         return user.getOwnedNotes().contains((Note)Note.findById(noteId));
     }
     
-    public static boolean  checkNotebookAccessibility(long nbId) {
+    public static boolean checkNotebookOwnership(long nbId) {
         User user = User.findByEmail(Security.connected());
-        return user.notebooks.contains((Notebook)Notebook.findById(nbId));
-        
+        return ((Notebook) Notebook.findById(nbId)).owner.equals(user);
+
+//        return user.notebooks.contains((Notebook)Notebook.findById(nbId));
+
     }
     
     public static boolean check(String what) {

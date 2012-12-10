@@ -31,7 +31,7 @@ public class Share extends Controller {
     }
     
     public static void shareNotebook(long id) {
-        if(!Security.checkNotebookAccessibility(id)) {
+        if(!Security.checkNotebookOwnership(id)) {
             forbidden();
         }
         Notebook notebook = Notebook.findById(id);
@@ -87,7 +87,7 @@ public class Share extends Controller {
                 user = User.findByEmail(arrayRemoved.get(i).getAsString());
                 note.sharedWith.remove(user);
                 //odstranenie z notebooku od nevlastnika
-                Query q = JPA.em().createQuery("select notebook from Notebook notebook where :u member of notebook.contributors and :n member of notebook.notes")
+                Query q = JPA.em().createQuery("select notebook from Notebook notebook where :u = notebook.owner and :n member of notebook.notes")
                         .setParameter("u", user)
                         .setParameter("n", note);
                 Notebook notebook = (Notebook) q.getSingleResult();
@@ -95,7 +95,6 @@ public class Share extends Controller {
                 notebook.removeNote(note);
                 notebook.save();
                 
-
             }
 
             for (int i = 0; i < arrayNew.size(); i++) {
@@ -121,14 +120,39 @@ public class Share extends Controller {
         if (type.equals("notebook")) {
             Notebook notebook = Notebook.findById(id);
 
-            for (int i = 0; i < arrayNew.size(); i++) {
-                user = User.findByEmail(arrayNew.get(i).getAsString());
-                //kontrola duplicity
-                if (!notebook.contributors.contains(user)) {
-                    user.notebooks.add(notebook);
-                    user.save();
-                }
+            if (!Security.checkNotebookOwnership(notebook.getId())) {
+                forbidden();
             }
+            
+            
+            for(int i=0; i<arrayRemoved.size(); i++){
+                user = User.findByEmail(arrayRemoved.get(i).getAsString());
+                //najst NB vlastnik user a notebook ma nalinkovany notebook
+                Query q = JPA.em().createQuery("select notebook from Notebook notebook where :u member of notebook.owner and notebook member of :nb.linkedNotebooks")
+                        .setParameter("u", user)
+                        .setParameter("nb", notebook);
+                Notebook notebookResult = (Notebook) q.getSingleResult();
+                notebook.unlinkNotebook(notebookResult);
+            }
+            
+            
+            for (int i=0; i<arrayNew.size(); i++){
+                //novy NB (nazov rovnaky, vlastnik arrrayNew), vlozit do DB,zavolat NB link Novy
+                user = User.findByEmail(arrayRemoved.get(i).getAsString());
+                Notebook newNb = Notebook.create(notebook.name, user.getId());
+                notebook.linkNotebook(newNb);
+                
+            }
+            notebook.save();
+            
+//            for (int i = 0; i < arrayNew.size(); i++) {
+//                user = User.findByEmail(arrayNew.get(i).getAsString());
+//                //kontrola duplicity
+//                if (!notebook.contributors.contains(user)) {
+//                    user.notebooks.add(notebook);
+//                    user.save();
+//                }
+//            }
         }
     }
 }

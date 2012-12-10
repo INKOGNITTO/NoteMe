@@ -151,7 +151,7 @@ public class NoteManager extends Controller {
     
     public static void remove(String type, Long id) {
         if (type.equals("notebook")) {
-            if(Security.checkNotebookAccessibility(id)) {
+            if(Security.checkNotebookOwnership(id)) {
                 ((Notebook) Notebook.findById(id)).remove();
             } else {
                 forbidden();
