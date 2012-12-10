@@ -136,4 +136,18 @@ public class App extends Controller{
         renderBinary(image.get());
     }
     
+    /**
+     * test xml odpovede, sluzi ako webova sluzba
+     * @param email email pouzivatela
+     * @param password heslo, nutne ak pouzivatel nie je prihlaseny 
+     */
+    public static void userNotes(String email,String password){
+        User user = User.findByEmail(email);
+        if(user == null || (!Passwords.matches(password, user.password) && !Security.connected().equals(email))){
+            forbidden();
+        }
+        renderArgs.put("user",user);
+        render("notes.xml");
+    }
+    
 }

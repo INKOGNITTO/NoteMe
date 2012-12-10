@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<noteMe>
+    #{list user.notebooks, as: 'notebook'}
+    <notebook name="${notebook.name}">
+        #{list notebook.notes, as: 'note'}
+        <note>
+            <name>${note.name}</name>
+            <owner>${note.owner}</owner>
+            <tags>
+                #{list note.tags, as: 'tag'}
+                <tag name="${tag.name}" />
+                #{/list}
+            </tags>
+            <content>
+                ${note.content}
+            </content>
+        </note>
+        #{/list}
+    </notebook>
+    #{/list}
+</noteMe>

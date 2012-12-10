@@ -1,4 +1,4 @@
-<div class="note" data-id="${note.id}">
+<div class="note #{ifNotNoteOwner noteId:note.id}not-owned-note#{/ifNotNoteOwner}" data-id="${note.id}">
 	<span class="ui-icon ui-icon-grip-dotted-vertical handle"></span>
 	<span class="title">${note.name}</span>
         <span class="flags">

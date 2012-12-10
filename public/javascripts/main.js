@@ -82,15 +82,7 @@ $(function() {
              */
             revertLastRename: function(){
                 lastRename.element.text(lastRename.value);
-            },
-            
-            
-            remove: function(){
-                
-        
             }
-            
-            
         };
         this.opened  = {
             note: {
@@ -347,9 +339,9 @@ $(function() {
                     boxShadow: "0px 0px 4px #757575",
                     cursor: "pointer",
                     zIndex:10
-                 }).addClass("ui-state-highlight ui-widget ui-corner-all ui-button-text-icon-secondary").position({
+                 }).addClass("ui-state-highlight ui-widget ui-corner-bl ui-corner-br ui-button-text-icon-secondary").position({
                      my: "left top",
-                     at: "left bottom+3",
+                     at: "left bottom+1",
                      of: "#header-bar #search input[type=\"search\"]"
                  }).append($("<span class='title ui-button-text'>"))
                    .append($("<span class='ui-icon ui-icon-close ui-button-icon-secondary'>")).attr("title","Zrušiť vyhľadávanie").hide();
@@ -880,7 +872,7 @@ $(function() {
 
     
     // premenovania
-    $('.notebook h2 .title, .notebook .note .title').live("dblclick",function() {
+    $('.notebook h2 .title, .notebook .note:not(.not-owned-note) .title').live("dblclick",function() {
         noteMe.manage.rename.call($(this),function(result){
             if(!result.saved){return;}
             var parents = $(this).parents(),
@@ -1324,7 +1316,7 @@ $(function() {
                                                 "Zrušiť": function(){
                                                     $(this).dialog("close");
                                                 },
-                                                "Zmazať účet": function(){
+                                                "Zmazať konto": function(){
                                                     $(this).find("form").submit();
                                                 }
                                             },

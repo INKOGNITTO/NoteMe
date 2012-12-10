@@ -61,6 +61,9 @@ POST    /accountManager                 AccountManager.accountManager
 POST    /accountManager/delete          AccountManager.deleteAccountDialog
 POST    /accoutManager/delete/delete    AccountManager.deleteAccount
 
+#Web service
+GET     /ws/notes/{email}                App.userNotes                        
+
 # Map static resources
 GET     /public/                        staticDir:public
 
