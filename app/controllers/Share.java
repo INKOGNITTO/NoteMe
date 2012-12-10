@@ -31,7 +31,7 @@ public class Share extends Controller {
     }
     
     public static void shareNotebook(long id) {
-        if(!Security.checkNotebookAccessibility(id)) {
+        if(!Security.checkNotebookOwnership(id)) {
             forbidden();
         }
         Notebook notebook = Notebook.findById(id);
