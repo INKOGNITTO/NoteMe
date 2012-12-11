@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.Query;
 import models.*;
+import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
 import play.mvc.*;
@@ -128,9 +129,9 @@ public class Share extends Controller {
             for(int i=0; i<arrayRemoved.size(); i++){
                 user = User.findByEmail(arrayRemoved.get(i).getAsString());
                 //najst NB vlastnik user a notebook ma nalinkovany notebook
-                Query q = JPA.em().createQuery("select notebook from Notebook notebook where :u member of notebook.owner and notebook member of :nb.linkedNotebooks")
+                Query q = JPA.em().createQuery("select notebook from Notebook notebook where :u member of notebook.owner and notebook.linkParent = :ntb")
                         .setParameter("u", user)
-                        .setParameter("nb", notebook);
+                        .setParameter("ntb", notebook);
                 Notebook notebookResult = (Notebook) q.getSingleResult();
                 notebook.unlinkNotebook(notebookResult);
             }

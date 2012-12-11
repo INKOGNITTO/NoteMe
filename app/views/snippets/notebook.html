@@ -2,6 +2,11 @@
 	<h2>
 		<span class="ui-icon ui-icon-grip-dotted-vertical handle"></span>
 		<span class="title">${notebook.name}</span>
+                <span class="flags">
+                    #{if notebook.linkParent!=null}
+                    <span class="ui-icon ui-icon-flag" title="Zdieľaný poznámkový blok<br>Vyzdieľal: ${notebook.linkParent.owner.email}"></span>
+                    #{/if}
+                </span>
 		<span class="iconbar">
 			<span class="ui-icon ui-icon-note new-note" title="Nová poznámka"></span>
 			<span class="ui-icon ui-icon-link" title="Zdieľať poznámkový blok"></span>

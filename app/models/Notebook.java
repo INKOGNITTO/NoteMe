@@ -27,8 +27,11 @@ public class Notebook extends Model {
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @OrderColumn
     public List<Note> notes = new LinkedList<Note>();
+    
+    @ManyToOne
+    public Notebook linkParent;
    
-    @ManyToMany
+    @OneToMany (mappedBy = "linkParent")
     public Set<Notebook> linkedNotebooks = new HashSet<Notebook>();
     
     @ManyToOne
@@ -52,23 +55,40 @@ public class Notebook extends Model {
     }
 
     public void addNote(Note note, int position) {
+        if(linkParent != null) {
+            linkParent.addNote(note, position);
+        } else {
+            linkNote(note, position);
+        }
+    }
+    
+    public void linkNote(Note note, int position) {
         if (position >= 0) {
             notes.add(position, note);
         } else {
             notes.add(note);
         }
         for (Notebook nb : linkedNotebooks) {
-            nb.addNote(note, 0);
+            nb.linkNote(note, 0);
+            nb.save();
         }
     }
 
     public void removeNote(Note note) {
-
         notes.remove(note);
-        if (note.owner.equals(User.findByEmail(Scope.Session.current.get().get("username")))) {
-            for (Notebook nb : linkedNotebooks) {
-                nb.removeNote(note);
+        if (note.owner.email.equals(Scope.Session.current.get().get("username"))) {
+            if(linkParent != null) {
+                linkParent.removeNote(note);
+            } else {
+                unlinkNote(note);
             }
+        }
+    }
+    
+    public void unlinkNote(Note note) {
+        for (Notebook nb : linkedNotebooks) {
+            nb.unlinkNote(note);
+            nb.save();
         }
     }
 
@@ -115,30 +135,46 @@ public class Notebook extends Model {
     }
 
     public void linkNotebook(Notebook notebook) {
-        linkedNotebooks.add(notebook);
+        notebook.linkParent = this;
         for (Note n : notes) {
-            Logger.info(n.name);
-            notebook.addNote(n,-1);
+            notebook.linkNote(n,-1);
         }
         notebook.save();
     }
 
     public void unlinkNotebook(Notebook notebook) {
-        linkedNotebooks.remove(notebook);
+        User user = User.findByEmail(Scope.Session.current.get().get("username"));
+        notebook.linkParent = null;
+        notebook.save();
+        List<Note> notesToRemove = new ArrayList();
         for (Note n : notebook.notes) {
-            if (n.owner.equals(owner)) {
-                notebook.removeNote(n);
+            if (n.owner.equals(user)) {
+                notesToRemove.add(n);
             }
         }
+        for( Note n :notesToRemove) {
+            notebook.removeNote(n);
+        }
         notebook.save();
+        notesToRemove.clear();
+        for (Note n : this.notes) {
+            if(n.owner!=user && !n.sharedWith.contains(user)) {
+                notesToRemove.add(n);
+            }
+        }
+        for( Note n :notesToRemove) {
+            this.removeNote(n);
+        }
+        
+        this.save();
     }
     
     public Set<Notebook> getConnectedNotebooks() {
-        Set<Notebook> list1 = this.linkedNotebooks;
+        Set<Notebook> list = this.linkedNotebooks;
         Query ln = JPA.em().createQuery("select nb1 from Notebook nb1 where :this member of nb1.linkedNotebooks").setParameter("this", this);
-        
-         list1.addAll(ln.getResultList());
-         return list1;
+         list.addAll(ln.getResultList());
+         list.remove(this);
+         return list;
     }
         
 }

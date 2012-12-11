@@ -636,7 +636,7 @@ h2 {
 .notebook h2 .title {
 	border: 1px solid transparent;
 	padding:2px;
-	min-width: 160px;
+	/*min-width: 160px;*/
 	display: inline-block;
 }
 
@@ -646,8 +646,8 @@ h2 {
     position: relative;
     top: 1px;
 }
-.notebook h2 .ui-icon,
- .notebook .note > .ui-icon:first-of-type{
+.notebook h2 .ui-icon.handle,
+ .notebook .note > .ui-icon.handle{
      cursor: move;
  }
 .notebook h2 .ui-icon {
@@ -737,8 +737,8 @@ h2 {
 	visibility:visible;
 }
 
-.notebook .note .flags .ui-icon {
-    background-image: url(noteMe-dark/images/ui-icons_c3c3c3_256x240.png);
+.notebook .flags .ui-icon {
+    background-image: url(noteMe-dark/images/ui-icons_c3c3c3_256x240.png) !important;
 }
 
 #note-scroll {
