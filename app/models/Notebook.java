@@ -75,21 +75,31 @@ public class Notebook extends Model {
     }
 
     public void removeNote(Note note) {
-        notes.remove(note);
         if (note.owner.email.equals(Scope.Session.current.get().get("username"))) {
+            Logger.info(Scope.Session.current.get().get("username") + " deleting " + note.name);
             if(linkParent != null) {
                 linkParent.removeNote(note);
             } else {
                 unlinkNote(note);
             }
+        } else {
+            notes.remove(note);
+            if (note.notebooks.isEmpty()){
+                note.remove();
+            }
         }
     }
     
     public void unlinkNote(Note note) {
+        notes.remove(note);
         for (Notebook nb : linkedNotebooks) {
             nb.unlinkNote(note);
             nb.save();
         }
+        if(note.isPersistent() && note.notebooks.isEmpty()) {
+            note.remove();
+        }
+        this.save();
     }
 
     /**
@@ -99,9 +109,7 @@ public class Notebook extends Model {
      */
     public void remove() {
         User actualUser = User.findByEmail(Scope.Session.current.get().get("username"));
-
-        
-        
+        Logger.info("removing notebook from db: "+actualUser.email + ", " + this.name + " " + this.id);
         List<Note> notesToRemove = new ArrayList();
         for (Note note : notes) {
             // ak pouzivatel nie je vlastnik, treba odstranit referenciu User.notOwnedNotes
@@ -116,9 +124,11 @@ public class Notebook extends Model {
             note.remove();
         }
         // odstrani pozn. blok aktualneho pouzivatela
+        actualUser.refresh();
         actualUser.notebooks.remove(this);
+        this.owner = null;
         actualUser.save();
-        this.refresh();
+        //this.refresh();
         /* Ak notebook, ktory chce pouzivatel zmazat je defaultny nb
          * t.j. nb do ktoreho sa mu ukladaju poznamky ktore mu vyzdielavaju iny pouzivatelia
          * treba ho odobrat z User.defaultNbSharedNotes
@@ -127,11 +137,17 @@ public class Notebook extends Model {
             actualUser.defaultNbSharedNotes = null;
             actualUser.save();
         }
-        Query q = JPA.em().createQuery("select notebook from Notebook notebook where :this member of notebook.linkedNotebooks").setParameter("this", this);
-        Notebook originNotebook = (Notebook)q.getSingleResult();
-        originNotebook.unlinkNotebook(this);
-        originNotebook.save();
-        this.delete();
+        //Query q = JPA.em().createQuery("select notebook from Notebook notebook where :this member of notebook.linkedNotebooks").setParameter("this", this);
+        //Notebook originNotebook = (Notebook)q.getSingleResult();
+        if (linkParent != null) {
+            linkParent.unlinkNotebook(this);
+        }
+        for (Notebook ntb : linkedNotebooks) {
+            this.unlinkNotebook(ntb);
+        }
+        //originNotebook.unlinkNotebook(this);
+        if (this.isPersistent()){
+        this.delete();}
     }
 
     public void linkNotebook(Notebook notebook) {
@@ -156,14 +172,24 @@ public class Notebook extends Model {
             notebook.removeNote(n);
         }
         notebook.save();
+
+        
+        //TODO neskor
         notesToRemove.clear();
         for (Note n : this.notes) {
-            if(n.owner!=user && !n.sharedWith.contains(user)) {
+            if(n.owner.equals(notebook.owner) && !n.sharedWith.contains(this.owner)) {
+                Logger.info("remove "+n.id);
                 notesToRemove.add(n);
+                
             }
         }
         for( Note n :notesToRemove) {
             this.removeNote(n);
+        }
+        
+        notebook.refresh();
+        if(notebook.notes.isEmpty()){
+            notebook.remove();
         }
         
         this.save();

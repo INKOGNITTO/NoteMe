@@ -82,6 +82,10 @@ public class Share extends Controller {
 
         if (type.equals("note")) {
             Note note = Note.findById(id);
+            
+            if (!Security.checkNoteAccessibility(id)) {
+                forbidden();
+            }
 
             //vymazanie pouzivatelov z note.shareddWidth
             for (int i = 0; i < arrayRemoved.size(); i++) {
@@ -138,7 +142,10 @@ public class Share extends Controller {
             
             
             for (int i=0; i<arrayNew.size(); i++){
-                //novy NB (nazov rovnaky, vlastnik arrrayNew), vlozit do DB,zavolat NB link Novy
+                if (arrayNew.get(i).getAsString().equals(session.get("username"))) {
+                    continue;  // pouzivatel nemoze zdielat blok sam so sebou
+                }
+                //novy NB (nazov rovnaky, vlastnik z arrrayNew)
                 user = User.findByEmail(arrayNew.get(i).getAsString());
                 Notebook newNb = Notebook.create(notebook.name, user.getId());
                 user.notebooks.add(newNb);

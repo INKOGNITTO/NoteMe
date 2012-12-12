@@ -113,11 +113,12 @@ public class Note extends Model {
 
     public void remove() {
         User actualUser = User.findByEmail(Scope.Session.current.get().get("username"));
+        Logger.info("removing note from db: "+actualUser.email + ", " + this.name);
         //ak poznamka patri prihlasenemu pouzivatelovi
         if (this.owner.equals(actualUser)) {
 
             // vyhladaj vsetky bloky, v ktorych je tato poznamka
-            Query q = JPA.em().createQuery("select nb from Notebook nb where :n member of nb.notes")
+            Query q = JPA.em().createQuery("select nb from Notebook nb where :n member of nb.notes and nb.linkParent = null")
                     .setParameter("n", this);
             List<Notebook> notebookWithNote = q.getResultList();
             //v tychto pozn. blokoch zmaz tuto (this) poznamku
@@ -126,6 +127,7 @@ public class Note extends Model {
                 n.removeNote(this);
                 n.save();
             }
+            
             this.refresh();
             //zmaz vsetky obrazky asociovane s poznamkou
             for (NoteImage noteImage : this.images) {
@@ -155,7 +157,7 @@ public class Note extends Model {
             List<Notebook> notebookWithNote = q.getResultList();
             // odstrani poznamku z notebookov (vlastne len z jedneho, ale pracujem z List-om, taze tak)
             for (Notebook n : notebookWithNote) {
-                n.notes.remove(this);
+                n.removeNote(this);
                 n.save();
             }
             // odstran vsetky znacky aktualneho pouzivatela

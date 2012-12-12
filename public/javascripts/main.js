@@ -328,6 +328,9 @@ $(function() {
             }
         };
         this.search = (function() {
+            if($("body").hasClass("section-public")){
+                return null;
+            }
             /**
              * konstrukcia panela s informaciami o aktualnom hladani 
              */
@@ -992,7 +995,7 @@ $(function() {
                     noteMe.message.info("Poznámkový blok \""+notebook.find("h2 .title").text()+"\" bol zmazaný");
                 },
                 error: function(err) {
-                    noteMe.message.error("Chbyba pri mazaní poznámkového bloku");
+                    noteMe.message.error("Chyba pri mazaní poznámkového bloku");
                     console.log(err);
                 }
             },
@@ -1692,6 +1695,7 @@ $(function(){
                 var val = $(this).text();
                 $.noanim(function(){self.add(val,"default");});
             });
+            element.find("input").focus();
         },
         add : function(value,type) {
             var index = this.params.values.length,
@@ -1949,7 +1953,7 @@ $(function(){
             
         };
         if($.browser.opera) {
-            // opera potrebuje specialny pristup :D
+            // toto aj tak nefunguje 
             history.navigationMode = 'compatible';
             window.onunload = function(){
                 processAction("all",false);

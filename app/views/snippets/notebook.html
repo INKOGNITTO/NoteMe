@@ -6,6 +6,9 @@
                     #{if notebook.linkParent!=null}
                     <span class="ui-icon ui-icon-flag" title="Zdieľaný poznámkový blok<br>Vyzdieľal: ${notebook.linkParent.owner.email}"></span>
                     #{/if}
+                    #{if !notebook.linkedNotebooks.isEmpty()}
+                    <span class="ui-icon ui-icon-link" title="Zdieľaný poznámkový blok"></span>
+                    #{/if}
                 </span>
 		<span class="iconbar">
 			<span class="ui-icon ui-icon-note new-note" title="Nová poznámka"></span>

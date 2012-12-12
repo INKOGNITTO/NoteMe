@@ -10,3 +10,14 @@ User(fero):
     password:   3sMQXOwZ8KIdHcbV2SRSimHuwwvQsH8QPX5i4FsaaAEFPgF6I=
     isAdmin:    false
 
+User(vlk):
+    email:      vlk@vlk.sk
+    name:       vlk
+    password:   wHnlZnr2cQZoA+mRW7S4TZ4XFBcwgOmNOi2NDE/d7rPEHbX3A=
+    isAdmin:    false
+    
+User(marek):
+    email:      marek@email.com
+    name:       marek
+    password:   j/wejKeI1f9A2CTa/g0HDfVFl0kAoUBwNDkyxyhoIfZ89Sy5o=
+    isAdmin:    false 
