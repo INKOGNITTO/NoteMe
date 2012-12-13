@@ -3,67 +3,67 @@
 # ~~~~
 
 # Home page
-GET     /                               App.index
+GET         /                                                                   App.index
 
 # Login & Registration
-GET     /welcome                        Secure.login
-POST    /login                          App.authenticate
-POST    /registration                   App.register
-GET     /logout                         Secure.logout
+GET         /welcome                                                            Secure.login
+POST        /login                                                              App.authenticate
+POST        /registration                                                       App.register
+GET         /logout                                                             Secure.logout
 
 # Manage
-GET     /manage                         NoteManager.index
-POST    /manage/viewNote/{id}           NoteManager.viewNote
-POST    /manage/newNotebook             NoteManager.newNotebook
-POST    /manage/saveNewNotebook         NoteManager.saveNewNotebook
-POST    /manage/newNote                 NoteManager.newNote
-POST    /manage/saveNewNote             NoteManager.saveNewNote
-POST    /manage/orderNotebooks          NoteManager.orderNotebooks
-POST    /manage/orderNotes              NoteManager.orderNotes
-POST    /manage/rename                  NoteManager.rename  
-POST    /manage/remove                  NoteManager.remove
-POST    /manage/saveNewTag              NoteManager.saveNewTag
-POST    /manage/removeTagFromNote       NoteManager.removeTagFromNote
-POST    /manage/addTagToNote            NoteManager.addTagToNote
+GET         /manage                                                             NoteManager.index
+GET         /manage/note/{<[0-9]+>id}                                           NoteManager.viewNote
+GET         /manage/newNotebook                                                 NoteManager.newNotebook
+POST        /manage/newNotebook/{name}                                          NoteManager.saveNewNotebook
+GET         /manage/notebook/{<[0-9]+>notebookId}/newNote                       NoteManager.newNote
+POST        /manage/notebook/{<[0-9]+>notebookId}/newNote/{name}                NoteManager.saveNewNote
+POST        /manage/order/notebook/{<[0-9]+>notebookId}                         NoteManager.orderNotebooks
+POST        /manage/order/note/{<[0-9]+>noteId}                                 NoteManager.orderNotes
+PUT         /manage/{type}/{<[0-9]+>id}/{newName}                               NoteManager.rename  
+DELETE      /manage/{type}/{<[0-9]+>id}                                         NoteManager.remove
+POST        /manage/newTag/{name}                                               NoteManager.saveNewTag
+DELETE      /manage/note/{<[0-9]+>noteId}/tag/{<[0-9]+>tagId}                   NoteManager.removeTagFromNote
+PUT         /manage/note/{<[0-9]+>noteId}/tag/{<[0-9]+>tagId}                   NoteManager.addTagToNote
 
-POST    /search                         NoteManager.search
-POST    /searchForTags                  NoteManager.searchForTags
+POST        /search/{exp}                                                       NoteManager.search
+POST        /search/tags/{id}                                                   NoteManager.searchForTags
 
 # Edit
-GET	/edit                           Edit.index
-POST    /edit/{<[0-9]+>id}              Edit.editNote
-POST    /edit/saveNote                  Edit.saveNote
-POST    /edit/imageUpload               Edit.imageUpload
+GET         /edit                                                               Edit.index
+GET         /edit/note/{<[0-9]+>id}                                             Edit.editNote
+PUT         /edit/note/{<[0-9]+>id}                                             Edit.saveNote
+POST        /edit/imageUpload                                                   Edit.imageUpload
 
 #Share
-POST 	/share/note                      Share.shareNote
-POST    /share/note/sharePublic          Share.sharePublic
-POST    /share/note/unsharePublic        Share.unsharePublic
-POST    /share/knownMail                 Share.knownMail
-POST    /sharing                         Share.sharing
-POST    /share/notebook                  Share.shareNotebook
+GET         /share/note/{<[0-9]+>id}                                            Share.shareNote
+POST        /share/note/{<[0-9]+>id}/public                                     Share.sharePublic
+DELETE      /share/note/{<[0-9]+>id}/public                                     Share.unsharePublic
+GET         /share/knownMail/{email}                                            Share.knownMail
+POST        /share/sharing                                                      Share.sharing
+POST        /share/notebook/{<[0-9]+>id}                                        Share.shareNotebook
 
 #Public note
-GET     /publicnote/{uuid}              PublicNote.index
+GET         /publicnote/{uuid}                                                  PublicNote.index
 
 #Note image
-GET     /noteImage/{uuid}               App.getNoteImage
+GET         /noteImage/{uuid}                                                   App.getNoteImage
 
 # jsRoutes
-GET     /jsRoutes                       App.jsRoutes
+GET         /jsRoutes                                                           App.jsRoutes
 
 # Admin 
-*       /admin                          module:crud
+*           /admin                                                              module:crud
 
 # Account Manager
-POST    /accountManager/save            AccountManager.manageAccount                 
-POST    /accountManager                 AccountManager.accountManager
-POST    /accountManager/delete          AccountManager.deleteAccountDialog
-POST    /accoutManager/delete/delete    AccountManager.deleteAccount
+PUT         /accountManager                                                     AccountManager.manageAccount                 
+GET         /accountManager                                                     AccountManager.accountManager
+GET         /accountManager/delete                                              AccountManager.deleteAccountDialog
+DELETE      /accoutManager/delete/delete                                        AccountManager.deleteAccount
 
 #Web service
-GET     /notes/{email}                  App.userNotes                        
+GET         /services/notes/{email}                                             App.userNotes                        
 
 # Map static resources
-GET     /public/                        staticDir:public
+GET         /public/                                                            staticDir:public
 

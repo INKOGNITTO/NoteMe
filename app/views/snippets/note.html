@@ -19,10 +19,8 @@
 		#{else}
                     #{ifNoteOwner noteId:note.id}<a href="@{Edit.index()}#${note.id}" class="ui-icon ui-icon-pencil" title="Editovať poznámku"></a>#{/ifNoteOwner}
                 #{/else}
-		#{ifNoteOwner noteId:note.id}
                 <span class="ui-icon ui-icon-link" title="Zdieľať poznámku"></span>
                 <span style="width:0px;height:4px;display:inline-block;"></span><!-- medzera pred ikonou zmazania-->
-                #{/ifNoteOwner}
 		<span class="ui-icon ui-icon-close" title="Zmazať poznámku"></span>
 	</span> 
 </div>

@@ -60,6 +60,7 @@ public class Notebook extends Model {
         } else {
             linkNote(note, position);
         }
+        save();
     }
     
     public void linkNote(Note note, int position) {
@@ -69,7 +70,7 @@ public class Notebook extends Model {
             notes.add(note);
         }
         for (Notebook nb : linkedNotebooks) {
-            nb.linkNote(note, 0);
+            nb.linkNote(note, position);
             nb.save();
         }
     }
@@ -88,6 +89,7 @@ public class Notebook extends Model {
                 note.remove();
             }
         }
+        save();
     }
     
     public void unlinkNote(Note note) {
@@ -128,7 +130,8 @@ public class Notebook extends Model {
         actualUser.notebooks.remove(this);
         this.owner = null;
         actualUser.save();
-        //this.refresh();
+        this.save();
+        this.refresh();
         /* Ak notebook, ktory chce pouzivatel zmazat je defaultny nb
          * t.j. nb do ktoreho sa mu ukladaju poznamky ktore mu vyzdielavaju iny pouzivatelia
          * treba ho odobrat z User.defaultNbSharedNotes
@@ -146,6 +149,7 @@ public class Notebook extends Model {
             this.unlinkNotebook(ntb);
         }
         //originNotebook.unlinkNotebook(this);
+        this.refresh();
         if (this.isPersistent()){
         this.delete();}
     }
@@ -174,7 +178,6 @@ public class Notebook extends Model {
         notebook.save();
 
         
-        //TODO neskor
         notesToRemove.clear();
         for (Note n : this.notes) {
             if(n.owner.equals(notebook.owner) && !n.sharedWith.contains(this.owner)) {
@@ -188,8 +191,13 @@ public class Notebook extends Model {
         }
         
         notebook.refresh();
-        if(notebook.notes.isEmpty()){
+        if(notebook.notes.isEmpty() && notebook.owner!=null){ // ak je notebook prazdny a este ma vlastnika (teda unlink nebezi v ramci mazanie notebook-u)
+            User nbOwner = notebook.owner;
+            notebook.owner = null;
+            nbOwner.notebooks.remove(notebook);
+            nbOwner.save();
             notebook.remove();
+
         }
         
         this.save();

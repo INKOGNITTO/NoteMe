@@ -7,7 +7,6 @@ import hash.Passwords;
 import play.data.validation.*;
 import play.db.jpa.Model;
 import controllers.CRUD;
-import play.db.jpa.GenericModel;
 import play.db.jpa.JPA;
 
 @Entity

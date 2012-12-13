@@ -23,7 +23,7 @@ public class Share extends Controller {
      * Dialogove okno zdielania poznamok
      */
     public static void shareNote(long id) {
-        if (!Security.checkNoteOwnership(id)) {
+        if (!Security.checkNoteAccessibility(id)) {
             forbidden();
         }
         Note note = Note.findById(id);
@@ -103,8 +103,8 @@ public class Share extends Controller {
             }
 
             for (int i = 0; i < arrayNew.size(); i++) {
-                if (arrayNew.get(i).getAsString().equals(session.get("username"))) {
-                    continue;  // pouzivatel nemoze zdielat poznamku sam so sebou
+                if (arrayNew.get(i).getAsString().equals(session.get("username")) || arrayNew.get(i).getAsString().equals(note.owner.email)) {
+                    continue;  // pouzivatel nemoze zdielat poznamku sam so sebou a nikto nemoze vyzdielat poznamku spat vlastnikovi
                 }
                 user = User.findByEmail(arrayNew.get(i).getAsString());
                 note.sharedWith.add(user);
@@ -136,8 +136,11 @@ public class Share extends Controller {
                 Query q = JPA.em().createQuery("select notebook from Notebook notebook where :u member of notebook.owner and notebook.linkParent = :ntb")
                         .setParameter("u", user)
                         .setParameter("ntb", notebook);
-                Notebook notebookResult = (Notebook) q.getSingleResult();
-                notebook.unlinkNotebook(notebookResult);
+                List<Notebook> notebookResult = q.getResultList();
+                for (Notebook nb: notebookResult) {
+                    notebook.unlinkNotebook(nb);
+                }
+                
             }
             
             

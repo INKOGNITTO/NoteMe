@@ -1,6 +1,7 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import models.Note;
 import models.Notebook;
@@ -52,24 +53,22 @@ public class NoteManager extends Controller {
         render("snippets/tag.html");
     }
     
-    public static void newNote() {
+    public static void newNote(Long notebookId) {
         try {
-            Long nbid = Long.valueOf(params.get("notebookId")).longValue();
             renderArgs.put("note",
                     new Note(Play.configuration.getProperty("note.defaultName"),
-                    nbid, User.findByEmail(session.get("username"))));
+                    notebookId, User.findByEmail(session.get("username"))));
             render("snippets/note.html");
         } catch (Exception e) {
             error(Http.StatusCode.BAD_REQUEST, "Error while creating new note");
         }
     }
     
-    public static void saveNewNote() {
+    public static void saveNewNote(Long notebookId, String name) {
         User user = User.findByEmail(session.get("username"));
         //try {
-        Long nbid = Long.valueOf(params.get("notebookId")).longValue();
-        Note note = Note.create(params.get("name"), nbid, user.id);
-        Notebook notebook = Notebook.findById(nbid);
+        Note note = Note.create(name, notebookId, user.id);
+        Notebook notebook = Notebook.findById(notebookId);
         //notebook.notes.add(0, note);
         notebook.addNote(note, 0);
         notebook.save();
@@ -83,17 +82,19 @@ public class NoteManager extends Controller {
     
     public static void orderNotebooks(long notebookId, int newPosition) {
         User user = User.findByEmail(session.get("username"));
-        try {
-            List<Notebook> usrNtb = user.notebooks;
-            Notebook dump = Notebook.findById(notebookId);
-            usrNtb.remove(dump);
-            if (dump != null) {
-                usrNtb.add(newPosition, dump);
-            }
+
+        //try {
+            Notebook notebook = Notebook.findById(notebookId);
+            Logger.info(String.valueOf(user.notebooks.size()));
+            user.notebooks.remove(notebook);
+            user.notebooks = new LinkedList<Notebook>(user.notebooks); // divny hack kvoli Hibernate
             user.save();
-        } catch (Exception ex) {
-            error(Http.StatusCode.BAD_REQUEST, "Error while reordering notebooks");
-        }
+            user.refresh();
+            user.notebooks.add(newPosition, notebook);
+            user.save();
+        //} catch (Exception ex) {
+          //  error(Http.StatusCode.BAD_REQUEST, "Error while reordering notebooks");
+        //}
     }
     
     public static void orderNotes(long noteId, long toNotebookId, long fromNotebookId, int newPosition) {

@@ -186,8 +186,10 @@ $(function() {
                             content.find(".ui-resizable-handle").remove();
                             content.find(".note-block").removeAttr("contenteditable");
                             noteMe.jsRoutes.saveNote.ajax({
+                                urlParams: {
+                                    id: $(".right-column.note").data("id")
+                                },
                                 data : {
-                                    id: $(".right-column.note").data("id"),
                                     content: content.html()
                                 },
                                 success : function(data) {
@@ -536,7 +538,7 @@ $(function() {
             return false;
         }
         noteMe.jsRoutes.search.ajax({
-            data: {
+            urlParams: {
                 exp: searchTerm
             },
             success: function(data){
@@ -643,8 +645,10 @@ $(function() {
             console.log(ui.item, ui.item.parent());
             console.log(ui.item.parent().children().index(ui.item));
             noteMe.jsRoutes.orderNotebooks.ajax({
+                urlParams: {
+                    notebookId: ui.item.data("id")
+                },
                 data: {
-                    notebookId: ui.item.data("id"),
                     newPosition: ui.item.parent().children().index(ui.item)
                 },
                 success: function(data) {
@@ -674,8 +678,10 @@ $(function() {
             }
             console.log(sourceNotebook);
             noteMe.jsRoutes.orderNotes.ajax({
+                urlParams: {
+                    noteId: ui.item.data("id")
+                },
                 data: {
-                    noteId: ui.item.data("id"),
                     fromNotebookId: sourceNotebook?sourceNotebook.data("id"):-1,
                     toNotebookId: targetNotebook.data("id"),
                     newPosition: ui.item.parent().children().index(ui.item)
@@ -708,7 +714,7 @@ $(function() {
     $(".tag .title").singleDoubleClick(function(){
         var tagName = $(this).parents(".tag").find(".title").text();
         noteMe.jsRoutes.searchForTags.ajax({
-            data: {
+            urlParams: {
                 id: $(this).parents(".tag").data("id")
             },
             success: function(data){
@@ -726,7 +732,7 @@ $(function() {
                 return;
             }
             noteMe.jsRoutes.rename.ajax({
-                data: {
+                urlParams: {
                     type:"tag",
                     id: tag.data("id"),
                     newName: $(this).text()
@@ -752,7 +758,7 @@ $(function() {
                 name: "Odstránenie značky "+$(this).parents(".tag").find(".title").text(),
                 action: noteMe.jsRoutes.remove.ajax,
                 actionParams : {
-                    data: {
+                    urlParams: {
                         type: "tag",
                         id: $(this).parents(".tag").data("id")
                     },
@@ -782,7 +788,7 @@ $(function() {
             var noteId = $(this).parents("#right-column-wrapper .note").data("id"),
                 tagId = $(this).parents(".tag").data("id");
             noteMe.jsRoutes.removeTagFromNote.ajax({
-                data: {
+                urlParams: {
                     noteId: noteId,
                     tagId: tagId
                 },
@@ -809,7 +815,7 @@ $(function() {
                 var self = this;
                 $(this).highlightWithClass(1000);
                 noteMe.jsRoutes.addTagToNote.ajax({
-                    data: {
+                    urlParams: {
                         tagId: ui.draggable.data("id"),
                         noteId: $(this).data("id")
                     },
@@ -857,7 +863,7 @@ $(function() {
             return;
         }
         noteMe.jsRoutes.saveNewTag.ajax({
-            data: {
+            urlParams: {
                 name: $(this).val()
             },
             success: function(data) {
@@ -887,7 +893,7 @@ $(function() {
                 type = "notebook";
             }
             noteMe.jsRoutes.rename.ajax({
-                data: {
+                urlParams: {
                     type: type,
                     id: self.parents("."+type).data("id"),
                     newName: self.text()
@@ -923,7 +929,7 @@ $(function() {
                         return;
                     }
                     noteMe.jsRoutes.saveNewNotebook.ajax({
-                        data: {
+                        urlParams: {
                             name: $(this).text()
                         },
                         success: function(data){
@@ -946,7 +952,7 @@ $(function() {
     $(".new-note").live("click",function(evnet) {
         var notebook = $(this).parents(".notebook");
            noteMe.jsRoutes.newNote.ajax({
-            data: {
+            urlParams: {
                 notebookId: $(notebook).data("id")
             },
             success: function(data) {
@@ -958,7 +964,7 @@ $(function() {
                         return;
                     }
                     noteMe.jsRoutes.saveNewNote.ajax({
-                        data: {
+                        urlParams: {
                             notebookId: $(notebook).data("id"),
                             name: $(this).text()
                         },
@@ -987,7 +993,7 @@ $(function() {
             name: "odstránenie poznámkového bloku "+notebook.find("h2 .title").text(),
             action: noteMe.jsRoutes.remove.ajax,
             actionParams: {
-                data: {
+                urlParams: {
                     type: "notebook",
                     id: notebook.data("id")
                 },
@@ -1055,7 +1061,7 @@ $(function() {
             name: "Odstránenie poznámky "+ note.find(".title").text(),
             action: noteMe.jsRoutes.remove.ajax,
             actionParams: {
-                data: {
+                urlParams: {
                     type: "note",
                     id: note.data("id")
                 },
@@ -1116,20 +1122,31 @@ $(function() {
     
     // zdielanie
     $(".sharenote-button, .note .iconbar .ui-icon-link").live("click",function() {
-    	noteMe.jsRoutes.shareNote.ajax({
-            data: {
-                id: $(this).parents(".note").data("id")
+    	var note = $(this).parents(".note");
+        noteMe.jsRoutes.shareNote.ajax({
+            urlParams: {
+                id: note.data("id")
             },
             dataType: "html",
             context: $("body"),
             success: function(data) {
                 $(data).appendTo($(this)).dialog({
                     buttons: {
-                        "Zavrieť": function() {
+                        "Zavrieť": function(event) {
+                            event.preventDefault();
                             $(this).dialog("close");
                         },
-                        "OK": function(){
-                            $(this).find("form").submit();
+                        "OK": function(event){
+                            event.preventDefault();
+                            $(this).find(">form").submit();
+                            if($(this).find(".ui-adder").adder("dataLength")){
+                                if(!note.find(".flags .ui-icon-link").length){
+                                    note.find(".flags").append("<span class=\"ui-icon ui-icon-link\" title=\"Zdieľaná poznámka\"></span>");
+                                }
+                            } else {
+                                note.find(".flags .ui-icon-link").remove();
+                            }
+                            $(this).dialog("close");
                         }
                     },
                     close:function() {
@@ -1142,7 +1159,7 @@ $(function() {
                     addCheck: function(value,item) {
                         var self = this;
                         noteMe.jsRoutes.knownMail.ajax({
-                            data: {
+                            urlParams: {
                                 email: value
                             },
                             success: function(data) {
@@ -1167,7 +1184,7 @@ $(function() {
                 } else {
                     $("#sharenote #publicId").attr('checked', true); 
                 }
-                $("#sharenote form").submit(function(event) {
+                $("#sharenote > form").submit(function(event) {
                     event.preventDefault();
                     noteMe.jsRoutes.sharing.ajax({
                         data: {
@@ -1184,13 +1201,12 @@ $(function() {
                         }
                     });
                     //adder.adder("destroy");
-                    $("#sharenote").dialog("close");
                     return false;
                 }); 
                 $("#sharenote #publicId").on("click",function(){
                     if($(this).is(":checked")){
                         noteMe.jsRoutes.sharePublic.ajax({
-                            data: {
+                            urlParams: {
                                 id: $(this).parents(".ui-dialog").find(".ui-dialog-content").data("id")
                             },
                             success: function(data) {
@@ -1203,7 +1219,7 @@ $(function() {
                         });
                     } else {
                         noteMe.jsRoutes.unsharePublic.ajax({
-                            data: {
+                            urlParams: {
                                 id: $(this).parents(".ui-dialog").find(".ui-dialog-content").data("id")
                             },
                             success: function(){
@@ -1227,20 +1243,31 @@ $(function() {
     	});
     });
     $(".notebook h2 .iconbar .ui-icon-link").live("click", function(){
-       noteMe.jsRoutes.shareNotebook.ajax({
-           data:{
-               id: $(this).parents(".notebook").data("id")
+       var notebook = $(this).parents(".notebook");
+        noteMe.jsRoutes.shareNotebook.ajax({
+           urlParams:{
+               id: notebook.data("id")
            },
            dataType: "html",
            context: $("body"),
            success: function(data) {
                 $(data).appendTo($(this)).dialog({
                     buttons: {
-                        "Zavrieť": function() {
+                        "Zavrieť": function(event) {
+                            event.preventDefault();
                             $(this).dialog("close");
                         },
-                        "OK": function(){
-                            $(this).find("form").submit();
+                        "OK": function(event){
+                            event.preventDefault();
+                            $(this).find(">form").submit();
+                            if($(this).find(".ui-adder").adder("dataLength")){
+                                if(!notebook.find("h2 .flags .ui-icon-link").length){
+                                    notebook.find("h2 .flags").append("<span class=\"ui-icon ui-icon-link\" title=\"Zdieľaná ppoznámkový blok\"></span>");
+                                }
+                            } else {
+                                notebook.find(".flags .ui-icon-link").remove();
+                            }
+                            $(this).dialog("close");
                         }
                     },
                     close:function() {
@@ -1253,7 +1280,7 @@ $(function() {
                     addCheck: function(value,item) {
                         var self = this;
                         noteMe.jsRoutes.knownMail.ajax({
-                            data: {
+                            urlParams: {
                                 email: value
                             },
                             success: function(data) {
@@ -1273,7 +1300,7 @@ $(function() {
                         });
                     }
                 });
-                $("#sharenotebook form").submit(function(event) {
+                $("#sharenotebook > form").submit(function(event) {
                     console.log(adder.adder("getValues"));
                     event.preventDefault();
                     console.log(JSON.stringify(adder.adder("getValues")));
@@ -1291,8 +1318,7 @@ $(function() {
                             noteMe.message.error("Chyba pri ukladaní zdieľania");
                         }
                     });
-                    //adder.adder("destroy");
-                    $("#sharenotebook").dialog("close");
+                    return false;
                 });
            }
        }); 
@@ -1708,7 +1734,7 @@ $(function(){
             }
             //kontrola duplicit
             for(i in this.params.values){
-                if(this.params.values[i].value === value){
+                if(this.params.values[i] && this.params.values[i].value === value){
                     this.params.added.children().filter(function() { return $(this).data("index") === parseInt(i,10); }).addClass("ui-state-highlight").removeClass("ui-state-highlight",500);
                     return;
                 }
@@ -1756,6 +1782,15 @@ $(function(){
                 "new" : newValues,
                 removed: removedValues
             };
+        },
+        dataLength: function(){
+            var val = [];
+            for(i in this.params.values){
+                if(this.params.values[i]){
+                    val.push(this.params.values[i].value);
+                }
+            }
+            return val.length;
         },
         size: function(s) {
             if (s && typeof s === "number"){
