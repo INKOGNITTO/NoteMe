@@ -9,7 +9,7 @@ GET         /                                                                   
 GET         /welcome                                                            Secure.login
 POST        /login                                                              App.authenticate
 POST        /registration                                                       App.register
-GET         /logout                                                             Secure.logout
+GET         /logout                                                             App.logout
 
 # Manage
 GET         /manage                                                             NoteManager.index
@@ -61,8 +61,11 @@ GET         /accountManager                                                     
 GET         /accountManager/delete                                              AccountManager.deleteAccountDialog
 DELETE      /accoutManager/delete/delete                                        AccountManager.deleteAccount
 
+GET         /resetpassword/                                                     App.resetPasswordDialog
+POST        /resetpassword/{email}                                              App.resetPassword
+
 #Web service
-GET         /services/notes/{email}                                             App.userNotes                        
+GET         /services/{email}/notes                                             App.userNotes                        
 
 # Map static resources
 GET         /public/                                                            staticDir:public

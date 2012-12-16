@@ -928,6 +928,12 @@ fieldset legend {
     overflow: auto;
 }
 
+.hotkey-tooltip {
+    font-size: 0.75em;
+    padding: 5px;
+    
+}
+
 
 
 

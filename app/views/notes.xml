@@ -1,21 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <noteMe>
+    <user>
+        <name>${user.name}</name>
+        <email>${user.email}</email>
+    </user>
     #{list user.notebooks, as: 'notebook'}
-    <notebook name="${notebook.name}">
+    <notebook name="${notebook.name}" id="${notebook.id}">
         #{list notebook.notes, as: 'note'}
-        <note>
+        <note id="${note.id}">
             <name>${note.name}</name>
             <owner>${note.owner}</owner>
             <tags>
                 #{list note.tags, as: 'tag'}
-                <tag name="${tag.name}" />
+                <tag name="${tag.name}" id="${tag.id}"/>
                 #{/list}
             </tags>
             <content>
                 ${note.content}
             </content>
+            <images>
+                #{list note.images, as:'image'}
+                <image>@@{App.getNoteImage(image.uuid)}</image>
+                #{/list}
+            </images>
         </note>
         #{/list}
     </notebook>
     #{/list}
+    <allTags>
+        #{list user.getTags(), as:'tag'}
+        <tag name="${tag.name}" id="${tag.id}"/>
+        #{/list}
+    </allTags>
 </noteMe>

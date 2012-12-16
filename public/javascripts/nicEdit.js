@@ -1078,10 +1078,10 @@ var nicEditorSelect = bkClass.extend({
 		
 		//this.margin = new bkElement('div').setStyle({'float' : 'left', margin : '2px 1px 0 1px'}).appendTo(this.elm);
                 this.margin = new bkElement('div').setStyle({display : "inline-block", margin : '2px 1px 0 1px'}).appendTo(this.elm);
-		this.contain = new bkElement('div').setStyle({width: '90px', height : '20px', cursor : 'pointer', overflow: 'hidden'}).addClass('selectContain').addEvent('click',this.toggle.closure(this)).appendTo(this.margin);
+		this.contain = new bkElement('div').setStyle({height : '20px', cursor : 'pointer', overflow: 'hidden'}).addClass('selectContain').addEvent('click',this.toggle.closure(this)).appendTo(this.margin);
 		this.items = new bkElement('div').setStyle({overflow : 'hidden', zoom : 1, border: '1px solid #ccc', paddingLeft : '3px', backgroundColor : '#fff'}).appendTo(this.contain);
 		this.control = new bkElement('div').setStyle({overflow : 'hidden', 'float' : 'right', height: '18px', width : '16px'}).addClass('selectControl').setStyle(this.ne.getIcon('arrow',options)).appendTo(this.items);
-		this.txt = new bkElement('div').setStyle({overflow : 'hidden', 'float' : 'left', width : '66px', height : '14px', marginTop : '1px', fontFamily : 'sans-serif', textAlign : 'center', fontSize : '12px'}).addClass('selectTxt').appendTo(this.items);
+		this.txt = new bkElement('div').setStyle({overflow : 'hidden', 'float' : 'left', height : '14px', marginTop : '1px', fontFamily : 'sans-serif', textAlign : 'center', fontSize : '12px'}).addClass('selectTxt').appendTo(this.items);
 		
 		if(!window.opera) {
 			this.contain.onmousedown = this.control.onmousedown = this.txt.onmousedown = bkLib.cancelEvent;
@@ -1118,11 +1118,11 @@ var nicEditorSelect = bkClass.extend({
 	},
 	
 	open : function() {
-		this.pane = new nicEditorPane(this.items,this.ne,{width : '88px', padding: '0px', borderTop : 0, borderLeft : '1px solid #ccc', borderRight : '1px solid #ccc', borderBottom : '0px', backgroundColor : '#fff'});
+		this.pane = new nicEditorPane(this.items,this.ne,{padding: '0px', borderTop : 0, borderLeft : '1px solid #ccc', borderRight : '1px solid #ccc', borderBottom : '0px', backgroundColor : '#fff'});
 		
 		for(var i=0;i<this.selOptions.length;i++) {
 			var opt = this.selOptions[i];
-			var itmContain = new bkElement('div').setStyle({overflow : 'hidden', borderBottom : '1px solid #ccc', width: '88px', textAlign : 'left', overflow : 'hidden', cursor : 'pointer'});
+			var itmContain = new bkElement('div').setStyle({overflow : 'hidden', borderBottom : '1px solid #ccc', textAlign : 'left', overflow : 'hidden', cursor : 'pointer'});
 			var itm = new bkElement('div').setStyle({padding : '0px 4px'}).setContent(opt[1]).appendTo(itmContain).noSelect();
 			itm.addEvent('click',this.update.closure(this,opt[0])).addEvent('mouseover',this.over.closure(this,itm)).addEvent('mouseout',this.out.closure(this,itm)).setAttributes('id',opt[0]);
 			this.pane.append(itmContain);
@@ -1207,17 +1207,17 @@ var nicLinkButton = nicEditorAdvancedButton.extend({
 	addPane : function() {
 		this.ln = this.ne.selectedInstance.selElm().parentTag('A');
 		this.addForm({
-			'' : {type : 'title', txt : 'Add/Edit Link'},
+			'' : {type : 'title', txt : 'Pridať/upraviť odkaz'},
 			'href' : {type : 'text', txt : 'URL', value : 'http://', style : {width: '150px'}},
-			'title' : {type : 'text', txt : 'Title'},
-			'target' : {type : 'select', txt : 'Open In', options : {'' : 'Current Window', '_blank' : 'New Window'},style : {width : '100px'}}
+			'title' : {type : 'text', txt : 'Popis'},
+			'target' : {type : 'select', txt : 'Otvoriť v', options : {'' : 'Aktuálnom okne', '_blank' : 'Novom okne'},style : {width : '100px'}}
 		},this.ln);
 	},
 	
 	submit : function(e) {
 		var url = this.inputs['href'].value;
 		if(url == "http://" || url == "") {
-			alert("You must enter a URL to Create a Link");
+			alert("Vložte URL pre vytvrenie odkazu");
 			return false;
 		}
 		this.removePane();
@@ -1244,13 +1244,44 @@ nicEditors.registerPlugin(nicPlugin,nicLinkOptions);
 /* START CONFIG */
 var nicColorOptions = {
 	buttons : {
-		'forecolor' : {name : __('Change Text Color'), type : 'nicEditorColorButton', noClose : true},
-		'bgcolor' : {name : __('Change Background Color'), type : 'nicEditorBgColorButton', noClose : true}
+		'forecolor' : {name : __('Zmeniť farbu textu'), type : 'nicEditorColorButton', noClose : true},
+		'bgcolor' : {name : __('Zmeniť farbu pozadia'), type : 'nicEditorBgColorButton', noClose : true}
 	}
 };
 /* END CONFIG */
 
-var nicEditorColorButton = nicEditorAdvancedButton.extend({	
+var nicEditorColorButton  = nicEditorAdvancedButton.extend({
+    addPane: function(){
+        this.ne.selectedInstance.saveRng();
+        var colorWrapper = new bkElement("DIV");
+        var self = this;
+     
+        
+        
+        $(colorWrapper).colorpicker({
+            strings: "Farby,Základné farby,Viac farieb,Menej farieb,Späť na paletu,História,Zatiaľ žiadna história"
+        });
+        
+        $(colorWrapper).on("change.color", function(event, color){
+           self.colorSelect(color);
+        });this.pane.append(colorWrapper.noSelect());
+    },
+    colorSelect : function(c) {
+            this.ne.selectedInstance.restoreRng();
+            this.ne.nicCommand('foreColor',c);
+            this.removePane();
+    }
+});
+
+var nicEditorBgColorButton = nicEditorColorButton.extend({
+    colorSelect : function(c) {
+            this.ne.selectedInstance.restoreRng();
+            this.ne.nicCommand('hiliteColor',c);
+            this.removePane();
+    }	
+});
+
+/*var nicEditorColorButton = nicEditorAdvancedButton.extend({	
 	addPane : function() {
 			var colorList = {0 : '00',1 : '33',2 : '66',3 :'99',4 : 'CC',5 : 'FF'};
 			var colorItems = new bkElement('DIV').setStyle({width: '270px'});
@@ -1294,6 +1325,7 @@ var nicEditorBgColorButton = nicEditorColorButton.extend({
 		this.removePane();
 	}	
 });
+    */
 
 nicEditors.registerPlugin(nicPlugin,nicColorOptions);
 

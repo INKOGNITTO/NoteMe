@@ -21,7 +21,7 @@
     <div class="content">
         <img src="@{'/public/images/logo-login.png'}" alt="noteMe" width="168" height="168">
         #{form @App.authenticate(), id:'lrform'}
-            <h1>Vitajte!</h1>
+            <h1>#{if flash.logout}Boli ste odhlásení.#{/if}#{else}Vitajte!#{/else}</h1>
             <label for="email">e-mail:</label>
             <input type="email" placeholder="e-mail" id="email" name="user.email" title="Zadajte svoj e-mail" autofocus="autofocus"><br>
             <div style="display:none;" class="registration-fields">
@@ -38,7 +38,8 @@
                 <input type="submit" value="Prihlásiť" id="submit">
             </div>
             <p class="small" id="go-registration"><br>
-                Ak ešte nemáte noteMe účet, <a href="#registration">zaregistrujte sa</a>.
+                Ak ešte nemáte noteMe účet, <a href="#registration">zaregistrujte sa</a>.<br>
+                <a href="#" id="rp">Zabudli ste heslo?</a>
             </p>
         #{/form}
     </div>
@@ -53,8 +54,17 @@
 
 </div>
 <script type="text/javascript">
+        // nacitaj routy
+    $.ajax({
+        url: "/jsRoutes",
+        type: "GET",
+        dataType: "script",
+        cache: true,
+        async: false
+    });
+    
 $(function(){
-
+    
     var defaultTooltips = function(){
         $("[title]").each(function(){
             try {
@@ -186,6 +196,35 @@ $(function(){
                     globalTooltip.tooltip("open");
                 } 
                 
+            }
+        });
+    });
+    
+    $("#rp").click(function(){
+        noteMe.jsRoutes.resetPasswordDialog.ajax({
+            success: function(data){
+                var dialog = $(data).appendTo(".content").first().dialog({
+                    buttons : {
+                        "Zavrieť": function(){
+                            $(this).dialog("close");
+                        }                    
+                    }
+                });
+                $("input[type='submit']").button();
+                $("#resetPassword form").submit(function(event){
+                    event.preventDefault();
+                    noteMe.jsRoutes.resetPassword.ajax({
+                        urlParams: {
+                            email: $(dialog).find("input[type='email']").val()
+                        },
+                        data : $(this).serialize(),
+                        success: function(){
+                            $("#resetPassword").html("Na registrovaný email Vám bolo zaslané nové heslo");
+                        },
+                        error: function(){}
+                    });
+                    return false;
+                });
             }
         });
     });

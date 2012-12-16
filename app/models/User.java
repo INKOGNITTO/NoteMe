@@ -39,7 +39,7 @@ public class User extends Model {
     @OneToOne (cascade = CascadeType.ALL)
     public Notebook defaultNbSharedNotes;
     
-   
+  
     /**
      * poznamky, ktore su pouzivatelovi vyzdielane od inych pouzivatelov
      * on nie je ich vlastnik, on ich iba vidi, nemoze ich editovat

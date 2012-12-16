@@ -9,6 +9,7 @@ import play.Logger;
 import play.data.validation.*;
 import play.data.validation.Check;
 import play.db.jpa.Blob;
+import play.libs.Codec;
 import play.mvc.*;
 import play.mvc.Http.StatusCode;
 
@@ -103,6 +104,7 @@ public class App extends Controller{
     public static void logout() {
     	session.clear();
         try {
+            flash.put("logout", "logout");
             Secure.login();
         } catch (Throwable ex) {
             java.util.logging.Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
@@ -118,12 +120,8 @@ public class App extends Controller{
      * Generovanie skriptu obsahujuceho reverzne cesty pre AJAX
      */
     public static void jsRoutes() {
-        if(Security.isConnected()) {
-            response.setContentTypeIfNotSet("text/javascript");
-            render("jsRoutes");
-        } else {
-            error(StatusCode.FORBIDDEN, "Nie ste prihlásený");
-        }
+        response.setContentTypeIfNotSet("text/javascript");
+        render("jsRoutes");
     }
     
     /**
@@ -148,6 +146,20 @@ public class App extends Controller{
         }
         renderArgs.put("user",user);
         render("notes.xml");
+    }
+    
+    public static void resetPasswordDialog() {
+        render("dialogs/resetPassword.html");
+    }
+    
+    public static void resetPassword(String email){
+        checkAuthenticity();
+        User user = User.findByEmail(email);
+        String newPass = Codec.UUID().substring(0,8);
+        user.password = Passwords.hashPassword(newPass);
+        user.save();
+        Mails.resetPassword(user,newPass);
+        
     }
     
 }

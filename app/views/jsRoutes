@@ -51,6 +51,9 @@ var noteMe = noteMe || {};
         deleteAccountDialog: makeRoute(#{jsRoute @AccountManager.deleteAccountDialog() /}),
         deleteAccount: makeRoute(#{jsRoute @AccountManager.deleteAccount() /}),
 
-        imageUpload: makeRoute(#{jsRoute @Edit.imageUpload() /})
+        imageUpload: makeRoute(#{jsRoute @Edit.imageUpload() /}),
+
+        resetPasswordDialog: makeRoute(#{jsRoute @App.resetPasswordDialog() /}),
+        resetPassword: makeRoute(#{jsRoute @App.resetPassword(':email') /})
     };
 }());
