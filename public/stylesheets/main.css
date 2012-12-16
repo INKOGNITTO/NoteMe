@@ -1031,8 +1031,6 @@ fieldset legend {
 
 @media print {
     * {
-        background: transparent !important;
-        color: #000 !important; /* Black prints faster: h5bp.com/s */
         box-shadow:none !important;
         text-shadow: none !important;
     }
@@ -1094,4 +1092,15 @@ fieldset legend {
     h3 {
         page-break-after: avoid;
     }
+    
+    header, footer, .seam-top, .seam-header, #toolbar, .sidebar-wrapper, #left-column-wrapper, #about{
+        display: none !important;
+        
+    }
+    
+    #right-column-wrapper {
+        margin-left: 0px;
+    }
+    
+    
 }

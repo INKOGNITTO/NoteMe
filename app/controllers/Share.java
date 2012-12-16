@@ -145,11 +145,15 @@ public class Share extends Controller {
             
             
             for (int i=0; i<arrayNew.size(); i++){
+                user = User.findByEmail(arrayNew.get(i).getAsString());
                 if (arrayNew.get(i).getAsString().equals(session.get("username"))) {
                     continue;  // pouzivatel nemoze zdielat blok sam so sebou
                 }
+                if (notebook.getLinkedTreeOwners().contains(user)) {
+                    Logger.info("zhoda v strome");
+                    continue; // nie je mozne vyzdielat notebook niekomu, ktor uz je v zidelacom strome
+                }
                 //novy NB (nazov rovnaky, vlastnik z arrrayNew)
-                user = User.findByEmail(arrayNew.get(i).getAsString());
                 Notebook newNb = Notebook.create(notebook.name, user.getId());
                 user.notebooks.add(newNb);
                 user.save();

@@ -94,6 +94,7 @@ $(function() {
                 close: function() {
                     this.id = null;
                     $(".right-column.note").remove();
+                    window.location.hash = "";
                 }
             }
         };
@@ -1297,7 +1298,7 @@ $(function() {
                             $(this).find(">form").submit();
                             if($(this).find(".ui-adder").adder("dataLength")){
                                 if(!notebook.find("h2 .flags .ui-icon-link").length){
-                                    notebook.find("h2 .flags").append("<span class=\"ui-icon ui-icon-link\" title=\"Zdieľaná ppoznámkový blok\"></span>");
+                                    notebook.find("h2 .flags").append("<span class=\"ui-icon ui-icon-link\" title=\"Zdieľaný poznámkový blok\"></span>");
                                 }
                             } else {
                                 notebook.find(".flags .ui-icon-link").remove();
@@ -1747,7 +1748,11 @@ $(function(){
 
             initValues.each(function(){
                 var val = $(this).text();
-                $.noanim(function(){self.add(val,"default");});
+                if ($(this).attr("data-type")==="read-only"){
+                    $.noanim(function(){self.add(val,"read-only");});
+                } else {
+                    $.noanim(function(){self.add(val,"default");});
+                }
             });
             element.find("input").focus();
         },
@@ -1763,16 +1768,22 @@ $(function(){
             //kontrola duplicit
             for(i in this.params.values){
                 if(this.params.values[i] && this.params.values[i].value === value){
-                    this.params.added.children().filter(function() { return $(this).data("index") === parseInt(i,10); }).addClass("ui-state-highlight").removeClass("ui-state-highlight",500);
+                    this.params.added.children().filter(function() { return $(this).data("index") === parseInt(i,10); }).toggleClass("ui-state-highlight").toggleClass("ui-state-highlight",500);
                     return;
                 }
             }
             this.params.values.push({value: value, type: type || "new"});
-            newItem = $("<div>").text(value).addClass(this._internal.itemClass).button({
-                icons: {
-                    secondary: "ui-icon-close"
-                }
-            }).prependTo(this.params.added).hide();
+            newItem = $("<div>").text(value).addClass(this._internal.itemClass);
+            if(type === "read-only") {
+                newItem.button().addClass("ui-state-highlight").css("cursor","default");
+            } else {
+                newItem.button({
+                    icons: {
+                        secondary: "ui-icon-close"
+                    }
+                });
+            }
+            newItem.prependTo(this.params.added).hide();
 
             $(newItem).data("index",index)
                 .slideDown("slow")

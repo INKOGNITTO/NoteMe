@@ -23,9 +23,6 @@ public class Note extends Model {
     @ManyToOne
     public User owner;
     
-    //@ManyToMany
-    //public List<User> users = new LinkedList<User>();
-    
     @Column(unique = true)
     public String publicID;
    
@@ -137,18 +134,7 @@ public class Note extends Model {
             // uz poznamka nie je v ziadnom bloku, zmaz ju z db
             this.delete();
             
-        } else {  //ak nie je vlastnena prihlasenym pouzivatelom
-//            // sa zmaze z blokov v ktorych ju pouzivatel ma, ale nezmaze ju ak je v zdielanom bloku a prihlaseny pouzivatel nie je jej vlastnikom 
-//            Query q = JPA.em().createQuery("select nb from Notebook nb where :n member of nb.notes and :u member of nb.contributors and :v not member of nb.contributors")
-//                    .setParameter("n", this)
-//                    .setParameter("u", actualUser)
-//                    .setParameter("v", this.owner);
-//            List<Notebook> notebookWithNote = q.getResultList();
-//            for (Notebook n : notebookWithNote) {
-//                //n.notes.remove(this);
-//                n.removeNote(this);
-//                n.save();
-//            }
+        } else { 
             
             //vybrat Notebook vlastneny aktualnym pouzivatelom, v ktorom sa nachadza pozadovana poznamka
             Query q = JPA.em().createQuery("select nb from Notebook nb where :o = nb.owner and :n member of nb.notes")
@@ -167,6 +153,11 @@ public class Note extends Model {
             save();
         }
 
-
     }
+    
+    @Override
+    public String toString(){
+        return this.name;
+    }
+    
 }

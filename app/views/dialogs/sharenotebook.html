@@ -4,8 +4,11 @@
                 <legend>Zdieľať s používateľom noteMe</legend>
                 <input type="hidden" name="share-with" id="share-with-hidden">
                 <div class="add-multiple ui-adder">
-                    #{list items:notebook.getConnectedNotebooks(), as:'nb'}
+                    #{list items:notebook.linkedNotebooks, as:'nb'}
                     <div>${nb.owner.email}</div>
+                    #{/list}
+                    #{list items:notebook.getLinkedTreeButDirectLinked(), as:'nb'}
+                    <div data-type="read-only">${nb.owner.email}</div>
                     #{/list}
                 </div>
             </fieldset>

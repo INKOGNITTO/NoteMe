@@ -5,10 +5,11 @@
                 <input type="hidden" name="share-with" id="share-with-hidden">
                 <div class="add-multiple ui-adder">
                     #{list items:note.sharedWith, as:'user'}
-                    <div>${user.email}</div>
+                    <div #{ifNotNoteOwner noteId: note.id}data-type="read-only"#{/ifNotNoteOwner}>${user.email}</div>
                     #{/list}
                 </div>
             </fieldset>
+            #{ifNoteOwner noteId: note.id}
             <fieldset>
                     <legend>Verejné zdieľanie</legend>
                     <input type="checkbox" value="public" id="publicId">
@@ -17,6 +18,7 @@
                             <p>Verejný odkaz:</p>
                             <div id="publicId-dest">#{if note.isPublic}@@{PublicNote.index(note.publicID)}#{/if}</div>
                     </div>
+            #{/ifNoteOwner}
             </fieldset>
 	</form>
 </div>

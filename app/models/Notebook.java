@@ -15,13 +15,6 @@ public class Notebook extends Model {
 
     @Required
     public String name;
-    /**
-     * Prispievatelia - pouzivatelia, ktori maju pristupny poznamkovy blok a
-     * mozu do neho vkladat poznamky
-     */
-    
-//    @ManyToMany(mappedBy = "notebooks")
-//    public List<User> contributors = new LinkedList<User>();
     
     @ManyToMany(cascade = CascadeType.ALL)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
@@ -203,12 +196,42 @@ public class Notebook extends Model {
         this.save();
     }
     
-    public Set<Notebook> getConnectedNotebooks() {
-        Set<Notebook> list = this.linkedNotebooks;
-        Query ln = JPA.em().createQuery("select nb1 from Notebook nb1 where :this member of nb1.linkedNotebooks").setParameter("this", this);
-         list.addAll(ln.getResultList());
-         list.remove(this);
-         return list;
+    public Set<Notebook> getLinkedTree(){
+        if (linkParent != null) {
+            return linkParent.getLinkedTree();
+        } else {
+            return this.getLinkedList();
+        }
+    }
+    
+    public Set<User> getLinkedTreeOwners(){
+        Set<Notebook> nbtree = getLinkedTree();
+        Set<User> owners = new HashSet();
+        for(Notebook nb : nbtree) {
+            owners.add(nb.owner);
+        }
+        return owners;
+    }
+    
+    private Set<Notebook> getLinkedList() {
+        Set<Notebook> ll = new HashSet();
+        ll.add(this);
+        for (Notebook nb : linkedNotebooks) {
+            ll.addAll(nb.getLinkedList());
+        }
+        return ll;
+    }
+    
+    public Set<Notebook> getLinkedTreeButDirectLinked(){
+        Set<Notebook> set = getLinkedTree();
+        set.removeAll(linkedNotebooks);
+        set.remove(this);
+        return set;
+    }
+    
+    @Override
+    public String toString(){
+        return this.name;
     }
         
 }
