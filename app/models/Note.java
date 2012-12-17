@@ -110,7 +110,6 @@ public class Note extends Model {
 
     public void remove() {
         User actualUser = User.findByEmail(Scope.Session.current.get().get("username"));
-        Logger.info("removing note from db: "+actualUser.email + ", " + this.name);
         //ak poznamka patri prihlasenemu pouzivatelovi
         if (this.owner.equals(actualUser)) {
 

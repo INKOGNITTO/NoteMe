@@ -64,7 +64,7 @@ DELETE      /accoutManager/delete/delete                                        
 GET         /resetpassword/                                                     App.resetPasswordDialog
 POST        /resetpassword/{email}                                              App.resetPassword
 
-#Web service
+#Services
 GET         /services/{email}/notes                                             App.userNotes                        
 
 # Map static resources

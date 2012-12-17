@@ -132,7 +132,7 @@ $(function(){
 
 
     // label namiesto placeholderov, ak ich prehliadač nepodporuje
-    if(Modernizr.input.placeholder){
+    if(Modernizr.input.placeholder && !$.browser.chrome){
         $("input").each(function() {
             if ( $(this).attr("placeholder") !=="" ) {
                 $('label[for="'+$(this).attr("id")+'"]').hide();

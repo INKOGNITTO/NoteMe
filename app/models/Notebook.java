@@ -70,7 +70,6 @@ public class Notebook extends Model {
 
     public void removeNote(Note note) {
         if (note.owner.email.equals(Scope.Session.current.get().get("username"))) {
-            Logger.info(Scope.Session.current.get().get("username") + " deleting " + note.name);
             if(linkParent != null) {
                 linkParent.removeNote(note);
             } else {

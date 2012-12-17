@@ -231,7 +231,7 @@ $(function() {
                         offset: offset[0] + " " + offset[1],
                         of: document,
                         collision:"none"
-                    }).draggable(draggableSettings).resizable(resizebleSettings);
+                    }).css({maxWidth: $("#editor-space").width()/2}).draggable(draggableSettings).resizable(resizebleSettings);
                     editor.addInstance(block.attr("id"));
                     editorInstances.push(block);
                     block.add(wrapper).on("click resize drag",function(){
