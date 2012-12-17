@@ -159,6 +159,7 @@ $(function() {
          * vytvara podporne funkcie pre editor poznamok
          */
         this.edit = (function(){
+            var noteMeEdit = this;
             if(typeof nicEditor === "undefined"){
                 return null;
             }
@@ -180,30 +181,31 @@ $(function() {
                 },
                 editorInstances = [],
                 editor = null,
+                saveNote = function(c){
+                    var content = $(editorSpace).clone();
+                    noteMe.opened.note.setEdited(false,2);
+                    content.find(".note-block-wrapper").attr("class","note-block-wrapper").find(".handle").hide();
+                    content.find(".ui-resizable-handle").remove();
+                    content.find(".note-block").removeAttr("contenteditable");
+                    noteMe.jsRoutes.saveNote.ajax({
+                        urlParams: {
+                            id: $(".right-column.note").data("id")
+                        },
+                        data : {
+                            content: content.html()
+                        },
+                        success : function(data) {
+                            noteMe.message.info("Poznámka uložená");
+                            noteMe.opened.note.setEdited(false,3);
+                        },
+                        error : function(err) {
+                            noteMe.message.error("Chyba pri ukladaní poznámky");
+                        }
+                    });
+                },
                 createEditor = function(){
                     return new nicEditor({
-                        onSave : function(c){
-                            var content = $(editorSpace).clone();
-                            noteMe.opened.note.setEdited(false,2);
-                            content.find(".note-block-wrapper").attr("class","note-block-wrapper").find(".handle").hide();
-                            content.find(".ui-resizable-handle").remove();
-                            content.find(".note-block").removeAttr("contenteditable");
-                            noteMe.jsRoutes.saveNote.ajax({
-                                urlParams: {
-                                    id: $(".right-column.note").data("id")
-                                },
-                                data : {
-                                    content: content.html()
-                                },
-                                success : function(data) {
-                                    noteMe.message.info("Poznámka uložená");
-                                    noteMe.opened.note.setEdited(false,3);
-                                },
-                                error : function(err) {
-                                    noteMe.message.error("Chyba pri ukladaní poznámky");
-                                }
-                            });
-                        }
+                        onSave : saveNote
                     });
                 },
                 blockCount = null;
@@ -211,7 +213,7 @@ $(function() {
             editor = createEditor();  
             
             return {
-                saveButton: null,
+                saveNote: saveNote,
                 removeAllInstances : function(){
                     for(var i in editorInstances){
                         editor.removeInstance(editorInstances[i].attr("id"));
@@ -528,6 +530,11 @@ $(function() {
         event.preventDefault();
         $("#search input[type=\"search\"]").focus();
         closeHotkeyTooltips();
+    }).bind("keydown","ctrl+s", function(event){
+        event.preventDefault();
+        if($("#saveButton").length){
+            noteMe.edit.saveNote();
+        }
     }).bind("keydown", "alt", function(event){
         event.preventDefault();
         $("#new-notebook").tooltip("open");
@@ -1065,14 +1072,18 @@ $(function() {
             $("<p>Poznámka bola zmenená</p>").dialog({
                 modal: true,
                 buttons : {
-                    "Ostať na poznámke": function(){
+                    "Uložiť poznámku": function(){
                         $(this).dialog("close");
+                        $.Deferred().resolve().done(noteMe.edit.saveNote).promise().done(action);
                         //$(noteMe.edit.saveButton).trigger("mousedown");
 
                     },
                     "Pokračovať bez uloženia": function(){
                         $(this).dialog("close");
                         action();
+                    },
+                    "Zrušiť": function(){
+                        $(this).dialog("close");
                     }
                 }
             });
@@ -1517,17 +1528,17 @@ if(typeof nicEditors !== "undefined"){
             this.progressBar.show().val(0);
             
             noteMe.edit.uploadImage(file,noteMe.opened.note.id,function(obj) {
-                if(!obj || !obj.imageUrl) {
+                if(!obj || !obj.image) {
                     return;
                 }
                 var image = self.ne.selectedInstance.selElm().parentTag('IMG');
                 if (!image) {
                     self.ne.selectedInstance.restoreRng();
-                    self.ne.nicCommand("insertImage", obj.imageUrl);
-                    image = self.findElm('IMG','src', obj.imageUrl);
+                    self.ne.nicCommand("insertImage", obj.image.url);
+                    image = self.findElm('IMG','src', obj.image.url);
                 }
                 if (image) {
-                    $(image).attr("src",obj.imageUrl).attr("width",Math.min(300));
+                    $(image).attr("src",obj.imageUrl).attr("width",Math.min(300,obj.image.width));
                 }
             
             });
@@ -1554,7 +1565,7 @@ if(typeof nicEditors !== "undefined"){
                     return;
                 }
                 noteMe.edit.uploadImage(event.originalEvent.dataTransfer.files[0],noteMe.opened.note.id,function(obj){
-                    if(!obj || !obj.imageUrl) {
+                    if(!obj || !obj.image) {
                         return;
                     }
                     var selInst = nicEditors.editors[0].selectedInstance ||
@@ -1572,11 +1583,11 @@ if(typeof nicEditors !== "undefined"){
                     var image = (selInst).selElm().parentTag('IMG');
                     if (!image) {
                         selInst.restoreRng();
-                        nicEditors.editors[0].nicCommand("insertImage", obj.imageUrl);
-                        image = findElm('IMG','src', obj.imageUrl);
+                        nicEditors.editors[0].nicCommand("insertImage", obj.image.url);
+                        image = findElm('IMG','src', obj.image.url);
                     }
                     if (image) {
-                        $(image).attr("src",obj.imageUrl).attr("width",300);
+                        $(image).attr("src",obj.imageUrl).attr("width",Math.min(300,obj.image.width));
                     }
                     });
             });

@@ -48,9 +48,6 @@ public class User extends Model {
     public Set<Note> notOwnedNotes = new HashSet<Note>(); 
     
     
-    //@ManyToMany(fetch = FetchType.LAZY)
-    //public List<Note> notes = new LinkedList<Note>();
-
     public User(String email, String name, String password) {
         this.email = email;
         this.name = name;
@@ -87,12 +84,6 @@ public class User extends Model {
     public List<Note> getOwnedNotes() {
         Query noteQuery = JPA.em().createQuery("select note from Note note where note.owner = :owner").setParameter("owner", this);
         return noteQuery.getResultList();
-    }
-    
-    
-    
-    public Note getFirstNote() {
-        return null; //TODO
     }
     
     public List<Tag> getTags() {

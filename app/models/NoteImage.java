@@ -4,9 +4,14 @@
  */
 package models;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.persistence.Entity;
 import javax.persistence.*;
 import play.db.jpa.Blob;
@@ -21,6 +26,10 @@ public class NoteImage extends Model {
     
     public Blob image;
     
+    public int width;
+    
+    public int height;
+    
     public String uuid;
     
     @ManyToOne (optional = false)
@@ -33,6 +42,13 @@ public class NoteImage extends Model {
             this.name = img.getName();
             this.image = new Blob();
             this.uuid = Codec.UUID() + "-" + this.name;
+            try {
+                BufferedImage imge = ImageIO.read(img);
+                this.width = imge.getWidth();
+                this.height = imge.getHeight();
+            } catch (IOException ex) {
+                Logger.getLogger(NoteImage.class.getName()).log(Level.SEVERE, null, ex);
+            }
             this.image.set(new FileInputStream(img), MimeTypes.getContentType(img.getName()));
         } catch (FileNotFoundException e) {
             e.printStackTrace(System.err);

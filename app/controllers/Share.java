@@ -96,7 +96,6 @@ public class Share extends Controller {
                         .setParameter("u", user)
                         .setParameter("n", note);
                 Notebook notebook = (Notebook) q.getSingleResult();
-                //notebook.notes.remove(note);
                 notebook.removeNote(note);
                 notebook.save();
                 
@@ -115,7 +114,6 @@ public class Share extends Controller {
                     user.save();
                 }
                 //pridanie poznamy do defaultneho notebooka
-                //user.defaultNbSharedNotes.notes.add(note);
                 user.defaultNbSharedNotes.addNote(note, -1);
                 user.defaultNbSharedNotes.save();
             }
@@ -161,15 +159,7 @@ public class Share extends Controller {
                 
             }
             notebook.save();
-            
-//            for (int i = 0; i < arrayNew.size(); i++) {
-//                user = User.findByEmail(arrayNew.get(i).getAsString());
-//                //kontrola duplicity
-//                if (!notebook.contributors.contains(user)) {
-//                    user.notebooks.add(notebook);
-//                    user.save();
-//                }
-//            }
+
         }
     }
 }

@@ -6,10 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.Query;
 import models.*;
-import play.Logger;
-import play.db.jpa.JPA;
 import play.mvc.*;
 
 @With(Secure.class)
@@ -54,11 +51,17 @@ public class Edit extends Controller {
         Note note = Note.findById(id);
         NoteImage ni = new NoteImage(note, image);
         ni.save();
-        Map<String,String> json = new HashMap();
+        JsonObject jsonImage = new JsonObject();
+        JsonObject jsonResponse  = new JsonObject();
         Map<String, Object> args = new HashMap();
         args.put("uuid", ni.uuid);
-        json.put("imageUrl", Router.reverse("App.getNoteImage",args).url);
-        renderJSON(json);
+        jsonImage.addProperty("url", Router.reverse("App.getNoteImage",args).url);
+        jsonImage.addProperty("fullUrl", Router.getFullUrl("App.getNoteImage", args));
+        jsonImage.addProperty("name", ni.name);
+        jsonImage.addProperty("width", ni.width);
+        jsonImage.addProperty("height",ni.height);
+        jsonResponse.add("image", jsonImage);
+        renderJSON(jsonResponse.toString());
     }
     
 

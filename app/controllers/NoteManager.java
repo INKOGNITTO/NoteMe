@@ -66,35 +66,24 @@ public class NoteManager extends Controller {
     
     public static void saveNewNote(Long notebookId, String name) {
         User user = User.findByEmail(session.get("username"));
-        //try {
         Note note = Note.create(name, notebookId, user.id);
         Notebook notebook = Notebook.findById(notebookId);
-        //notebook.notes.add(0, note);
         notebook.addNote(note, 0);
         notebook.save();
         note.save();
         renderText(note.id);
-        /*} catch (Exception e) {
-         error(Http.StatusCode.BAD_REQUEST, e.);
-         //error(Http.StatusCode.BAD_REQUEST, "Error while creating new note");
-         }*/
     }
     
     public static void orderNotebooks(long notebookId, int newPosition) {
         User user = User.findByEmail(session.get("username"));
-
-        //try {
-            Notebook notebook = Notebook.findById(notebookId);
-            Logger.info(String.valueOf(user.notebooks.size()));
-            user.notebooks.remove(notebook);
-            user.notebooks = new LinkedList<Notebook>(user.notebooks); // divny hack kvoli Hibernate
-            user.save();
-            user.refresh();
-            user.notebooks.add(newPosition, notebook);
-            user.save();
-        //} catch (Exception ex) {
-          //  error(Http.StatusCode.BAD_REQUEST, "Error while reordering notebooks");
-        //}
+        Notebook notebook = Notebook.findById(notebookId);
+        Logger.info(String.valueOf(user.notebooks.size()));
+        user.notebooks.remove(notebook);
+        user.notebooks = new LinkedList<Notebook>(user.notebooks); // divny hack kvoli Hibernate
+        user.save();
+        user.refresh();
+        user.notebooks.add(newPosition, notebook);
+        user.save();
     }
     
     public static void orderNotes(long noteId, long toNotebookId, long fromNotebookId, int newPosition) {
@@ -112,10 +101,9 @@ public class NoteManager extends Controller {
                 error(Http.StatusCode.FORBIDDEN, "No access");
             }
             
-            //sourceNotebook.notes.remove(note);
             sourceNotebook.removeNote(note);
             sourceNotebook.save();
-            //destinationNotebook.notes.add(newPosition, note);
+
             destinationNotebook.addNote(note, newPosition);
             destinationNotebook.save();
             

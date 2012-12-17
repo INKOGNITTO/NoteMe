@@ -1414,7 +1414,7 @@ nicEditors.registerPlugin(nicPlugin,nicImageOptions);
 
     var nicEditorSaveButton = nicEditorButton.extend({
             init : function() {
-                $(this.margin).css({display : 'inline-block'});
+                $(this.margin).css({display : 'inline-block'}).attr("id","saveButton");
             },
             mouseClick : function() {
                     //if(this.isDisabled) {return;}

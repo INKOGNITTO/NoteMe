@@ -132,15 +132,14 @@ public class Notebook extends Model {
             actualUser.defaultNbSharedNotes = null;
             actualUser.save();
         }
-        //Query q = JPA.em().createQuery("select notebook from Notebook notebook where :this member of notebook.linkedNotebooks").setParameter("this", this);
-        //Notebook originNotebook = (Notebook)q.getSingleResult();
+
         if (linkParent != null) {
             linkParent.unlinkNotebook(this);
         }
         for (Notebook ntb : linkedNotebooks) {
             this.unlinkNotebook(ntb);
         }
-        //originNotebook.unlinkNotebook(this);
+
         this.refresh();
         if (this.isPersistent()){
         this.delete();}
@@ -199,7 +198,7 @@ public class Notebook extends Model {
         if (linkParent != null) {
             return linkParent.getLinkedTree();
         } else {
-            return this.getLinkedList();
+            return this.getLinkedChildList();
         }
     }
     
@@ -212,15 +211,18 @@ public class Notebook extends Model {
         return owners;
     }
     
-    private Set<Notebook> getLinkedList() {
+    private Set<Notebook> getLinkedChildList() {
         Set<Notebook> ll = new HashSet();
         ll.add(this);
         for (Notebook nb : linkedNotebooks) {
-            ll.addAll(nb.getLinkedList());
+            ll.addAll(nb.getLinkedChildList());
         }
         return ll;
     }
     
+    /**
+     * @return set vsetkych prepojenych pozn. blokov okrem tych, ktore vlastnik priamo poskytol dalsim 
+     */
     public Set<Notebook> getLinkedTreeButDirectLinked(){
         Set<Notebook> set = getLinkedTree();
         set.removeAll(linkedNotebooks);
